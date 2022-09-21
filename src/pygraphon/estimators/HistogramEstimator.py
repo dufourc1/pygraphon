@@ -36,7 +36,8 @@ class HistogramEstimator(BaseEstimator):
         rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
-        graphon_matrix, _, h = self._approximate(adjacency_matrix, bandwidthHist)
+        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist)
+        self.estimated_edge_connectivity_matrix = P
         return StepGraphon(graphon_matrix, h, rho)
 
     def _approximate(
