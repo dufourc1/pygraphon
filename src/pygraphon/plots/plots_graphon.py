@@ -1,3 +1,4 @@
+from turtle import color
 from typing import Tuple
 
 import matplotlib.pyplot as plt
@@ -40,6 +41,7 @@ def plot_sample(
     ax: Axes = None,
     colorbar=False,
     integrate_to_1: bool = False,
+    cmap = "binary",
 ) -> Tuple[Figure, Axes]:
     """Plot the graphon."""
     x1, x2 = np.linspace(0, 1, resolution, endpoint=False), np.linspace(
@@ -52,7 +54,7 @@ def plot_sample(
     if not integrate_to_1:
         result *= graphon.initial_rho
 
-    im = ax.imshow(result, cmap="binary", vmin=0, vmax=1)
+    im = ax.imshow(result, cmap=cmap, vmin=0, vmax=1)
     if colorbar:
         add_colorbar(im, ax=ax)
     _make_pretty(ax)
@@ -75,8 +77,9 @@ def plot(
     """
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=figsize)
-    sc = ax.imshow(graphon.graphon, cmap=plt.cm.get_cmap("jet"), aspect="auto")
-    fig.colorbar(sc, ax=ax)
+    plot_sample(graphon= graphon, fig = fig, ax = ax, colorbar = True)
+    #sc = ax.imshow(graphon.graphon, cmap=plt.cm.get_cmap("jet"), aspect="auto")
+    #fig.colorbar(sc, ax=ax)
     return fig, ax
 
 
