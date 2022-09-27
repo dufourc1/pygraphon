@@ -158,7 +158,8 @@ class GraphonAbstract(ABC):
         I, J = np.triu_indices(n, 1)
         for index, nodes in enumerate(zip(I, J)):
             probs[index] = self.graphon_function(latentVarArray[nodes[0]], latentVarArray[nodes[1]])
-
+        probs *= self.initial_rho
+        
         if wholeMatrix:
             P = np.zeros((n, n))
             P[np.triu_indices(n, 1)] = probs
