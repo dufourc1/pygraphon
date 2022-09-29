@@ -82,7 +82,7 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     diag_eye = np.eye(P_star.shape[0])
     for i in range(P_smooth.shape[0]):
         smoothed_graphons_error[i] = np.linalg.norm(
-            (P_star-P_smooth[i])/(diag_eye + P_star))  # add diag of ones for division -> does not matter
+            (P_star-P_smooth[i])/(diag_eye + P_star))/(n*(n-1)/2)  # add diag of ones for division -> does not matter
     # Store P estimated by Hist and Best P from smoothing (may be P from Hist)
     P_hist = hist_approx._get_edge_probabilities(n, False, True)
     P_best_est_smooth = P_smooth[np.argmin(smoothed_graphons_error)]
@@ -115,8 +115,8 @@ def smooth_heatmap2(n_list, k_list, error, title):
     #x, y = np.meshgrid(n_list, k_list)
     k_list = np.array(k_list)
     fig, ax = plt.subplots(2,2)
+    k=0
     for j in range(2):
-        k=0
         for i in range(2):
             c = ax[j,i].imshow(error[k], cmap='Reds', interpolation='spline36',
                         extent=[n_list.min(), n_list.max(), k_list.min(), k_list.max()],
@@ -130,5 +130,6 @@ def smooth_heatmap2(n_list, k_list, error, title):
             ax[j,i].axis([n_list.min(), n_list.max(), k_list.min(), k_list.max()])
             plt.colorbar(c, ax=ax[j,i])
             k+=1
+            print(k)
     plt.show()
     return fig, ax
