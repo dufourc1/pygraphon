@@ -33,7 +33,7 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     # max_k = int(nrow_tile*(nrow_tile+1)/2)  # number of individual tile
     # copies for different number of clusters
     avr_graphon = np.asarray([flat_graphon.copy()
-                             for k in range(nclust_detect_hist)])
+                             for _ in range(nclust_detect_hist)])
     #print(f"Hist returned {nrow_tile} communities, hence {max_k} tiles")
     #print(f"flat_graphon {flat_graphon}")
     # print(len(np.unique(flat_graphon)))
@@ -108,28 +108,32 @@ def smooth_heatmap(n_list, k_list, error, title):
 
     plt.show()
     return fig, ax
-    # antialiased', 'none', 'nearest', 'bilinear', 'bicubic', 'spline16', 
-    # 'spline36', 'hanning', 'hamming', 'hermite', 'kaiser', 'quadric', 'catrom', 
-    # 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos', 'blackman'
+    # antialiased', 'none', 'nearest', 'bilinear', 'bicubic', 'spline16',
+    # 'spline36', 'hanning', 'hamming', 'hermite', 'kaiser', 'quadric', 'catrom',
+    # 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos', 'blackman', 'jet'
+
+
 def smooth_heatmap2(n_list, k_list, error, title):
     #x, y = np.meshgrid(n_list, k_list)
     k_list = np.array(k_list)
-    fig, ax = plt.subplots(2,2)
-    k=0
+    fig, ax = plt.subplots(2, 2)
+    k = 0
     for j in range(2):
         for i in range(2):
-            c = ax[j,i].imshow(error[k], cmap='Reds', interpolation='spline36',
-                        extent=[n_list.min(), n_list.max(), k_list.min(), k_list.max()],
-                        aspect="auto",
-                        vmin=np.min(error[k]),
-                        vmax=np.max(error[k]),
-                        origin="lower"
-                        )
-            ax[j,i].set_title(title[k])
+            c = ax[j, i].imshow(error[k], cmap='Reds', interpolation=None,
+                                extent=[n_list.min(), n_list.max(),
+                                        k_list.min(), k_list.max()],
+                                aspect="auto",
+                                vmin=np.min(error[k]),
+                                vmax=np.max(error[k]),
+                                origin="lower"
+                                )
+            ax[j, i].set_title(title[k])
             # set the limits of the plot to the limits of the data
-            ax[j,i].axis([n_list.min(), n_list.max(), k_list.min(), k_list.max()])
-            plt.colorbar(c, ax=ax[j,i])
-            k+=1
-            print(k)
+            ax[j, i].axis([n_list.min(), n_list.max(),
+                          k_list.min(), k_list.max()])
+            plt.colorbar(c, ax=ax[j, i])
+            k += 1
+    plt.tight_layout()
     plt.show()
     return fig, ax
