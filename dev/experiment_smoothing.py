@@ -10,9 +10,15 @@ from pygraphon.estimators.MomentEstimator import MomentEstimator, SimpleMomentEs
 
 
 def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
+    A, hist_approx, graphon = initialisation_hist(n,rho_n, graphon_matrix, bandwidth)
+    avr_graphon, nclust_detect_hist, nrow_tile = smoothing_histLC(hist_approx, A)
+    P_smooth = flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx,n)
+    smoothed_graphons_error = mse(P_smooth, graphon)
+    return graphon, hist_approx, smoothed_graphons_error
 
-    # ------------Initialisation----------------
+# ------------Initialisation----------------
 
+def initialisation_hist(n,rho_n,graphon_matrix, bandwidth):
     # set up normalised graphon with graphon
     graphon = StepGraphon(graphon_matrix, bandwidth)
     # Set Adjacency
@@ -22,9 +28,10 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     hist = HistogramEstimator()
     hist_approx = hist.estimate(adjacency_matrix=A, bandwidthHist=None)
     #P = hist.estimated_edge_connectivity_matrix
+    return A, hist_approx, graphon
 
-    # ------------Smoothing of Hist for Link Communities-------------
-
+# ------------Smoothing of Hist for Link Communities-------------
+def smoothing_histLC(hist_approx, A):
     # Extract tiles and reshape
     nrow_tile = hist_approx.graphon.shape[0]
     flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
@@ -48,9 +55,10 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
             for j in range(i+1):  # average tiles of same community
                 avr_graphon[i][kmeans.labels_ ==
                                j] = flat_graphon[kmeans.labels_ == j].mean()
+    return avr_graphon, nclust_detect_hist, nrow_tile
 
-    # -----------Reshaping Data into tensor-----------
-
+# -----------Reshaping Data into tensor-----------
+def flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n):
     # Reverse flattening back to 2d
     # initiate matrix containing smooth graphon
     KM_smooth_graphon = np.zeros(
@@ -72,9 +80,10 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
                                      initial_rho=hist_approx.initial_rho) for i in range(sym_KM_smooth_graphon.shape[0])]
     P_smooth = np.array([g._get_edge_probabilities(
         n=n, exchangeable=False) for g in smoothed_graphons])
+    return P_smooth
 
-    # ---------------Evaluate Error--------------
-
+# ---------------Evaluate Error--------------
+def mse(P_smooth, graphon):
     # Compute error, MSE
     smoothed_graphons_error = np.zeros(P_smooth.shape[0])
     P_star = graphon._get_edge_probabilities(
@@ -82,14 +91,13 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     diag_eye = np.eye(P_star.shape[0])
     for i in range(P_smooth.shape[0]):
         smoothed_graphons_error[i] = np.linalg.norm(
-            (P_star-P_smooth[i])/(diag_eye + P_star))/(n*(n-1)/2)  # add diag of ones for division -> does not matter
+            (P_star-P_smooth[i])/(diag_eye + P_star))/(n**2)  # add diag of ones for division -> does not matter
     # Store P estimated by Hist and Best P from smoothing (may be P from Hist)
-    P_hist = hist_approx._get_edge_probabilities(n, False, True)
-    P_best_est_smooth = P_smooth[np.argmin(smoothed_graphons_error)]
+    #P_hist = hist_approx._get_edge_probabilities(n, False, True)
 
-    return graphon, P_hist, P_best_est_smooth, smoothed_graphons_error
+    return smoothed_graphons_error
 
-
+#------------------PLOT-------------------
 def smooth_heatmap(n_list, k_list, error, title):
     x, y = np.meshgrid(n_list, k_list)
     fig, ax = plt.subplots()
@@ -113,14 +121,13 @@ def smooth_heatmap(n_list, k_list, error, title):
     # 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos', 'blackman', 'jet'
 
 
-def smooth_heatmap2(n_list, k_list, error, title):
-    #x, y = np.meshgrid(n_list, k_list)
+def smooth_heatmap2(n_list, k_list, error, title, tile_type):
     k_list = np.array(k_list)
     fig, ax = plt.subplots(2, 2)
     k = 0
     for j in range(2):
         for i in range(2):
-            c = ax[j, i].imshow(error[k], cmap='Reds', interpolation=None,
+            c = ax[j, i].imshow(error[k], cmap='Reds', interpolation=tile_type,
                                 extent=[n_list.min(), n_list.max(),
                                         k_list.min(), k_list.max()],
                                 aspect="auto",
