@@ -8,17 +8,31 @@ from sklearn.cluster import KMeans
 from pygraphon.estimators.HistogramEstimator import HistogramEstimator
 from pygraphon.estimators.MomentEstimator import MomentEstimator, SimpleMomentEstimator
 
+def error_operator(rel_error, metric_list,i,j,k):
+    best_est_id = np.argmin(rel_error)
+    best_est_LCk = best_est_id+1  # gives the number of LC from best estimator
+    metric_list[0][i,j] = rel_error[-1]/rel_error[best_est_id]  
+    metric_list[1][i, j] = rel_error[best_est_id]
+    metric_list[2][i, j] = (int(
+        k*(k+1)/2)-best_est_LCk)/int(k*(k+1)/2)
+    metric_list[3][i, j] = (len(
+        rel_error)-best_est_LCk)/(len(rel_error))
+    return metric_list
 
 def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
-    A, hist_approx, graphon = initialisation_hist(n,rho_n, graphon_matrix, bandwidth)
-    avr_graphon, nclust_detect_hist, nrow_tile = smoothing_histLC(hist_approx, A)
-    P_smooth = flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx,n)
+    A, hist_approx, graphon = initialisation_hist(
+        n, rho_n, graphon_matrix, bandwidth)
+    avr_graphon, nclust_detect_hist, nrow_tile = smoothing_histLC(
+        hist_approx, A)
+    P_smooth = flat_to_tensor(
+        avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n)
     smoothed_graphons_error = mse(P_smooth, graphon)
     return graphon, hist_approx, smoothed_graphons_error
 
 # ------------Initialisation----------------
 
-def initialisation_hist(n,rho_n,graphon_matrix, bandwidth):
+
+def initialisation_hist(n, rho_n, graphon_matrix, bandwidth):
     # set up normalised graphon with graphon
     graphon = StepGraphon(graphon_matrix, bandwidth)
     # Set Adjacency
@@ -31,6 +45,8 @@ def initialisation_hist(n,rho_n,graphon_matrix, bandwidth):
     return A, hist_approx, graphon
 
 # ------------Smoothing of Hist for Link Communities-------------
+
+
 def smoothing_histLC(hist_approx, A):
     # Extract tiles and reshape
     nrow_tile = hist_approx.graphon.shape[0]
@@ -58,6 +74,8 @@ def smoothing_histLC(hist_approx, A):
     return avr_graphon, nclust_detect_hist, nrow_tile
 
 # -----------Reshaping Data into tensor-----------
+
+
 def flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n):
     # Reverse flattening back to 2d
     # initiate matrix containing smooth graphon
@@ -83,6 +101,8 @@ def flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n):
     return P_smooth
 
 # ---------------Evaluate Error--------------
+
+
 def mse(P_smooth, graphon):
     # Compute error, MSE
     smoothed_graphons_error = np.zeros(P_smooth.shape[0])
@@ -90,14 +110,14 @@ def mse(P_smooth, graphon):
         P_smooth[0].shape[0], False, True)  # theoretical P
     diag_eye = np.eye(P_star.shape[0])
     for i in range(P_smooth.shape[0]):
+        # add diag of ones for division -> does not matter
         smoothed_graphons_error[i] = np.linalg.norm(
-            (P_star-P_smooth[i])/(diag_eye + P_star))/(n**2)  # add diag of ones for division -> does not matter
-    # Store P estimated by Hist and Best P from smoothing (may be P from Hist)
-    #P_hist = hist_approx._get_edge_probabilities(n, False, True)
-
+            (P_star-P_smooth[i])/(diag_eye + P_star))/(P_smooth.shape[1]**2)
     return smoothed_graphons_error
 
-#------------------PLOT-------------------
+# ------------------PLOT-------------------
+
+
 def smooth_heatmap(n_list, k_list, error, title):
     x, y = np.meshgrid(n_list, k_list)
     fig, ax = plt.subplots()
