@@ -1,12 +1,12 @@
 # Import packages
 from pygraphon.graphons.StepGraphon import StepGraphon
 import numpy as np
-from pygraphon.plots.plot_matrices import spy
+#from pygraphon.plots.plot_matrices import spy
 import matplotlib.pyplot as plt
 from pygraphon.utils.utils_graph import edge_density
 from sklearn.cluster import KMeans
 from pygraphon.estimators.HistogramEstimator import HistogramEstimator
-from pygraphon.estimators.MomentEstimator import MomentEstimator, SimpleMomentEstimator
+#from pygraphon.estimators.MomentEstimator import MomentEstimator, SimpleMomentEstimator
 
 def error_operator(rel_error, metric_list,i,j,k):
     best_est_id = np.argmin(rel_error)
@@ -28,6 +28,12 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
         avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n)
     smoothed_graphons_error = mse(P_smooth, graphon)
     return graphon, hist_approx, smoothed_graphons_error
+
+def smooth_exp_parallel(i, j, k, n_it, rho_n, theta, metric_list):
+    _, _, rel_error = smooth_hist(
+        n=n_it, rho_n=rho_n, graphon_matrix=theta, bandwidth=1/k)
+    metric_list = error_operator(rel_error, metric_list, i, j, k)
+    return metric_list
 
 # ------------Initialisation----------------
 
