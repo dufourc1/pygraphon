@@ -1,0 +1,6 @@
+#!/bin/bash -l
+#SBATCH -N 1
+
+module load gcc
+source ../env/bin/activate
+srun python3 experience.py

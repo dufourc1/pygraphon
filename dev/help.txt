@@ -1,0 +1,5 @@
+# check queue 
+squeue -u verdeyme
+
+# check output 
+cat slurm-{job_id}.out

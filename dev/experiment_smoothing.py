@@ -30,6 +30,7 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     return graphon, hist_approx, smoothed_graphons_error
 
 def smooth_exp_parallel(i, j, k, n_it, rho_n, theta, metric_list):
+    print(f"Processing {i,k}")
     _, _, rel_error = smooth_hist(
         n=n_it, rho_n=rho_n, graphon_matrix=theta, bandwidth=1/k)
     metric_list = error_operator(rel_error, metric_list, i, j, k)
