@@ -1,5 +1,15 @@
+# stop program: ctrl+c
 # check queue 
 squeue -u verdeyme
 
 # check output 
 cat slurm-{job_id}.out
+
+# watch queue, jobid, if pending or not, the time etc...
+watch -n 1 squeue -u verdeyme
+
+# lancer ton script
+sbatch {name of batch file}.batch
+
+# kill your realised data
+rm slurm-245807*
