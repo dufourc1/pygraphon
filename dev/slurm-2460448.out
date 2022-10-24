@@ -1,0 +1,7 @@
+loading env
+launching python script
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 2460448 ON h159 CANCELLED AT 2022-10-19T14:42:25 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 2460448.0 ON h159 CANCELLED AT 2022-10-19T14:42:25 DUE TO TIME LIMIT ***
+srun: error: h159: task 0: Terminated
+srun: launch/slurm: _step_signal: Terminating StepId=2460448.0
