@@ -2,9 +2,6 @@
 #SBATCH --job-name=hist_smooth
 #SBATCH -N 1
 #SBATCH --time=48:00:00
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=arthur.verdeyme@epfl.ch
-
 
 echo "loading env"
 source ../env/bin/activate

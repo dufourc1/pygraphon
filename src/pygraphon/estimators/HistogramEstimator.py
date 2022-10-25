@@ -50,7 +50,7 @@ class HistogramEstimator(BaseEstimator):
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
         graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist)
-        return StepGraphon(graphon_matrix, rho, h), P
+        return StepGraphon(graphon_matrix,initial_rho =  rho,bandwidthHist =  h), P
 
     def _approximate(
         self,

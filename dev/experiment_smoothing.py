@@ -8,9 +8,9 @@ from pygraphon.utils.utils_graph import edge_density
 from sklearn.cluster import KMeans
 from pygraphon.estimators.HistogramEstimator import HistogramEstimator
 from loguru import logger
-
 # from pygraphon.estimators.MomentEstimator import MomentEstimator, SimpleMomentEstimator
 
+counter = 0
 
 def error_operator(rel_error, i, j, k):
     best_est_id = np.argmin(rel_error)
@@ -35,6 +35,8 @@ def smooth_exp_parallel(i, j, k, n_it, rho_n, theta):
     metric_result = error_operator(rel_error, i, j, k)
     # save metric list
     np.save(f"temp/metric_list_{i}_{j}_{k}_{n_it}.npy", np.array(metric_result))
+    counter += 1
+    logger.debug(f"Done: {counter}")
     return metric_result
 
 
@@ -49,7 +51,8 @@ def initialisation_hist(n, rho_n, graphon_matrix, bandwidth):
 
     # Apply histogram anc connectivity matrix
     hist = HistogramEstimator()
-    hist_approx = hist.estimate(adjacency_matrix=A, bandwidthHist=None)
+    hist.fit(graph=A, bandwidthHist=None)
+    hist_approx = hist.get_graphon()
     # P = hist.estimated_edge_connectivity_matrix
     return A, hist_approx, graphon
 

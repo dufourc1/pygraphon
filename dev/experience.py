@@ -9,6 +9,7 @@ from gen_sbm import AssociativeFullyRandom
 from joblib import Parallel, delayed
 from loguru import logger
 from tqdm import tqdm
+import os, shutil
 
 
 class TqdmToLogger(io.StringIO):
@@ -41,7 +42,7 @@ def main():
     n_list = np.arange(n_min, n_max, n_step)
     rho_n = 10/n_list
 
-    k_max = 10
+    k_max = 6
     k_list = list(range(2, k_max + 1))
     theta_intra_min, theta_intra_max = 0.15, 0.5
     theta_inter_min, theta_inter_max = 0.05, 0.15
@@ -85,6 +86,8 @@ def main():
         for index in tqdm(it_list, file=tqdm_out)
     )
 
+    logger.info("post-processing results")
+
     #post process result (list of metric lists)
     for i,index in enumerate(it_list):
         for result_index in range(4):
@@ -94,7 +97,22 @@ def main():
     logger.info("Computing done")
     with open("result.pkl", "wb") as f:
         pickle.dump(metric_list, f, protocol=pickle.HIGHEST_PROTOCOL)
-    logger.info("Results saved, bye")
+
+    logger.info("Cleaning temp/")    
+    #clean temp folder
+    folder = './temp'
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+        logger.info("Results saved, bye")
 
 
 if __name__ == "__main__":

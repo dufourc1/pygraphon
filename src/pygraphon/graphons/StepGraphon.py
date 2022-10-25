@@ -5,7 +5,7 @@ import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
 from pygraphon.utils.utils_matrix import check_symmetric
-
+import math
 
 class StepGraphon(Graphon):
     """A step function graphon, by giving the matrix representing the block model approxumation.
@@ -37,6 +37,8 @@ class StepGraphon(Graphon):
         # save args
         self.graphon = graphon
         self.bandwidthHist = bandwidthHist
+
+        assert self.graphon.shape[0] == int(math.ceil(1/bandwidthHist))
 
         self.areas = np.ones_like(self.graphon) * self.bandwidthHist**2
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
