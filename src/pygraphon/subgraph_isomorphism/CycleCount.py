@@ -1,3 +1,4 @@
+"""Class to compute cycle homomorphism."""
 import numpy as np
 
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
@@ -20,13 +21,17 @@ class CycleCount:
         self.counts = None
 
     def __call__(self, adjacency_matrix: np.ndarray) -> np.ndarray:
-        """Count the densities of subgraph C_l in a graph G: t(C_L,G)
+        """Count the densities of subgraph C_l in a graph G: t(C_L,G).
 
-        Args:
-            adjacency_matrix (np.ndarray): Adjacency matrix representing the simple graph G
+        Parameters
+        ----------
+        adjacency_matrix : np.ndarray
+             Adjacency matrix representing the simple graph G
 
-        Returns:
-            np.ndarray : counts of cycle of length 3 to  L
+        Returns
+        -------
+        np.ndarray
+            counts of cycle of length 3 to  L
         """
         check_simple_adjacency_matrix(adjacency_matrix)
         self.adjacency_matrix = adjacency_matrix
@@ -39,27 +44,45 @@ class CycleCount:
 
         Will compute the different network profile in parallel
 
-        Args:
-            adjacency_matrix (np.ndarray): Adjacency matrix representing the simple graph G
-            kmax (int): maximum length of cycles to consider (default: None). If None, use the value of L.
-            subsample (float): fraction of the graph to subsample (default: 0.4)
-            repetitions (int): number of times to subsample the graph (default: 3)
+        Parameters
+        ----------
+        adjacency_matrix : np.ndarray
+            Adjacency matrix representing the simple graph G
+        kmax : int
+            maximum length of cycles to consider (default: None). If None, use the value of L.
+        subsample : float
+            fraction of the graph to subsample (default: 0.4)
+        repetitions : int
+             number of times to subsample the graph (default: 3)
 
-
-        Returns:
-            np.ndarray: approximation to network profile of the graph
+        Raises
+        ------
+        NotImplementedError
+            NotImplemented for now
         """
         raise NotImplementedError("approximate_network_profile is not implemented")
 
     def network_profile(self, adjacency_matrix, kmax=None) -> np.ndarray:
-        """Compute the network profile of a graph: normalized counts of cycles of length 3 to L
+        """Compute the network profile of a graph: normalized counts of cycles of length 3 to L.
 
-        Args:
-            adjacency_matrix (np.ndarray): Adjacency matrix representing the simple graph G
-            kmax (int): maximum length of cycles to consider (default: None). If None, use the value of L.
+        Parameters
+        ----------
+        adjacency_matrix : np.ndarray
+             Adjacency matrix representing the simple graph G
+        kmax : int
+            maximum length of cycles to consider (default: None). If None, use the value of L.
 
-        Returns:
-            np.ndarray: network profile of the graph
+        Returns
+        -------
+        np.ndarray
+            network profile of the graph
+
+        Raises
+        ------
+        NotImplementedError
+            if L is bigger than 10
+        ValueError
+            if L is smaller than 3
         """
         if kmax is None:
             kmax = self.L

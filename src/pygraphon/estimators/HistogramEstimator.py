@@ -5,7 +5,7 @@ from typing import Tuple
 import numpy as np
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
-from pygraphon.estimators.nethist import nethist
+from pygraphon.estimators.utils.nethist import nethist
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
 
@@ -30,15 +30,27 @@ class HistogramEstimator(BaseEstimator):
         self.bandwidthHist = bandwithHist
 
     def _approximate_graphon_from_adjacency(
-        self, adjacency_matrix: np.ndarray, bandwidthHist=None, *args, **kwargs
-    ) -> StepGraphon:
-        """Estimate the graphon function f(x,y) from an adjacency matrix"""
+        self, adjacency_matrix: np.ndarray, bandwidthHist: float = None
+    ) -> Tuple[StepGraphon, np.ndarray]:
+        """Estimate the graphon function f(x,y) from an adjacency matrix.
+
+        Parameters
+        ----------
+        adjacency_matrix : np.ndarray
+            adjancency matrix of the graph
+        bandwidthHist : float
+            size of the blocks (between 0 and 1), by default None
+
+        Returns
+        -------
+        Tuple[StepGraphon, np.ndarray]
+            approximated graphon and matrix of connection Pij of size n x n
+        """
         rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
         graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist)
-        self.estimated_edge_connectivity_matrix = P
-        return StepGraphon(graphon_matrix, h, rho)
+        return StepGraphon(graphon_matrix, rho, h), P
 
     def _approximate(
         self,
@@ -46,22 +58,31 @@ class HistogramEstimator(BaseEstimator):
         bandwidthHist: float = None,
         use_default_bandwidth: bool = False,
         return_membership: bool = False,
-    ) -> Tuple[np.ndarray]:
-        """Use function from Universality of block model approximation [1] to approximate a graphon
-        from a single adjacency matrix.
+    ) -> Tuple[Tuple[np.ndarray], float]:
+        """Use function from Universality of block model approximation [1].
 
-        Args:
-            adjacencyMatrix (np.ndarray): adjacency matrix of the realized graph
-            bandwidthHist (float, optional):  size of the block of the histogram. Defaults to None
-            use_default_bandwidth (bool, optional): if True, use the default bandwidth. Defaults to False.
+        Approximate a graphon from a single adjacency matrix.
 
-        Returns:
-            Tuple[np.ndarray], float : graphon_matrix, edge_probability_matrix, h. graphon_matrix is the block model
+        Parameters
+        ----------
+        adjacencyMatrix : np.ndarray
+            adjancency matrix of the graph
+        bandwidthHist : float
+            size of the block of the histogram. Defaults to None
+        use_default_bandwidth : bool
+            if True, use the default bandwidth. Defaults to False.
+        return_membership : bool
+            if true return also the node membership, by default False
+
+        Returns
+        -------
+        Tuple[Tuple[np.ndarray], float]
+            graphon_matrix, edge_probability_matrix, h. graphon_matrix is the block model
             graphon and P is the edge probability matrix
             corresponding to the adjacency matrix. h is the size of the block
 
-
-        Sources:
+        Sources
+        -------
             [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
         """
         # network histogram approximation

@@ -1,8 +1,9 @@
+"""Implementation of the SBA estimator."""
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 
 
 class SBA(BaseEstimator):
-    """Estimate graphon base on SB approximation
+    """Estimate graphon base on SB approximation.
 
     Parameters
     ----------

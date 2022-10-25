@@ -1,4 +1,4 @@
-from turtle import color
+"""Utilities to plot graphons."""
 from typing import Tuple
 
 import matplotlib.pyplot as plt
@@ -6,12 +6,12 @@ import numpy as np
 from matplotlib.pyplot import Axes, Figure
 from mpl_toolkits import axes_grid1
 
-from pygraphon.graphons.GraphonFunction import Graphon
+from pygraphon.graphons.Graphon import Graphon
 from pygraphon.graphons.StepGraphon import StepGraphon
 
 
-def add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
-    """Add a vertical color bar to an image plot."""
+# noqa: DAR101
+def _add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
     divider = axes_grid1.make_axes_locatable(im.axes)
     width = axes_grid1.axes_size.AxesY(im.axes, aspect=1.0 / aspect)
     pad = axes_grid1.axes_size.Fraction(pad_fraction, width)
@@ -24,14 +24,29 @@ def add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
 def plot_graphon_function(
     graphon: Graphon, fig: Figure = None, ax: Axes = None, figsize: Tuple[int, int] = (6, 5)
 ) -> Tuple[Figure, Axes]:
-    """Plot the graphon."""
+    """Plot a graphon function.
+
+    Parameters
+    ----------
+    graphon : Graphon
+        graphon defined with a function.
+    fig : Figure
+        matplotlib figure, by default None
+    ax : Axes
+        maplotlib ax, by default None
+    figsize : Tuple[int, int], optional
+        figure size, by default (6, 5)
+
+    Returns
+    -------
+    Tuple[Figure, Axes]
+        plot
+    """
     x1, x2 = np.meshgrid(np.arange(0, 1, 0.1), np.arange(0, 1, 0.1))
     y = graphon.graphon_function(x1, x2)
     ax.imshow(y, extent=[0, 1, 0, 1], cmap=plt.cm.get_cmap("jet"), origin="lower")
     fig.colorbar()
     plt.show()
-
-    raise NotImplementedError
 
 
 def plot_sample(
@@ -43,7 +58,28 @@ def plot_sample(
     integrate_to_1: bool = False,
     cmap = "binary",
 ) -> Tuple[Figure, Axes]:
-    """Plot the graphon."""
+    """Plot a sample of the graphon.
+
+    Parameters
+    ----------
+    graphon : Graphon
+        graphon
+    resolution : int
+        number of samples to take, by default 100
+    fig : Figure
+        figure, by default None
+    ax : Axes
+        ax, by default None
+    colorbar : bool
+        if yes add a colorbar, by default False
+    integrate_to_1 : bool
+        if False plot with original edge density, by default False
+
+    Returns
+    -------
+    Tuple[Figure, Axes]
+        plotted sample
+    """
     x1, x2 = np.linspace(0, 1, resolution, endpoint=False), np.linspace(
         0, 1, resolution, endpoint=False
     )
@@ -56,7 +92,7 @@ def plot_sample(
 
     im = ax.imshow(result, cmap=cmap, vmin=0, vmax=1)
     if colorbar:
-        add_colorbar(im, ax=ax)
+        _add_colorbar(im, ax=ax)
     _make_pretty(ax)
     return fig, ax
 
@@ -66,14 +102,21 @@ def plot(
 ) -> Tuple[Figure, Axes]:
     """Plot the graphon.
 
-    Args:
-        graphon (Graphon): graphon to plot.
-        fig (Figure, optional): Defaults to None.
-        ax (Axes, optional): Defaults to None.
-        figsize (Tuple[int, int], optional):. Defaults to (6, 5).
+    Parameters
+    ----------
+    graphon : StepGraphon
+         graphon to plot.
+    fig : Figure
+        figure, by default None
+    ax : Axes
+        ax, by default None
+    figsize : Tuple[int, int]
+        figsize, by default (6, 5)
 
-    Returns:
-        Tuple[Figure, Axes]: figure and axis of the plot.
+    Returns
+    -------
+    Tuple[Figure, Axes]
+        plot
     """
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=figsize)
@@ -84,7 +127,13 @@ def plot(
 
 
 def _make_pretty(ax):
-    """Remove the figure frame, x- and y-ticks, and set the aspect to equal."""
+    """Remove the figure frame, x- and y-ticks, and set the aspect to equal.
+
+    Parameters
+    ----------
+    ax :  Axes
+        matplotlib ax, by default None
+    """
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_aspect("equal")

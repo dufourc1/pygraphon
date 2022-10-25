@@ -1,10 +1,11 @@
+"""Implementation of empirical degrees based estimator."""
 import numpy as np
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 
 
 class LG(BaseEstimator):
-    """Estimate graphons based on empirical degrees
+    """Estimate graphons based on empirical degrees.
 
     Parameters
     ----------

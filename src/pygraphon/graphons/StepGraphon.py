@@ -1,27 +1,38 @@
+"""Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
 from typing import Callable
 
 import numpy as np
 
-from pygraphon.graphons.GraphonAbstract import GraphonAbstract
+from pygraphon.graphons.Graphon import Graphon
 from pygraphon.utils.utils_matrix import check_symmetric
 
 
-class StepGraphon(GraphonAbstract):
+class StepGraphon(Graphon):
     """A step function graphon, by giving the matrix representing the block model approxumation.
 
-    Args:
-        graphon (np.ndarray): [description]. Defaults to None.
-        bandwidthHist (float, optional): [description]. Defaults to None.
+    Parameters
+    ----------
+        graphon : np.ndarray
+            np array representing the theta matrix
+        bandwidthHist : float
+            size of the groups (between 0 and 1), by default None
+        initial_rho : float
+            initial edge density (used to keep track in case of normalization), by default None
     """
 
     def __init__(
-        self, graphon: np.ndarray, bandwidthHist: float = None, initial_rho: float = None
+        self, graphon: np.ndarray, bandwidthHist: float, initial_rho: float = None
     ) -> None:
-        """Create an instance of a step function graphon, by giving the matrix representing the block model approxumation.
+        """Create an instance of a step function graphon, by giving the matrix representing the block model approx.
 
-        Args:
-            graphon (np.ndarray): [description]. Defaults to None.
-            bandwidthHist (float, optional): [description]. Defaults to None.
+        Parameters
+        ----------
+        graphon : np.ndarray
+            np array representing the theta matrix
+        bandwidthHist : float
+            size of the groups (between 0 and 1), by default None
+        initial_rho : float
+            initial edge density (used to keep track in case of normalization), by default None
         """
         # save args
         self.graphon = graphon
@@ -34,43 +45,50 @@ class StepGraphon(GraphonAbstract):
             self.areas[-1, :] = self.bandwidthHist * self.remainder
             self.areas[-1, -1] = self.remainder**2
 
-        super().__init__(initial_rho=initial_rho)
+        super().__init__(function=self.graphon_function_builder(), initial_rho=initial_rho)
 
 
     def graphon_function_builder(self) -> Callable:
-        """Build the graphon function f(x,y)"""
+        """Build the graphon function f(x,y).
 
-        def function(
-            x: float,
-            y: float,
-            h: float = self.bandwidthHist,
-            blocksValue: np.ndarray = self.graphon,
-        ):
-            """Return the value of the graphon at the point (x,y)
+        Returns
+        -------
+        Callable
+            graphon function
+        """
 
-            Args:
-                x ([float]):coordinate x
-                y ([type]):coordinate y
-                h ([float], optional): size of the blocks of the graphon. Defaults to self.bandwidthHist.
-                blocksValue ([np.ndarray], optional): connection matrices value. Defaults to self.graphon.
+        def _function(x: float, y: float) -> float:
+            """Return the value of the graphon at the point (x,y).
 
-            Returns:
-                [float]: f(x,h)
+            Parameters
+            ----------
+            x : float
+                coordinate x (first latent variable)
+            y : float
+                coordinate y (second latent variable)
+
+            Returns
+            -------
+            float
+                f(x,y)
             """
-            return blocksValue[int(x // h)][int(y // h)]
+            return self.graphon[int(x // self.bandwidthHist)][int(y // self.bandwidthHist)]
 
-        return function
+        return _function
 
     def correct_graphon_integral(self):
-        """Normalize the graphon such that the integral is equal to 1 if needed"""
-        return self.normalize()
+        """Normalize the graphon such that the integral is equal to 1 if needed."""
+        self.normalize()
 
     def check_graphon(self):
-        """Check if the graphon is symmetric, positive
+        """Check if the graphon is symmetric, positive.
 
-        Raises:
-            ValueError: if the graphon is not symmetric,
-            ValueError: if the graphon is not non negative
+        Raises
+        ------
+        ValueError
+             if the graphon is not symmetric
+        ValueError
+            if the graphon is not non negative
         """
         if not check_symmetric(self.graphon):
             raise ValueError("graphon matrix should be symmetric")
@@ -78,10 +96,19 @@ class StepGraphon(GraphonAbstract):
             raise ValueError("graphon matrix should be non-negative")
 
     def integral(self, graphon=None, areas=None) -> float:
-        """Integrate the graphon over [0,1]x[0,1]
+        """Integrate the graphon over [0,1]x[0,1].
 
-        Returns:
-            float: the value of the integral
+        Parameters
+        ----------
+        graphon : np.ndarray, optional
+            theta matrix, by default None
+        areas : np.ndarray, optional
+            areas of the different blocks, by default None
+
+        Returns
+        -------
+        float
+            the value of the integral
         """
         if graphon is None:
             graphon = self.graphon
@@ -90,8 +117,9 @@ class StepGraphon(GraphonAbstract):
         return np.sum(graphon * areas)
 
     def normalize(self) -> None:
-        """Normalize graphon such that the integral is equal to 1
-        if the graphon is the empty graphon, does not do anything
+        """Normalize graphon such that the integral is equal to 1.
+
+        If the graphon is the empty graphon, does not do anything
         """
         integral = self.integral()
         if integral != 0:
@@ -100,9 +128,21 @@ class StepGraphon(GraphonAbstract):
             self.graphon = self.graphon
 
     def get_graphon(self) -> np.ndarray:
-        """Get the graphon matrix"""
+        r"""Get the graphon matrix.
+
+        Returns
+        -------
+        np.ndarray
+            graphon connectivity matrix (\Theta)
+        """
         return self.graphon
 
     def get_number_groups(self) -> int:
-        """Return the number of groups of the graphon"""
-        return 1 // self.bandwidthHist + 1
+        """Return the number of groups of the graphon.
+
+        Returns
+        -------
+        int
+            number of groups
+        """
+        return int(1 // self.bandwidthHist) + 1

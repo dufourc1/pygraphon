@@ -1,10 +1,11 @@
+"""Implementation of USVD estimator."""
 import numpy as np
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 
 
 class USVT(BaseEstimator):
-    """Estimate graphons  via Universal Singular Value Thresholding
+    """Estimate graphons  via Universal Singular Value Thresholding.
 
     Parameters
     ----------

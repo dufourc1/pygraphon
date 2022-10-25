@@ -1,3 +1,4 @@
+"""Utilities to plot matrices."""
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -5,11 +6,19 @@ import numpy as np
 def spy(A: np.ndarray, fig=None, ax=None):
     """Spy function for matplotlib.pyplot.
 
-    Args:
-        A ([np.ndarray]): matrix to plot.
+    Parameters
+    ----------
+    A : np.ndarray
+         matrix to plot.
+    fig : Figure, optional
+        figure from matplotlib, by default None
+    ax : Axes, optional
+        ax from matplotlib, by default None
 
-    Returns:
-        fig, ax: figure and axis of the plot.
+    Returns
+    -------
+    Figure,Axes
+        figure and ax from matplotlib.
     """
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))

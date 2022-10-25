@@ -1,3 +1,4 @@
+"""Greedy optimization procedure for the nethist estimator."""
 from typing import Iterable, Optional, Tuple
 
 import numpy as np
@@ -18,15 +19,39 @@ def graphest_fastgreedy(
     verbose: bool = True,
     trace: bool = True,
 ) -> Tuple[np.ndarray, int, Optional[Tuple[np.ndarray, np.ndarray]]]:
-    """Implements likelihood-based optimization for nethist. Returns a list of cluster labels.
+    """Implement likelihood-based optimization for nethist.
 
-    Args:
-        A (np.ndarray): Adjacency matrix (simple graph)
-        hbar (int): number of nodes in each cluster
-        inputLabelVec (Iterable): initial guess for the cluster labels.
+    Returns a list of cluster labels.
 
-    Returns:
-        np.ndarray: cluster labels.
+    Parameters
+    ----------
+    A : np.ndarray
+        Adjacency matrix (simple graph)
+    hbar : int
+        number of nodes in each cluster
+    inputLabelVec : Iterable
+        initial guess for the cluster labels.
+    absTol : float
+        when to stop optimizing ll, by default 2.5*1e-4
+    maxNumRestarts : int
+        maximum number of restart for the greedy algorithm, by default 500
+    verbose : bool
+        verbose flag, by default True
+    trace : bool
+        trace flag, by default True
+
+    Returns
+    -------
+    Tuple[np.ndarray, int, Optional[Tuple[np.ndarray, np.ndarray]]]
+        cluster labels, number of blocks,
+        and optionally the trace of the optimization (lls_trace, normalized_best_ll_trace)
+
+    Raises
+    ------
+    RuntimeError
+       if a cluster has only one node
+    RuntimeError
+        if a node is not assigned to any cluster
     """
     n = A.shape[0]
     numGreedySteps, allInds = set_num_greedy_steps(n)
@@ -53,11 +78,9 @@ def graphest_fastgreedy(
 
     habSqrd = np.outer(h, h) - np.diag(np.multiply(h, h) - np.multiply(h, (h - 1)) / 2)
 
-    if not np.all(habSqrd) >= 1:
+    if np.all(habSqrd) < 1:
         raise RuntimeError("All clusters must contain at least 2 nodes")
-    if np.max(orderedClusterInds) != n - 1:
-        raise RuntimeError("All nodes must be assigned to a cluster")
-    if np.sum(h) != n:
+    if np.max(orderedClusterInds) != n - 1 or np.sum(h) != n:
         raise RuntimeError("All nodes must be assigned to a cluster")
 
     initialLabelVec = inputLabelVec.astype(int)
@@ -307,13 +330,17 @@ def graphest_fastgreedy(
 
 
 def set_num_greedy_steps(n) -> Tuple[int, bool]:
-    """Arbitrary cutoff to the number of greeddy steps to take at each iterations
+    """Arbitrary cutoff to the number of greeddy steps to take at each iterations.
 
-    Args:
-        n ([int]): number of nodes in graph
+    Parameters
+    ----------
+    n : int
+         number of nodes in graph
 
-    Returns:
-        Tuple[int,bool]: number of greedy steps to take, whether to use all indices
+    Returns
+    -------
+    Tuple[int, bool]
+        number of greedy steps to take, whether to use all indices
     """
     if n <= 256:
         numGreedySteps = int(n * (n - 1) / 2)

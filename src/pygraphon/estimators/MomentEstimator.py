@@ -1,6 +1,7 @@
+"""Estimator based on method of moments for cycle counts."""
 from collections.abc import Iterable as IterableCollection
 from itertools import product
-from typing import Callable, Iterable, List, Union
+from typing import Callable, Iterable, List, Tuple, Union
 
 import numpy as np
 from scipy.optimize import fsolve
@@ -22,10 +23,23 @@ class SimpleMomentEstimator(BaseEstimator):
         self,
         blocks: Union[int, Iterable[float]],
     ) -> None:
-        """
+        """Moment estimator uses subgraph isomorphims density to fit a step graphon.
 
-        Args:
-            blocks (Union[int, Iterable[float]]): number of blocks or size of blocks
+        Parameters
+        ----------
+        blocks : Union[int, Iterable[float]]
+            number of blocks or size of blocks
+
+        Raises
+        ------
+        ValueError
+            if blocks is not an integer or an iterable of floats
+        ValueError
+            if blocks is an iterable of floats and the sum is not 1
+        ValueError
+            blocks is not an integer or an iterable of floats
+        ValueError
+            if too many blocks are specified (can do between 2 and 8)
         """
         super().__init__()
 
@@ -54,9 +68,22 @@ class SimpleMomentEstimator(BaseEstimator):
         self.counter = CycleCount(2 + self.numberParameters - 1)
 
     def _approximate_graphon_from_adjacency(
-        self, adjacency_matrix: np.ndarray, *args, **kwargs
-    ) -> StepGraphon:
-        """Estimate the graphon function f(x,y) from an adjacency matrix by solving moment equations."""
+        self, adjacency_matrix: np.ndarray
+    ) -> Tuple[StepGraphon, None]:
+        """Estimate the graphon function f(x,y) from an adjacency matrix by solving moment equations.
+
+        The P matrix is not returned as it is not used in the estimation.
+
+        Parameters
+        ----------
+        adjacency_matrix : np.ndarray
+            adjacency matrix
+
+        Returns
+        -------
+        StepGraphon, None
+            approximated graphon and None
+        """
         # compute densities from observed graphs
         cycles = self._count_cycles(adjacency_matrix)
         rho = edge_density(adjacency_matrix)
@@ -68,22 +95,29 @@ class SimpleMomentEstimator(BaseEstimator):
         # structure the parameters into a graphon
         graphon = self._add_constraints_on_SBM(root, self.numberBlocks)
         graphon = self.correct_fitted_values(graphon, kind="abs")
-        return StepGraphon(graphon, 1 / self.numberBlocks, initial_rho=rho)
+        return StepGraphon(graphon, 1 / self.numberBlocks, initial_rho=rho), None
 
     @staticmethod
     def correct_fitted_values(graphon, kind="abs") -> np.ndarray:
         """Project the method of moment into the graphon space.
 
-        Args:
-            graphon ([np.ndarray]): estimated graphon
-            kind (str, optional): method of projection. Either absolute value ("abs") or clipping ("clip").
+        Parameters
+        ----------
+        graphon : np.ndarray
+             estimated graphon
+        kind : str
+            method of projection. Either absolute value ("abs") or clipping ("clip").
             Defaults to "abs".
 
-        Raises:
-            ValueError: if kind is not in ["abs", "clip"]
+        Returns
+        -------
+        np.ndarray
+            projected graphon
 
-        Returns:
-            np.ndarray: projected graphon
+        Raises
+        ------
+        ValueError
+            if kind is not in ["abs", "clip"]
         """
         if kind == "abs":
             return np.abs(graphon)
@@ -93,18 +127,35 @@ class SimpleMomentEstimator(BaseEstimator):
 
     @staticmethod
     def _cycle_moments_theoretical(L: int, theta: np.ndarray, areas: np.ndarray = None) -> float:
-        """Return the theoretical values of homomorphism densities of cycle of length L given a block model
-            represented by a connection matrix theta and sizes of the blocks areas.
+        """Return the theoretical values of homomorphism densities of cycle of length L.
 
-        Args:
-            L (int): length of the cycle density to compute: C_L
-            theta (np.ndarray): connection matrix. Should be in [0,1]^KxK and symmetric
-            areas (np.ndarray, optional): array of size of blocks. Should be in [0,1]^K, symmetric and summing to one.
-                                            Defaults to None, which sets all blocks to be of same size.
+        Take as input a block model represented by a connection matrix theta and sizes of the blocks areas.
 
+        Parameters
+        ----------
+        L : int
+            length of the cycle density to compute: C_L
+        theta : np.ndarray
+            connection matrix. Should be in [0,1]^KxK and symmetric
+        areas : np.ndarray
+            array of size of blocks. Should be in [0,1]^K, symmetric and summing to one.
+            Defaults to None, which sets all blocks to be of same size.
 
-        Returns:
-            float: t(C_L,W)
+        Returns
+        -------
+        float
+            t(C_L,W)
+
+        Raises
+        ------
+        ValueError
+            if theta is not symmetric
+        ValueError
+            if theta and the number of blocks are not compatible
+        ValueError
+            if the sum of the areas is not 1
+        ValueError
+            if the areas are not in [0,1]
         """
         if not check_symmetric(theta):
             raise ValueError("connection matrix theta should be symmetric")
@@ -137,14 +188,30 @@ class SimpleMomentEstimator(BaseEstimator):
 
     @staticmethod
     def _edge_density_moment_theoretical(theta: np.ndarray, areas: np.ndarray = None) -> float:
-        """Return the theoretical values of homomorphism densities of edge density given a block model
+        """Return the theoretical values of homomorphism densities of edge density given a block model.
 
-        Args:
-            theta (np.ndarray): connection matrix
-            areas (np.ndarray, optional): sizes of the blocks. Defaults to None and then supposed to be homogeneous.
+        Parameters
+        ----------
+        theta : np.ndarray
+             connection matrix
+        areas : np.ndarray
+            sizes of the blocks. Defaults to None and then supposed to be homogeneous.
 
-        Returns:
-            float: theoretical edge density of the SBM represented by theta
+        Returns
+        -------
+        float
+             theoretical edge density of the SBM represented by theta
+
+        Raises
+        ------
+        ValueError
+            if theta is not symmetric
+        ValueError
+            if theta and the number of blocks are not compatible
+        ValueError
+            if the sum of the areas is not 1
+        ValueError
+            if the areas are not in [0,1]
         """
         if not check_symmetric(theta):
             raise ValueError("connection matrix theta should be symmetric")
@@ -169,14 +236,30 @@ class SimpleMomentEstimator(BaseEstimator):
 
     @staticmethod
     def _cherry_density_moment_theoretical(theta: np.ndarray, areas: np.ndarray = None) -> float:
-        """Return the theoretical values of homomorphism densities of cherry density given a block model
+        """Return the theoretical values of homomorphism densities of cherry density given a block model.
 
-        Args:
-            theta (np.ndarray): connection matrix
-            areas (np.ndarray, optional): sizes of the blocks. Defaults to None and then supposed to be homogeneous.
+        Parameters
+        ----------
+        theta : np.ndarray
+            connection matrix
+        areas : np.ndarray
+            sizes of the blocks. Defaults to None and then supposed to be homogeneous.
 
-        Returns:
-            float: theoretical cherry density of the SBM represented by theta
+        Returns
+        -------
+        float
+            theoretical cherry density of the SBM represented by theta
+
+        Raises
+        ------
+        ValueError
+            if theta is not symmetric
+        ValueError
+            if theta and the number of blocks are not compatible
+        ValueError
+            if the sum of the areas is not 1
+        ValueError
+            if the areas are not in [0,1]
         """
         if not check_symmetric(theta):
             raise ValueError("connection matrix theta should be symmetric")
@@ -209,15 +292,21 @@ class SimpleMomentEstimator(BaseEstimator):
         cyclesCounts: Iterable[float],
         edgeDensity: float,
     ) -> Callable:
-        """Return the system of equations to solve to find the parameters of a block model (p,q)
-        based on the moments (edge density and cycle densities)
+        """Return the system of equations to solve to find the parameters of a block model (p,q).
 
-        Args:
-            cyclesCounts (Iterable[float]): cycle (homomorphism) densities starting from C_3
-            edgeDensity (float): edge density (homomorphism density of K_2)
+        Based  on the moments (edge density and cycle densities)
 
-        Returns:
-            Callable: system of equation to solve to pass to scipy.optimize
+        Parameters
+        ----------
+        cyclesCounts : Iterable[float]
+            cycle (homomorphism) densities starting from C_3
+        edgeDensity : float
+            edge density (homomorphism density of K_2)
+
+        Returns
+        -------
+        Callable
+            system of equation to solve to pass to scipy.optimize
         """
         K = self.numberBlocks
 
@@ -244,24 +333,34 @@ class SimpleMomentEstimator(BaseEstimator):
     def _add_constraints_on_SBM(x, K) -> np.ndarray:
         """Return a structured array with the constraints on the SBM parameters.
 
-        Args:
-            x ([np.ndarray]): parameters of the SBM
-            K ([int]): number of blocks
+        Parameters
+        ----------
+        x : np.ndarray
+             parameters of the SBM
+        K : int
+            number of blocks
 
-        Returns:
-            [np.ndarray]: constrained matrix of connectivity of the SBM
+        Returns
+        -------
+        np.ndarray
+            constrained matrix of connectivity of the SBM
         """
         return x[-1] * np.ones((K, K)) + (x[0:-1] - x[-1]) * np.eye(K)
 
     def _count_cycles(self, instance: np.ndarray) -> List[float]:
         """Return the normalized count of cycle of length L in the instance of a simple graph.
+
         hom(C_k,G)/n^k for k in 3,..,9
 
-        Args:
-            instance (np.ndarray): graph
+        Parameters
+        ----------
+        instance : np.ndarray
+            graph
 
-        Returns:
-            List[float]: homomorphism densities of cycle in instance
+        Returns
+        -------
+        List[float]
+             homomorphism densities of cycle in instance
         """
         return self.counter(instance)
 

@@ -1,8 +1,9 @@
+"""Implementation of the matrix completion scheme estimator."""
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 
 
 class Completion(BaseEstimator):
-    """Estimate graphons via matrix completion scheme"""
+    """Estimate graphons via matrix completion scheme."""
 
     def __init__(
         self,
