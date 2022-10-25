@@ -39,7 +39,7 @@ def main():
     # Initialise parameters: n nodes, k blocks, theta prob
     n_min, n_max, n_step =  50, 1001, 50
     n_list = np.arange(n_min, n_max, n_step)
-    rho_n = 1 / 3
+    rho_n = 10/n_list
 
     k_max = 10
     k_list = list(range(2, k_max + 1))
@@ -47,15 +47,15 @@ def main():
     theta_inter_min, theta_inter_max = 0.05, 0.15
 
     # Create arrays to store metrics
-    hm_matrix_smoothing_test_error = np.zeros((n_list.shape[0], len(k_list)))
-    hm_matrix_smoothing_test_deviation_from_true = np.zeros_like(hm_matrix_smoothing_test_error)
-    hm_matrix_smoothing_test_deviation_from_hist = np.zeros_like(hm_matrix_smoothing_test_error)
-    hm_matrix_smoothing_test_comp_to_hist_perf = np.zeros_like(hm_matrix_smoothing_test_error)
+    error = np.zeros((n_list.shape[0], len(k_list)))
+    deviation_from_true = np.zeros_like(error)
+    deviation_from_hist = np.zeros_like(error)
+    comp_to_hist_perf = np.zeros_like(error)
     metric_list = [
-        hm_matrix_smoothing_test_comp_to_hist_perf,
-        hm_matrix_smoothing_test_error,
-        hm_matrix_smoothing_test_deviation_from_hist,
-        hm_matrix_smoothing_test_deviation_from_true,
+        comp_to_hist_perf,
+        error,
+        deviation_from_hist,
+        deviation_from_true,
     ]
 
     # Initialise connectivity matrices for different prior to nested loop
@@ -75,11 +75,11 @@ def main():
     it_list = list(itertools.product(list(enumerate(n_list)), list(enumerate((k_list)))))
     result = Parallel(n_jobs=36, prefer="threads")(
         delayed(smooth_exp_parallel)(
-            index[0][0],
-            index[1][0],
-            index[1][1],
-            index[0][1],
-            rho_n,
+            index[0][0],#index of n in n_list
+            index[1][0],#index of k in k_list
+            index[1][1],#value of k
+            index[0][1],#value of n
+            rho_n[index[0][0]],#rho_n corresponding to correct n
             theta[index[1][0]],
         )
         for index in tqdm(it_list, file=tqdm_out)

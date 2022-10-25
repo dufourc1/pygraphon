@@ -21,12 +21,6 @@ def error_operator(rel_error, i, j, k):
         (int(k * (k + 1) / 2) - best_est_LCk) / int(k * (k + 1) / 2),
         (len(rel_error) - best_est_LCk) / (len(rel_error)),
     )
-    #metric_list[0][i, j] = rel_error[-1] / rel_error[best_est_id]
-    #metric_list[1][i, j] = rel_error[best_est_id]
-    #metric_list[2][i, j] = (int(k * (k + 1) / 2) - best_est_LCk) / int(k * (k + 1) / 2)
-    #metric_list[3][i, j] = (len(rel_error) - best_est_LCk) / (len(rel_error))
-    #return metric_list
-
 
 def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     A, hist_approx, graphon = initialisation_hist(n, rho_n, graphon_matrix, bandwidth)
