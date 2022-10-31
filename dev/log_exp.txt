@@ -1,2 +1,15 @@
-2022-10-26 04:16:31.840 | INFO     | __main__:main:39 - Starting experiment
-2022-10-26 04:16:31.842 | Level 20 | __main__:flush:34 - 0%|          | 0/100 [00:00<?, ?it/s]
+2022-10-31 11:53:41.290 | INFO     | __main__:main:39 - Starting experiment
+2022-10-31 11:53:41.291 | Level 20 | __main__:flush:34 - 0%|          | 0/9 [00:00<?, ?it/s]
+2022-10-31 11:53:41.292 | Level 20 | __main__:flush:34 - 100%|##########| 9/9 [00:00<00:00, 54550.20it/s]
+2022-10-31 12:07:48.566 | INFO     | __main__:main:89 - post-processing results
+2022-10-31 12:07:48.569 | INFO     | __main__:main:98 - Computing done
+2022-10-31 12:07:48.600 | INFO     | __main__:main:102 - Cleaning temp/
+2022-10-31 12:07:48.601 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.601 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.603 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.604 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.604 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.605 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.606 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.606 | INFO     | __main__:main:116 - Results saved, bye
+2022-10-31 12:07:48.607 | INFO     | __main__:main:116 - Results saved, bye

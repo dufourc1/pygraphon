@@ -16,3 +16,6 @@ rm slurm-245807*
 
 # load venv
 source env/bin/activate
+
+#stop ALL job
+scancel -u verdeyme

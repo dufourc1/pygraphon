@@ -2,15 +2,11 @@
 from pygraphon.graphons.StepGraphon import StepGraphon
 import numpy as np
 
-# from pygraphon.plots.plot_matrices import spy
 import matplotlib.pyplot as plt
 from pygraphon.utils.utils_graph import edge_density
 from sklearn.cluster import KMeans
 from pygraphon.estimators.HistogramEstimator import HistogramEstimator
 from loguru import logger
-# from pygraphon.estimators.MomentEstimator import MomentEstimator, SimpleMomentEstimator
-
-counter = 0
 
 def error_operator(rel_error, i, j, k):
     best_est_id = np.argmin(rel_error)
@@ -35,8 +31,6 @@ def smooth_exp_parallel(i, j, k, n_it, rho_n, theta):
     metric_result = error_operator(rel_error, i, j, k)
     # save metric list
     np.save(f"temp/metric_list_{i}_{j}_{k}_{n_it}.npy", np.array(metric_result))
-    counter += 1
-    logger.debug(f"Done: {counter}")
     return metric_result
 
 
@@ -164,7 +158,7 @@ def smooth_heatmap(n_list, k_list, error, title):
     # 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos', 'blackman', 'jet'
 
 
-def smooth_heatmap2(n_list, k_list, error, title, tile_type):
+def smooth_heatmap2(n_list, k_list, error, main_title, subtitle, tile_type):
     k_list = np.array(k_list)
     fig, ax = plt.subplots(2, 2)
     k = 0
@@ -180,11 +174,15 @@ def smooth_heatmap2(n_list, k_list, error, title, tile_type):
                 vmax=np.max(error[k]),
                 origin="lower",
             )
-            ax[j, i].set_title(title[k])
+            ax[j, i].set_title(subtitle[k])
             # set the limits of the plot to the limits of the data
             ax[j, i].axis([n_list.min(), n_list.max(), k_list.min(), k_list.max()])
             plt.colorbar(c, ax=ax[j, i])
             k += 1
+    # set labels
+    plt.setp(ax[-1, :], xlabel='n')
+    plt.setp(ax[:, 0], ylabel='k')
+    fig.suptitle(main_title)
     plt.tight_layout()
     plt.show()
     return fig, ax

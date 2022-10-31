@@ -38,11 +38,11 @@ def main():
 
     logger.info("Starting experiment")
     # Initialise parameters: n nodes, k blocks, theta prob
-    n_min, n_max, n_step =  50, 1001, 50
+    n_min, n_max, n_step =  50, 1001, 25
     n_list = np.arange(n_min, n_max, n_step)
     rho_n = 10/n_list
 
-    k_max = 6
+    k_max = 15
     k_list = list(range(2, k_max + 1))
     theta_intra_min, theta_intra_max = 0.15, 0.5
     theta_inter_min, theta_inter_max = 0.05, 0.15
@@ -86,10 +86,9 @@ def main():
         for index in tqdm(it_list, file=tqdm_out)
     )
 
-    logger.info("post-processing results")
-
     #post process result (list of metric lists)
     for i,index in enumerate(it_list):
+        print(i,index)
         for result_index in range(4):
             metric_list[result_index][index[0][0], index[1][0]] = result[i][result_index]
     
