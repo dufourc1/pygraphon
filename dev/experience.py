@@ -38,10 +38,12 @@ def main():
 
     logger.info("Starting experiment")
     # Initialise parameters: n nodes, k blocks, theta prob
-    n_min, n_max, n_step =  50, 1001, 25
+    n_min, n_max, n_step =  50, 1001, 50
     n_list = np.arange(n_min, n_max, n_step)
-    rho_n = 10/n_list
-
+    rho_n = 0.2*np.sqrt(n_min)/np.sqrt(n_list)
+    #10/n_list
+    #0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
+    #0.2*np.sqrt(n_min)/np.sqrt(n_list)
     k_max = 15
     k_list = list(range(2, k_max + 1))
     theta_intra_min, theta_intra_max = 0.15, 0.5
