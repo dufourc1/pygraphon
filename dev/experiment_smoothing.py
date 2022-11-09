@@ -26,11 +26,11 @@ def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     return graphon, hist_approx, smoothed_graphons_error
 
 
-def smooth_exp_parallel(i, j, k, n_it, rho_n, theta, temp_folder: str):
+def smooth_exp_parallel(i, j, k, n_it, rho_n, theta, temp_folder):
     _, _, rel_error = smooth_hist(n=n_it, rho_n=rho_n, graphon_matrix=theta, bandwidth=1 / k)
     metric_result = error_operator(rel_error, i, j, k)
     # save metric list
-    np.save(f"{temp_folder}/metric_list_{i}_{j}_{k}_{n_it}.npy", np.array(metric_result))
+    np.save(f"temp/{temp_folder}metric_list_{i}_{j}_{k}_{n_it}.npy", np.array(metric_result))
     return metric_result
 
 

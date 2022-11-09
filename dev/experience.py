@@ -34,26 +34,9 @@ class TqdmToLogger(io.StringIO):
         self.logger.log(self.level, self.buf)
 
 
-def main():
-
-    temp_folder = time.strftime("%Y%m%d-%H%M%S")
+def main(n_list, k_list, rho_n,sparsity_regime):
 
     logger.info("Starting experiment")
-    # Initialise parameters: n nodes, k blocks, theta prob
-    n_min, n_max, n_step =  50, 1001, 50
-    n_list = np.arange(n_min, n_max, n_step)
-    rho_n =0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
-    #10/n_list
-    #0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
-    #0.2*(n_min/np.power(np.log(n_min),3))*np.power(np.log(n_list),3)/n_list
-    #0.2*np.sqrt(n_min)/np.sqrt(n_list)
-    #0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
-    k_max = 10
-    k_list = list(range(2, k_max + 1))
-    theta_intra_min, theta_intra_max = 0.15, 0.5
-
-    theta_inter_min, theta_inter_max = 0.05, 0.15
-
     # Create arrays to store metrics
     error = np.zeros((n_list.shape[0], len(k_list)))
     deviation_from_true = np.zeros_like(error)
@@ -71,7 +54,7 @@ def main():
     theta = []
     tqdm_out = TqdmToLogger(logger, level=logging.INFO)
     
-    for j, k in enumerate(k_list):
+    for _, k in enumerate(k_list):
         theta.append(
             AssociativeFullyRandom(
                 K=k,
@@ -90,7 +73,7 @@ def main():
             index[0][1],#value of n
             rho_n[index[0][0]],#rho_n corresponding to correct n
             theta[index[1][0]],
-            temp_folder,
+            sparsity_regime
         )
         for index in tqdm(it_list, file=tqdm_out)
     )
@@ -103,13 +86,12 @@ def main():
     
 
     logger.info("Computing done")
-    #results name: 'results', 'results1n', 'resultslognn', 'resultslog3n', 'resultssqrt', 'resultssqrt4'
-    with open("resultssqrt4.pkl", "wb") as f:
+    with open("results"+f"{sparsity_regime}.pkl", "wb") as f:
         pickle.dump(metric_list, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    logger.info(f"Cleaning {temp_folder}/")    
+    logger.info(f"Cleaning temp/")    
     #clean temp folder
-    folder = './' + temp_folder
+    folder = './temp'
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
@@ -128,4 +110,25 @@ if __name__ == "__main__":
     logger.remove()
     logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
     logger.add("log_exp.txt", level="INFO", mode="w")
-    main()
+
+    #n init
+    n_min, n_max, n_step =  50, 1001, 50
+    n_list = np.arange(n_min, n_max, n_step)
+    #sparsity init
+    sparsity_regime = 1 #results name: '1', '1n', 'lognn', 'log3n', 'sqrt', 'sqrt4'
+    rho_n =0.2*np.sqrt(n_min)/np.sqrt(n_list)
+    #10/n_list
+    #0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
+    #0.2*(n_min/np.power(np.log(n_min),3))*np.power(np.log(n_list),3)/n_list
+    #0.2*np.sqrt(n_min)/np.sqrt(n_list)
+    #0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
+
+    #k init
+    k_max = 10
+    k_list = list(range(2, k_max + 1))
+    #theta init
+    theta_intra_min, theta_intra_max = 0.15, 0.5
+    theta_inter_min, theta_inter_max = 0.05, 0.15
+
+
+    main(n_list=n_list, k_list = k_list, rho_n = rho_n, sparsity_regime=sparsity_regime)
