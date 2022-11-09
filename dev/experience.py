@@ -116,8 +116,9 @@ if __name__ == "__main__":
     n_min, n_max, n_step =  50, 1001, 50
     n_list = np.arange(n_min, n_max, n_step)
     #sparsity init
-    sparsity_regime = 'constant' #results name: 'constant', '1n', 'lognn', 'log3n', 'sqrt', 'sqrt4'
-    rho_n =0.2*np.sqrt(n_min)/np.sqrt(n_list)
+    sparsity_regime = 'sqrt4' #results name: 'constant', '1n', 'lognn', 'log3n', 'sqrt', 'sqrt4'
+    rho_n =0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
+    #0.2*np.ones_like(n_list)
     #10/n_list
     #0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
     #0.2*(n_min/np.power(np.log(n_min),3))*np.power(np.log(n_list),3)/n_list
