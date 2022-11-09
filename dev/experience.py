@@ -93,17 +93,18 @@ def main(n_list, k_list, rho_n,sparsity_regime):
     #clean temp folder
     folder = './temp'
     for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+        if sparsity_regime in filename: #only delete files from corresponding regime
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
-        logger.info("Results saved, bye")
+            logger.info("Results saved, bye")
 
 
 if __name__ == "__main__":
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     n_min, n_max, n_step =  50, 1001, 50
     n_list = np.arange(n_min, n_max, n_step)
     #sparsity init
-    sparsity_regime = 1 #results name: '1', '1n', 'lognn', 'log3n', 'sqrt', 'sqrt4'
+    sparsity_regime = 'constant' #results name: 'constant', '1n', 'lognn', 'log3n', 'sqrt', 'sqrt4'
     rho_n =0.2*np.sqrt(n_min)/np.sqrt(n_list)
     #10/n_list
     #0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
