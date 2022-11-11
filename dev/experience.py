@@ -103,8 +103,7 @@ def main(n_list, k_list, rho_n,sparsity_regime):
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-
-            logger.info("Results saved, bye")
+    logger.info("Results saved, bye")
 
 
 if __name__ == "__main__":
