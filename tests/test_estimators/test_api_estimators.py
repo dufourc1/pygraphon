@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 import pytest
 
-from pygraphon.estimators import LG, USVT, HistogramEstimator, NBDsmooth, SimpleMomentEstimator
+from pygraphon.estimators import LG, SBA, USVT, HistogramEstimator, NBDsmooth, SimpleMomentEstimator
 from pygraphon.graphons import StepGraphon
 from pygraphon.utils.utils_matrix import check_symmetric
 
@@ -78,3 +78,11 @@ class TestApiLG(TestApiHistogramEstimator):
     @pytest.fixture
     def estimator(self):
         return LG(K=3)
+
+
+class TestApiSBA(TestApiHistogramEstimator):
+    """Test api for SBA estimator."""
+
+    @pytest.fixture
+    def estimator(self):
+        return SBA()
