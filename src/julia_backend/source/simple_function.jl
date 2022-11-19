@@ -20,7 +20,7 @@ function loglik(θ, hab_sqrd_vec, n::Int)
     count / n
 end
 
-function test()
+function test_old_ll()
     θ = rand(100, 100)
     hab_sqrd_vec = rand(100, 100)
     b = @benchmark loglik($θ, $hab_sqrd_vec, 100)
@@ -31,7 +31,7 @@ end
 
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    b, b2 = test()
+    b, b2 = test_old_ll()
     b
     b2
 end
