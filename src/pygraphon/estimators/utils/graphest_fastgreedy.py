@@ -7,7 +7,10 @@ import scipy
 from numba import njit
 from tqdm import tqdm
 
-from pygraphon.utils.utils_matrix import bound_away_from_one_and_zero_arrays, upper_triangle_values
+from pygraphon.utils.utils_matrix import (
+    bound_away_from_one_and_zero_arrays,
+    upper_triangle_values,
+)
 
 
 def graphest_fastgreedy(
@@ -68,7 +71,7 @@ def graphest_fastgreedy(
         orderedInds = np.arange(a * hbar, (a + 1) * hbar)
         h[a] = len(orderedInds)
         orderedLabels[orderedInds - 1] = a
-        orderedClusterInds[a - 1, :] = orderedInds
+        orderedClusterInds[a, :] = orderedInds
     if smaller_last_group:
         orderedIndsLast = np.arange((k - 1) * hbar, n)
         h[k - 1] = len(orderedIndsLast)
@@ -76,6 +79,7 @@ def graphest_fastgreedy(
             [orderedIndsLast, np.zeros(hbar - len(orderedIndsLast))]
         )
 
+    # number of possible connections between the clusters
     habSqrd = np.outer(h, h) - np.diag(np.multiply(h, h) - np.multiply(h, (h - 1)) / 2)
 
     if np.all(habSqrd) < 1:
@@ -95,8 +99,11 @@ def graphest_fastgreedy(
         initialClusterInds[k - 1, 0 : len(np.where(initialLabelVec == k - 1)[0])] = np.where(
             initialLabelVec == k - 1
         )[0]
+        initialClusterInds[k - 1, len(np.where(initialLabelVec == k - 1)[0]):] = -2
 
+    # matrix of size (K,K) with the number of edges between clusters
     initialACounts = _getSampleCounts(A, initialClusterInds)
+
     initialLL = _fastNormalizedBMLogLik(
         upper_triangle_values(initialACounts) / upper_triangle_values(habSqrd),
         upper_triangle_values(habSqrd),
@@ -365,6 +372,15 @@ def _delta_neg(habSqrdCola, thetaCola, habSqrdColb, thetaColb, habSqrdEntryab, t
 
 # works
 def _getSampleCounts(X, clusterInds):
+    """_summary_
+
+    Args:
+        X (_type_): adjacency matrix
+        clusterInds (_type_): cluster assignments
+
+    Returns:
+        _type_: _description_
+    """
 
     numClusters = clusterInds.shape[0]
     Xsums = np.zeros((numClusters, numClusters), dtype=int)
