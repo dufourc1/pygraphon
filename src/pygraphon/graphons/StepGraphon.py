@@ -44,7 +44,10 @@ class StepGraphon(Graphon):
         self.graphon = graphon
         self.bandwidthHist = bandwidthHist
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
+            raise ValueError(
+                f"The graphon matrix should have size {graphon.shape[0]} consistent with the bandwidth \
+                    {self.bandwidthHist}: {int(math.ceil(1 / self.bandwidthHist))}."
+            )
 
         self.areas = np.ones_like(self.graphon) * self.bandwidthHist**2
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
