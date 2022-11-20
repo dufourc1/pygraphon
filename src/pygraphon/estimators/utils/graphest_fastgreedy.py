@@ -99,7 +99,7 @@ def graphest_fastgreedy(
         initialClusterInds[k - 1, 0 : len(np.where(initialLabelVec == k - 1)[0])] = np.where(
             initialLabelVec == k - 1
         )[0]
-        initialClusterInds[k - 1, len(np.where(initialLabelVec == k - 1)[0]):] = -2
+        initialClusterInds[k - 1, len(np.where(initialLabelVec == k - 1)[0]) :] = -2
 
     # matrix of size (K,K) with the number of edges between clusters
     initialACounts = _getSampleCounts(A, initialClusterInds)

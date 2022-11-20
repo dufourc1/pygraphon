@@ -1,4 +1,7 @@
 """Implementation of network histogram estimator."""
+import os
+import pathlib
+import time
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -9,6 +12,9 @@ from sklearn.metrics import pairwise_distances
 
 from pygraphon.estimators.utils.graphest_fastgreedy import graphest_fastgreedy
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
+
+THIS_DIR = str(pathlib.Path(__file__).parent.absolute())
+JULIA_PATH = os.path.join(THIS_DIR, "../../../julia_backend/source")
 
 
 def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float = 1) -> float:
@@ -169,7 +175,12 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
 
 
 def nethist(
-    A: np.ndarray, h: int = None, verbose: bool = False, trace: bool = False
+    A: np.ndarray,
+    h: int = None,
+    verbose: bool = False,
+    trace: bool = False,
+    backend: str = "julia",
+    iterations: int = 10000,
 ) -> Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
@@ -214,6 +225,24 @@ def nethist(
         lastGroupSize = n % h
 
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
+
+    if backend == "julia":
+        print("Using Julia backend")
+        try:
+            start = time.time()
+            from julia import Main
+
+            Main.include(os.path.join(JULIA_PATH, "graphest_fastgreedy.jl"))
+            idx, _ = Main.GreedyLLopt(A.astype(int), h, iterations, idxInit.astype(int)+1)
+            end = time.time()
+            print(f"Julia backend took {end-start} seconds")
+            return idx - 1, h, None
+        except Exception as e:
+            print(e)
+            print("julia not avaialble, falling back to python")
+
+    print("Using Python backend")
+    start = time.time()
     if trace:
         idx, _, trace = graphest_fastgreedy(
             A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
@@ -222,4 +251,6 @@ def nethist(
         idx, _ = graphest_fastgreedy(
             A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
         )
+    end = time.time()
+    print(f"Python backend took {end-start} seconds")
     return idx, h, trace

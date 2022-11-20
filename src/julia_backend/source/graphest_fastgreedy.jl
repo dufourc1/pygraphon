@@ -2,6 +2,19 @@ using Graphs
 using BenchmarkTools
 using StatsBase
 using Plots
+using ProgressBars
+using PyCall
+py"""
+import numpy as np
+import networkx as nx
+from copy import copy
+def get_sbm(n=100, permute = False):
+    p = 0.8
+    q = 0.3
+    G = nx.stochastic_block_model([n, n], [[p, q], [q, p]])
+    A =  nx.to_numpy_array(G, nodelist = np.random.permutation(G.nodes()) if permute else None , dtype = np.int64)
+    return A
+"""
 
 mutable struct Assignment
 
@@ -64,16 +77,13 @@ end
 
 
 function create_initial_assignment(adjacency_matrix::Matrix{Int}, number_groups::Int64)
-    # create initial assignment by chunking the nodes
-    number_nodes = size(adjacency_matrix, 1)
-    node_labels = [Int(ceil(i / (number_nodes / number_groups))) for i in 1:number_nodes]
-    #node_labels = zeros(Int64, size(adjacency_matrix, 1))
-    #for i in 1:number_groups
-    #    node_labels[i] = i
-    #end
-    #for i in number_groups+1:size(adjacency_matrix, 1)
-    #    node_labels[i] = rand(1:number_groups)
-    #end
+    node_labels = zeros(Int64, size(adjacency_matrix, 1))
+    for i in 1:number_groups
+        node_labels[i] = i
+    end
+    for i in number_groups+1:size(adjacency_matrix, 1)
+        node_labels[i] = rand(1:number_groups)
+    end
     return create_assignment(node_labels, number_groups, adjacency_matrix)
 end
 
@@ -86,45 +96,65 @@ function GreedyLLopt(
     A::Matrix{Int},
     cluster_size::Int,
     steps::Int=100,
+    init_labels::Vector{Int}=zeros(Int64, 0),
 )
+
     n = size(A, 1)
     indices = collect(1:n)
-    candidate_assignment = create_initial_assignment(A, cluster_size)
+    number_groups = div(n, cluster_size)
+    if number_groups * cluster_size != n
+        number_groups += 1
+    end
+    max_no_improv = div(number_groups * n * (n - 1), 2)
+
+    if length(init_labels) == 0
+        candidate_assignment = create_initial_assignment(A, number_groups)
+    else
+        candidate_assignment = create_assignment(init_labels, number_groups, A)
+    end
+
+    update_count_no_improv = 0
+    previous_best_ll = -Inf
     best_ll = fastLL(candidate_assignment)
     best_assignment = deepcopy(candidate_assignment)
-    ll_trace = [best_ll]
-    best_ll_trace = [best_ll]
-
     # not sure why both loops are needed in the original script ???
     # What am I missing ?? 
     for _ in 1:steps
-        if check_stoppping_condition()
+        if check_stoppping_condition(update_count_no_improv, best_ll, previous_best_ll, max_no_improv)
             break
         end
         perm = sample(indices, 2, replace=false)
 
         ll_candidate = updateLL(best_ll, best_assignment, perm, A, candidate_assignment)
-        push!(ll_trace, ll_candidate)
         if ll_candidate > best_ll
+            previous_best_ll = best_ll
             best_ll = ll_candidate
             best_assignment = deepcopy(candidate_assignment)
+        else
+            update_count_no_improv += 1
         end
-        push!(best_ll_trace, best_ll)
     end
 
-    return best_assignment.node_labels, best_assignment.estimated_theta, ll_trace, best_ll_trace
+    return best_assignment.node_labels, best_assignment.estimated_theta
 
 end
 
 
-function check_stoppping_condition()
-    @warn "does not do anything yet"
+function check_stoppping_condition(update_count_no_improv, best_ll, previous_best_ll, max_no_improv::Int=100)
+    if update_count_no_improv > max_no_improv
+        @info "too many iterations without improvement"
+        return true
+    end
+    if best_ll - previous_best_ll < 1e-6
+        @info "too small improvement"
+        return true
+    end
     return false
 end
 
 
 function updateLL(ll::Float64, assignment::Assignment, perm::Vector{Int}, adjacency_matrix::Matrix{Int}, new_assignment::Assignment)
-    @warn "Hihgly inefficient implementation"
+    #@warn "Hihgly inefficient implementation"
     new_assignment.node_labels = deepcopy(assignment.node_labels)
     new_assignment.node_labels[perm[1]] = assignment.node_labels[perm[2]]
     new_assignment.node_labels[perm[2]] = assignment.node_labels[perm[1]]
@@ -143,7 +173,7 @@ function fastLL(assignment::Assignment)
     @inbounds @simd for i in 1:assignment.number_groups
         for j in i:assignment.number_groups
             θ = assignment.estimated_theta[i, j]
-            θ_c = θ < 0 ? 2.220446049250313e-16 : (θ > 1 ? 1 - 2.220446049250313e-16 : θ)
+            θ_c = θ < 0 ? 1e-16 : (θ > 1 ? 1 - 1e-16 : θ)
             loglik += (θ_c * log(θ_c) + (1 - θ_c) * log(1 - θ_c)) * assignment.counts[i, j]
         end
     end
@@ -154,16 +184,17 @@ end
 function benchmark_test(n::Int64=10)
     K = 2
     A = Matrix(Graphs.LinAlg.adjacency_matrix(erdos_renyi(n, 0.8)))
-
-    b = @benchmark GreedyLLopt($A, $K, 2)
+    b = @benchmark GreedyLLopt($A, $K, 100)
     return b
 end
 
 
-function test_verbose(n::Int64=10)
+function test_verbose(n::Int64=10, num_int::Int64=1000)
     K = 2
-    A = Matrix(Graphs.LinAlg.adjacency_matrix(erdos_renyi(n, 0.8)))
-    return GreedyLLopt(A, K, 2)
+    #A = Matrix(Graphs.LinAlg.adjacency_matrix(erdos_renyi(n, 0.8)))
+    A = py"get_sbm"(n)
+    a, tetha = GreedyLLopt(A, K, num_int)
+    return a, tetha
 
 end
 
@@ -177,7 +208,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     assignment = create_assignment(node_labels, K, A)
     println(assignment.node_labels)
     println(fastLL(assignment))
-    a, ll = GreedyLLopt(A, K, 1e-6, 3)
+    a, theta = GreedyLLopt(A, K, 3)
     println(a.node_labels)
     println(ll)
 end

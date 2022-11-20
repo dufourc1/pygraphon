@@ -24,10 +24,13 @@ class HistogramEstimator(BaseEstimator):
         [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
     """
 
-    def __init__(self, bandwithHist: float = None) -> None:
+    def __init__(self, bandwithHist: float = None, backend: str = "julia") -> None:
 
         super().__init__()
         self.bandwidthHist = bandwithHist
+        if backend.lower() not in ["julia", "python"]:
+            raise ValueError("Backend must be either 'julia' or 'python'")
+        self.backend = backend.lower()
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray, bandwidthHist: float = None
@@ -93,7 +96,7 @@ class HistogramEstimator(BaseEstimator):
             h = None
         else:
             h = int(bandwidthHist * adjacencyMatrix.shape[0])
-        groupmembership, h, _ = nethist(A=adjacencyMatrix, h=h)
+        groupmembership, h, _ = nethist(A=adjacencyMatrix, h=h, backend=self.backend)
 
         if bandwidthHist is None:
             bandwidthHist = h / adjacencyMatrix.shape[0]
