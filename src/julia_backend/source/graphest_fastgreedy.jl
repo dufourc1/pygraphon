@@ -141,7 +141,7 @@ end
 function fastLL(assignment::Assignment)
     loglik = 0.0
     @inbounds @simd for i in 1:assignment.number_groups
-        for j in i+1:assignment.number_groups
+        for j in i:assignment.number_groups
             θ = assignment.estimated_theta[i, j]
             θ_c = θ < 0 ? 2.220446049250313e-16 : (θ > 1 ? 1 - 2.220446049250313e-16 : θ)
             loglik += (θ_c * log(θ_c) + (1 - θ_c) * log(1 - θ_c)) * assignment.counts[i, j]
