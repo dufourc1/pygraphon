@@ -1,10 +1,10 @@
 #!/bin/bash -l
-#SBATCH --job-name=hist_smooth
+#SBATCH --job-name=hist_smooth_sqrt4
 #SBATCH -N 1
 #SBATCH --time=72:00:00
 
 echo "loading env"
 source ../env/bin/activate
 echo "launching python script"
-srun python3 experience.py --regime lognn
+srun python3 experience.py --regime sqrt4
 echo "experiment done"

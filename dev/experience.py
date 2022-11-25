@@ -118,7 +118,7 @@ if __name__ == "__main__":
     logger.add("log_exp.txt", level="INFO", mode="w")
 
     #n init
-    n_min, n_max, n_step =  50, 101, 50
+    n_min, n_max, n_step =  50, 1001, 50
     n_list = np.arange(n_min, n_max, n_step)
 
     #sparse regime import and init
@@ -130,9 +130,9 @@ if __name__ == "__main__":
 
     #sparsity init
     if args.regime == 'constant':
-        rho_n= 0.2
-    elif args.regime == '1n':
         rho_n= 0.2*np.ones_like(n_list)
+    elif args.regime == '1n':
+        rho_n= 10/n_list
     elif args.regime == 'lognn':
         rho_n= 0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
     elif args.regime == 'log3n':
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         raise ValueError(f"regime should be a str, got {args.regime}, {type(args.regime)}")
 
     #k init
-    k_max = 3
+    k_max = 10
     k_list = list(range(2, k_max + 1))
     #theta init
     theta_intra_min, theta_intra_max = 0.15, 0.5
