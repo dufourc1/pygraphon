@@ -6,5 +6,5 @@
 echo "loading env"
 source ../env/bin/activate
 echo "launching python script"
-srun python3 experience.py
+srun python3 experience.py --regime lognn
 echo "experiment done"

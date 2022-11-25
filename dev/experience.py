@@ -2,6 +2,7 @@ import io
 import itertools
 import logging
 import pickle
+import argparse
 
 import numpy as np
 from experiment_smoothing import smooth_exp_parallel
@@ -37,6 +38,8 @@ class TqdmToLogger(io.StringIO):
 def main(n_list, k_list, rho_n,sparsity_regime):
 
     logger.info("Starting experiment")
+    logger.info(sparsity_regime)
+    print(sparsity_regime)
     # Create arrays to store metrics
     error = np.zeros((n_list.shape[0], len(k_list)))
     deviation_from_true = np.zeros_like(error)
@@ -86,6 +89,8 @@ def main(n_list, k_list, rho_n,sparsity_regime):
     
 
     logger.info("Computing done")
+    logger.info(sparsity_regime)
+    print(sparsity_regime, "aftercomputing")
     with open("results"+f"{sparsity_regime}.pkl", "wb") as f:
         pickle.dump(metric_list, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -107,29 +112,43 @@ def main(n_list, k_list, rho_n,sparsity_regime):
 
 
 if __name__ == "__main__":
+    #init logger because Charles corrupted me
     logger.remove()
     logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
     logger.add("log_exp.txt", level="INFO", mode="w")
 
     #n init
-    n_min, n_max, n_step =  50, 1001, 50
+    n_min, n_max, n_step =  50, 101, 50
     n_list = np.arange(n_min, n_max, n_step)
+
+    #sparse regime import and init
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--regime")
+    args = parser.parse_args()
+    logger.info(args.regime)
+    logger.info(type(args.regime))
+
     #sparsity init
-    sparsity_regime = 'sqrt4' #results name: 'constant', '1n', 'lognn', 'log3n', 'sqrt', 'sqrt4'
-    rho_n =0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
-    #0.2*np.ones_like(n_list)
-    #10/n_list
-    #0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
-    #0.2*(n_min/np.power(np.log(n_min),3))*np.power(np.log(n_list),3)/n_list
-    #0.2*np.sqrt(n_min)/np.sqrt(n_list)
-    #0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
+    if args.regime == 'constant':
+        rho_n= 0.2
+    elif args.regime == '1n':
+        rho_n= 0.2*np.ones_like(n_list)
+    elif args.regime == 'lognn':
+        rho_n= 0.2*(n_min/np.log(n_min))*np.log(n_list)/n_list
+    elif args.regime == 'log3n':
+        rho_n = 0.2*(n_min/np.power(np.log(n_min),3))*np.power(np.log(n_list),3)/n_list
+    elif args.regime == 'sqrt':
+        rho_n = 0.2*np.sqrt(n_min)/np.sqrt(n_list)
+    elif args.regime == 'sqrt4': 
+        rho_n = 0.2*np.power(n_min,1/4)/np.power(n_list, 1/4)
+    else:
+        raise ValueError(f"regime should be a str, got {args.regime}, {type(args.regime)}")
 
     #k init
-    k_max = 10
+    k_max = 3
     k_list = list(range(2, k_max + 1))
     #theta init
     theta_intra_min, theta_intra_max = 0.15, 0.5
     theta_inter_min, theta_inter_max = 0.05, 0.15
 
-
-    main(n_list=n_list, k_list = k_list, rho_n = rho_n, sparsity_regime=sparsity_regime)
+    main(n_list=n_list, k_list = k_list, rho_n = rho_n, sparsity_regime = args.regime)

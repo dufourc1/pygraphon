@@ -1,2 +1,2 @@
-2022-11-09 11:53:28.640 | INFO     | __main__:main:41 - Starting experiment
-2022-11-09 11:53:28.642 | Level 20 | __main__:flush:34 - 0%|          | 0/180 [00:00<?, ?it/s]
+2022-11-25 11:09:13.989 | INFO     | __main__:<module>:128 - 1n
+2022-11-25 11:09:13.990 | INFO     | __main__:<module>:129 - <class 'str'>
