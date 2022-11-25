@@ -6,11 +6,36 @@ import networkx as nx
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils.utils_graph import get_adjacency_matrix_from_graph
+from pygraphon.utils.utils_graph import (
+    check_simple_adjacency_matrix,
+    get_adjacency_matrix_from_graph,
+)
 
 
 class BaseEstimator:
-    """Base class for Graphon estimator."""
+    """Base class for Graphon estimator.
+
+    If the method can do function estimation, `.get_graphon()` should return a Graphon object,
+    otherwise it should return None.
+    If the method can do value estimation, `.get_edge_connectivity()` should return a numpy array,
+    otherwise it should return None.
+
+    Notes
+    -----
+    For methods that can do value estimation, the function estimation is done by
+    approximating the graphon with a step function with bandwidth 1/n, where n is the number of nodes.
+
+
+    Examples
+    --------
+    >>> import networkx as nx
+    >>> from pygraphon.estimators import USVT
+    >>> estimator = USVT()
+    >>> graph = nx.erdos_renyi_graph(n=100, p=0.1)
+    >>> estimator.fit(graph)
+    >>> graphon = estimator.get_graphon() # returns a stepgraphon
+    >>> edge_connectivity = estimator.get_edge_connectivity() # returns a matrix 100x100
+    """
 
     def __init__(self) -> None:
         self.fitted = False
@@ -34,7 +59,7 @@ class BaseEstimator:
         ValueError
             type of graph is not supported
         ValueError
-            if both a graph and an adjacency matrix are provided and do not agree
+            if the graph is not a simple graph
         """
         if isinstance(graph, nx.Graph):
             adjacency_matrix = get_adjacency_matrix_from_graph(graph)
@@ -44,6 +69,7 @@ class BaseEstimator:
             raise ValueError(
                 f"type of graph is not supported, got {type(graph)}, but expected nx.Graph or np.ndarray"
             )
+        check_simple_adjacency_matrix(adjacency_matrix)
         self.graphon, self.edge_connectivity = self._approximate_graphon_from_adjacency(
             adjacency_matrix, *args, **kwargs
         )

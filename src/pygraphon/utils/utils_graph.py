@@ -76,7 +76,7 @@ def check_simple_adjacency_matrix(adjacency_matrix: np.ndarray) -> None:
         raise ValueError("Adjacency matrix should be binary")
 
 
-def _approximate_from_node_membership(
+def _approximate_P_from_node_membership(
     adjacencyMatrix: np.ndarray, node_memberships: np.ndarray
 ) -> np.ndarray:
     """Average the adjacency matrix according to the node memberships.
@@ -91,22 +91,20 @@ def _approximate_from_node_membership(
     Returns
     -------
     np.ndarray
-        matrix of connection probability P
+        edge connectivity
     """
     # compute the actual values of the graphon approximation
     groups = np.unique(node_memberships)
     countGroups = Counter(node_memberships)
     ngroups = len(groups)
-    rho = edge_density(adjacencyMatrix)
-    rho_inv = 1 / rho if rho != 0 else 1
-    graphon_matrix = np.zeros((ngroups, ngroups))
+    P = np.zeros_like(adjacencyMatrix)
 
     # compute the number of links between groups i and j / all possible
     # links
     for i in range(ngroups):
         for j in np.arange(i, ngroups):
             total = countGroups[groups[i]] * countGroups[groups[j]]
-            graphon_matrix[i][j] = (
+            value = (
                 np.sum(
                     adjacencyMatrix[np.where(node_memberships == groups[i])[0]][
                         :, np.where(node_memberships == groups[j])[0]
@@ -114,6 +112,6 @@ def _approximate_from_node_membership(
                 )
                 / total
             )
-            graphon_matrix[i, j] = graphon_matrix[i, j] * rho_inv
-            graphon_matrix[j][i] = graphon_matrix[i, j]
-    return graphon_matrix
+            P[np.where(node_memberships == i)[0]][:, np.where(node_memberships == j)[0]] = value
+            P[np.where(node_memberships == j)[0]][:, np.where(node_memberships == i)[0]] = value
+    return P

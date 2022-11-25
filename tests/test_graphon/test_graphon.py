@@ -27,11 +27,11 @@ class TestGraphon:
         """Test that the step graphon is correctly instantiated."""
         # compute theoretical quantities
         integral = 0.5
-        assert graphon.initial_rho == integral
+        assert np.allclose(graphon.initial_rho, integral)
 
     def test_normalized(self, graphon):
         """Test that the step graphon is normalized."""
-        assert graphon.integral() == 1
+        assert np.allclose(graphon.integral(), 1)
 
     def test_edge_probability_between_0_and_1(self, graphon):
         """Test that the edge probability is correct."""

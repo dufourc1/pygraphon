@@ -42,11 +42,11 @@ class TestRegularGraphon:
         # check areas
         assert np.allclose(step_graphon.areas, areas)
         # check initial rho is correct
-        assert step_graphon.initial_rho == integral
+        assert np.allclose(step_graphon.initial_rho, integral)
 
     def test_normalized(self, step_graphon):
         """Test that the step graphon is normalized."""
-        assert step_graphon.integral() == 1
+        assert np.allclose(step_graphon.integral(), 1)
 
     def test_edge_probability_between_0_and_1(self, step_graphon):
         """Test that the edge probability is correct."""

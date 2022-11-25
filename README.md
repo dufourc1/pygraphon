@@ -33,7 +33,9 @@
   <a href="https://deepsource.io/gh/dufourc1/pygraphon/?ref=repository-badge}" target="_blank"><img alt="DeepSource" title="DeepSource" src="https://deepsource.io/gh/dufourc1/pygraphon.svg/?label=active+issues&show_trend=true&token=lp6MCoxjOCXI4DUzy9XWTv04"/></a>
 </p>
 
-Python library to work with graphons
+Python library to work with graphons. 
+
+Will try to get backend more efficient than pure python.
 
 ## 🚀 Installation
 

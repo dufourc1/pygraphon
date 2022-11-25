@@ -1,4 +1,5 @@
 """Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
+import math
 from typing import Callable
 
 import numpy as np
@@ -33,10 +34,17 @@ class StepGraphon(Graphon):
             size of the groups (between 0 and 1), by default None
         initial_rho : float
             initial edge density (used to keep track in case of normalization), by default None
+
+        Raises
+        ------
+        ValueError
+            if the graphon is and the bandwidthHist are not compatible.
         """
         # save args
         self.graphon = graphon
         self.bandwidthHist = bandwidthHist
+        if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
+            raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
 
         assert self.graphon.shape[0] == int(math.ceil(1/bandwidthHist))
 

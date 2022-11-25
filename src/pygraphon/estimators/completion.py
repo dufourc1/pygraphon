@@ -1,5 +1,10 @@
 """Implementation of the matrix completion scheme estimator."""
+from typing import Optional, Tuple
+
+import numpy as np
+
 from pygraphon.estimators.BaseEstimator import BaseEstimator
+from pygraphon.graphons import Graphon
 
 
 class Completion(BaseEstimator):
@@ -7,7 +12,7 @@ class Completion(BaseEstimator):
 
     def __init__(
         self,
-        rank: int = None,
+        rank: Optional[int] = None,
         tol: float = 1e-3,
         iternumber: int = 20,
         progress: bool = False,
@@ -18,3 +23,8 @@ class Completion(BaseEstimator):
         self.iternumber = iternumber
         self.progress = progress
         self.adjust = adjust
+
+    def _approximate_graphon_from_adjacency(
+        self, adjacency_matrix: np.ndarray
+    ) -> Tuple[Graphon, np.ndarray]:
+        raise NotImplementedError()
