@@ -18,16 +18,16 @@ def error_operator(rel_error, i, j, k):
         (len(rel_error) - best_est_LCk) / (len(rel_error)),
     )
 
-def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
+def smooth_hist(n, rho_n, graphon_matrix, bandwidth,k_test):
     A, hist_approx, graphon = initialisation_hist(n, rho_n, graphon_matrix, bandwidth)
-    avr_graphon, nclust_detect_hist, nrow_tile = smoothing_histLC(hist_approx, A)
+    avr_graphon, nclust_detect_hist, nrow_tile = smoothing_histLC(hist_approx, A,k_test)
     P_smooth = flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n)
     smoothed_graphons_error = mse(P_smooth, graphon)
     return graphon, hist_approx, smoothed_graphons_error
 
 
 def smooth_exp_parallel(i, j, k, n_it, rho_n, theta, temp_folder):
-    _, _, rel_error = smooth_hist(n=n_it, rho_n=rho_n, graphon_matrix=theta, bandwidth=1 / k)
+    _, _, rel_error = smooth_hist(n=n_it, rho_n=rho_n, graphon_matrix=theta, bandwidth=1 / k, k_test= k)
     metric_result = error_operator(rel_error, i, j, k)
     # save metric list
     np.save(f"temp/{temp_folder}metric_list_{i}_{j}_{k}_{n_it}.npy", np.array(metric_result))
@@ -54,12 +54,13 @@ def initialisation_hist(n, rho_n, graphon_matrix, bandwidth):
 # ------------Smoothing of Hist for Link Communities-------------
 
 
-def smoothing_histLC(hist_approx, A):
+def smoothing_histLC(hist_approx, A, k_test):
     # Extract tiles and reshape
     nrow_tile = hist_approx.graphon.shape[0]
     flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
     # Clustering according to kmeans
     nclust_detect_hist = len(np.unique(flat_graphon))
+    print(f"number of unique tiles is {nclust_detect_hist} for n={A.shape[0]} and k={k_test}")
     # max_k = int(nrow_tile*(nrow_tile+1)/2)  # number of individual tile
     # copies for different number of clusters
     avr_graphon = np.asarray([flat_graphon.copy() for _ in range(nclust_detect_hist)])
@@ -124,8 +125,8 @@ def mse(P_smooth, graphon):
     for i in range(P_smooth.shape[0]):
         # add diag of ones for division -> does not matter
         smoothed_graphons_error[i] = np.linalg.norm(
-            (P_star - P_smooth[i]) / (diag_eye + P_star)
-        ) / (P_smooth.shape[1] ** 2)
+            (P_star - P_smooth[i]) #/ (diag_eye + P_star)
+        )**2 / (P_smooth.shape[1] ** 2)
     return smoothed_graphons_error
 
 

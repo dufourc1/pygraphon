@@ -1,0 +1,5 @@
+loading env
+launching python script
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 2511051 ON h119 CANCELLED AT 2022-11-27T18:29:43 ***
+slurmstepd: error: *** STEP 2511051.0 ON h119 CANCELLED AT 2022-11-27T18:29:43 ***

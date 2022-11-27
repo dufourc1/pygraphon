@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --job-name=hist_smooth_sqrt4
+#SBATCH --job-name=smooth_sqrt4
 #SBATCH -N 1
 #SBATCH --time=72:00:00
 
