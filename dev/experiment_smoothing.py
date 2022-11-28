@@ -8,6 +8,7 @@ from sklearn.cluster import KMeans
 from pygraphon.estimators.HistogramEstimator import HistogramEstimator
 from loguru import logger
 
+
 def error_operator(rel_error, k):
     best_est_id = np.argmin(rel_error)
     best_est_LCk = best_est_id + 1  # gives the number of LC from best estimator
@@ -18,10 +19,11 @@ def error_operator(rel_error, k):
         (len(rel_error) - best_est_LCk) / (len(rel_error)),
     )
 
+
 def smooth_hist(n, rho_n, graphon_matrix, bandwidth):
     A, hist_approx, graphon = initialisation_hist(n, rho_n, graphon_matrix, bandwidth)
-    avr_graphon, nclust_detect_hist, nrow_tile = smoothing_histLC(hist_approx, A)
-    P_smooth = flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n)
+    avr_graphon, nclust_hist, nrow_tile = smoothing_histLC(hist_approx, A)
+    P_smooth = flat_to_tensor(avr_graphon, nclust_hist, nrow_tile, hist_approx, n)
     smoothed_graphons_error = mse(P_smooth, graphon)
     return graphon, hist_approx, smoothed_graphons_error
 
@@ -59,53 +61,48 @@ def smoothing_histLC(hist_approx, A):
     nrow_tile = hist_approx.graphon.shape[0]
     flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
     # Clustering according to kmeans
-    nclust_detect_hist = len(np.unique(flat_graphon))
-    # max_k = int(nrow_tile*(nrow_tile+1)/2)  # number of individual tile
+    nclust_hist = len(np.unique(flat_graphon))
     # copies for different number of clusters
-    avr_graphon = np.asarray([flat_graphon.copy() for _ in range(nclust_detect_hist)])
-    # print(f"Hist returned {nrow_tile} communities, hence {max_k} tiles")
-    # print(f"flat_graphon {flat_graphon}")
-    # print(len(np.unique(flat_graphon)))
-    for i in range(nclust_detect_hist - 1):
+    avr_graphon = np.asarray([flat_graphon.copy() for _ in range(nclust_hist)])
+    for i in range(nclust_hist - 1):
         if i == 0:
             avr_graphon[i] = edge_density(A) * np.ones_like(flat_graphon)
         else:
             kmeans = KMeans(n_clusters=i + 1, random_state=0, init="k-means++", n_init=10).fit(
                 flat_graphon.reshape(-1, 1)
             )
-            # print(i+1, np.unique(kmeans.labels_, return_counts=True))
             # Smooth using mean by memberhsip
             for j in range(i + 1):  # average tiles of same community
                 avr_graphon[i][kmeans.labels_ == j] = flat_graphon[kmeans.labels_ == j].mean()
-    return avr_graphon, nclust_detect_hist, nrow_tile
+    return avr_graphon, nclust_hist, nrow_tile
 
 
 # -----------Reshaping Data into tensor-----------
 
 
-def flat_to_tensor(avr_graphon, nclust_detect_hist, nrow_tile, hist_approx, n):
+def flat_to_tensor(avr_graphon, nclust_hist, nrow_tile, hist_approx, n):
     # Reverse flattening back to 2d
     # initiate matrix containing smooth graphon
-    KM_smooth_graphon = np.zeros((nclust_detect_hist, nrow_tile, nrow_tile))  # max_k?
+    KM_smooth_g = np.zeros((nclust_hist, nrow_tile, nrow_tile))  # max_k?
     i, j = np.triu_indices(nrow_tile)
-    KM_smooth_graphon[:, i, j] = avr_graphon
+    KM_smooth_g[:, i, j] = avr_graphon
     # Make it symmetric by extracting diag, making it 3d and doing X+X^T-diag(X)
     # Extract diagonal
     i, j = np.diag_indices(nrow_tile)
-    diag_KM_vec = np.diagonal(KM_smooth_graphon, axis1=1, axis2=2)
+    diag_km_vec = np.diagonal(KM_smooth_g, axis1=1, axis2=2)
     # make 3d array with diagonal in axis 1&2
-    diag_km = np.zeros((nclust_detect_hist, nrow_tile, nrow_tile))  # max_k ?
-    diag_km[:, i, j] = diag_KM_vec
+    diag_km = np.zeros((nclust_hist, nrow_tile, nrow_tile))  # max_k ?
+    diag_km[:, i, j] = diag_km_vec
     # X+X^T-diag(X) on axis (1,2) of tensor
-    sym_KM_smooth_graphon = KM_smooth_graphon + np.transpose(KM_smooth_graphon, (0, 2, 1)) - diag_km
+    sym_KM_smooth_g = KM_smooth_g + np.transpose(KM_smooth_g, (0, 2, 1)) - diag_km
     # Get smooth graphon into correct form and \hat{pij} for the whole tensor
     smoothed_graphons = [
         StepGraphon(
-            graphon=sym_KM_smooth_graphon[i],
+            graphon=sym_KM_smooth_g[i],
             bandwidthHist=hist_approx.bandwidthHist,
             initial_rho=hist_approx.initial_rho,
         )
-        for i in range(sym_KM_smooth_graphon.shape[0])
+        for i in range(sym_KM_smooth_g.shape[0])
     ]
     P_smooth = np.array(
         [g._get_edge_probabilities(n=n, exchangeable=False) for g in smoothed_graphons]
@@ -123,9 +120,9 @@ def mse(P_smooth, graphon):
     diag_eye = np.eye(P_star.shape[0])
     for i in range(P_smooth.shape[0]):
         # add diag of ones for division -> does not matter
-        smoothed_graphons_error[i] = np.linalg.norm(
-            (P_star - P_smooth[i]) #/ (diag_eye + P_star)
-        )**2 / (P_smooth.shape[1] ** 2)
+        smoothed_graphons_error[i] = np.linalg.norm((P_star - P_smooth[i])) ** 2 / (
+            P_smooth.shape[1] ** 2
+        )
     return smoothed_graphons_error
 
 
@@ -180,8 +177,8 @@ def smooth_heatmap2(n_list, k_list, error, main_title, subtitle, tile_type):
             plt.colorbar(c, ax=ax[j, i])
             k += 1
     # set labels
-    plt.setp(ax[-1, :], xlabel='n')
-    plt.setp(ax[:, 0], ylabel='k')
+    plt.setp(ax[-1, :], xlabel="n")
+    plt.setp(ax[:, 0], ylabel="k")
     fig.suptitle(main_title)
     plt.tight_layout()
     plt.show()
