@@ -38,8 +38,6 @@ class TqdmToLogger(io.StringIO):
 def main(n_list, k_list, rho_n,sparsity_regime):
 
     logger.info("Starting experiment")
-    logger.info(sparsity_regime)
-    print(sparsity_regime)
     # Create arrays to store metrics
     error = np.zeros((n_list.shape[0], len(k_list)))
     deviation_from_true = np.zeros_like(error)
@@ -83,14 +81,11 @@ def main(n_list, k_list, rho_n,sparsity_regime):
 
     #post process result (list of metric lists)
     for i,index in enumerate(it_list):
-        print(i,index)
         for result_index in range(4):
             metric_list[result_index][index[0][0], index[1][0]] = result[i][result_index]
     
 
     logger.info("Computing done")
-    logger.info(sparsity_regime)
-    print(sparsity_regime, "aftercomputing")
     with open("results"+f"{sparsity_regime}.pkl", "wb") as f:
         pickle.dump(metric_list, f, protocol=pickle.HIGHEST_PROTOCOL)
 
