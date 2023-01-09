@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from pygraphon.utils.utils_graph import edge_density
 from sklearn.cluster import KMeans
 from pygraphon.estimators.HistogramEstimator import HistogramEstimator
-from loguru import logger
 
 
 def error_operator(rel_error, k):
@@ -46,8 +45,8 @@ def initialisation_hist(n, rho_n, graphon_matrix, bandwidth):
     A = graphon.draw(rho=rho_n, n=n, exchangeable=False)
 
     # Apply histogram anc connectivity matrix
-    hist = HistogramEstimator()
-    hist.fit(graph=A, bandwidthHist=None)
+    hist = HistogramEstimator(bandwithHist=bandwidth)
+    hist.fit(graph=A)
     hist_approx = hist.get_graphon()
     # P = hist.estimated_edge_connectivity_matrix
     return A, hist_approx, graphon
