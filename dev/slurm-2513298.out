@@ -1,0 +1,10 @@
+loading env
+launching python script
+2022-11-29 00:04:33.477 | INFO     | __main__:<module>:118 - sqrt4
+[32m2022-11-29 00:04:33.482[0m | [1mINFO    [0m | [36m__main__[0m:[36mmain[0m:[36m40[0m - [1mStarting experiment[0m
+[32m2022-11-29 00:04:33.484[0m | Level 20[0m | [36m__main__[0m:[36mflush[0m:[36m35[0m - 0%|          | 0/4 [00:00<?, ?it/s][0m
+[32m2022-11-29 00:04:33.485[0m | Level 20[0m | [36m__main__[0m:[36mflush[0m:[36m35[0m - 100%|##########| 4/4 [00:00<00:00, 26092.09it/s][0m
+[32m2022-11-29 00:08:01.223[0m | [1mINFO    [0m | [36m__main__[0m:[36mmain[0m:[36m88[0m - [1mComputing done[0m
+[32m2022-11-29 00:08:01.226[0m | [1mINFO    [0m | [36m__main__[0m:[36mmain[0m:[36m92[0m - [1mCleaning temp/[0m
+[32m2022-11-29 00:08:01.228[0m | [1mINFO    [0m | [36m__main__[0m:[36mmain[0m:[36m106[0m - [1mResults saved, bye[0m
+experiment done
