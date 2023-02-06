@@ -1,7 +1,4 @@
-import networkx as nx
-
 from pygraphon.graphons import Graphon
-from pygraphon.utils.utils_graph import get_adjacency_matrix_from_graph
 
 
 class BaseGenerator:
