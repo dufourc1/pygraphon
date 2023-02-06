@@ -14,3 +14,11 @@ def test_cannot_use_loss_estimator_not_fitted():
         loss(graphon, estimator)
 
 
+def test_can_run():
+    """Should run."""
+    graphon = Graphon(function=lambda x, y: 0.5)
+    estimator = HistogramEstimator()
+    A = graphon.draw(rho=1, n=30)
+    estimator.fit(A)
+    loss = MSE_P_hat(n_nodes=10)
+    loss(graphon, estimator)

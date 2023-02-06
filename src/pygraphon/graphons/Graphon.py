@@ -66,7 +66,6 @@ class Graphon:
         else:
             self.initial_rho = deepcopy(initial_rho)
 
-        #
         if check:
             self.check_graphon()
             if not self.check_graphon_integral() and self.scaled:
@@ -131,7 +130,8 @@ class Graphon:
         Parameters
         ----------
         rho : float
-            edge density of the realized graph
+            edge density of the realized graph (if `1` will return a graph
+            with edge density = `self.initial_rho` )
         n : int
              number of vertices of the realized graph
         exchangeable : bool
