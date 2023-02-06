@@ -1,4 +1,5 @@
 from abc import abstractclassmethod
+from typing import Optional
 
 import numpy as np
 
@@ -7,8 +8,21 @@ from pygraphon.graphons import Graphon
 
 
 class BaseMetric:
+    def __call__(
+        self,
+        graphon: Graphon,
+        estimator: BaseEstimator,
+        ajd_matrix: Optional[np.ndarray] = None,
+        **kwargs,
+    ):
+        if ajd_matrix is not None:
+            estimator.fit(adj_matrix=ajd_matrix, **kwargs)
+        if not estimator.fitted:
+            raise ValueError("Estimator is not fitted and no adjacency matrix was provided")
+        return self._compute(graphon=graphon, estimated=estimator.graphon)
+
     @abstractclassmethod
-    def __call__(self, graphon: Graphon, estimator: Graphon):
+    def _compute(self, graphon: Graphon, estimated: Graphon):
         pass
 
     @abstractclassmethod
@@ -21,11 +35,9 @@ class MSE_P_hat(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def __call__(self, graphon: Graphon, estimator: BaseEstimator):
+    def _compute(self, graphon: Graphon, estimated: Graphon):
         p_0 = graphon._get_edge_probabilities(self.n_nodes, exchangeable=False)
-        if not estimator.fitted:
-            raise ValueError("Estimator is not fitted")
-        p_hat = estimator.graphon._get_edge_probabilities(self.n_nodes, exchangeable=False)
+        p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean((p_0 - p_hat) ** 2)
 
     def __str__(self):
