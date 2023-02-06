@@ -20,7 +20,7 @@ def test_same_output_values():
     """The function should have the same output."""
 
     def f(x):
-        return x**2
+        return x ** 2
 
     g = copy_func(f)
     assert np.all([f(x) == g(x) for x in range(10)])

@@ -4,13 +4,11 @@ from pygraphon.utils.utils_graph import get_adjacency_matrix_from_graph
 
 
 class BaseGenerator:
-
     def generate(self, number_nodes: int, number_graphs: int):
         raise NotImplementedError()
 
 
 class DummyGenerator(BaseGenerator):
-
     def generate(self, number_nodes: int, number_graphs: int):
         return [self._er(number_nodes) for _ in range(number_graphs)]
 

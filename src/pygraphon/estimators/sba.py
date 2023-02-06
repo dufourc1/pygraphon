@@ -50,7 +50,7 @@ class SBA(BaseEstimator):
             )
 
             # find the close nodes and add them to the community
-            close_j = non_clustered_indices[np.where(distances < self.delta**2)[0]]
+            close_j = non_clustered_indices[np.where(distances < self.delta ** 2)[0]]
             for j in close_j:
                 membership[j] = k
                 set_index.remove(j)

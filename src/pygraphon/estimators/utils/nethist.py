@@ -104,17 +104,17 @@ def oracbwplugin(
         h = (
             2 ** (alpha + 1)
             * alpha
-            * mult**2
+            * mult ** 2
             * (p[0] + p[1] * len(uMid) / 2) ** 2
             * p[1] ** 2
             * pseudo_inverse_rho_hat
         ) ** (-1 / (2 * (alpha + 1)))
         estMSqrd = (
             2
-            * mult**2
+            * mult ** 2
             * (p[0] + p[1] * len(uMid) / 2) ** 2
             * p[1] ** 2
-            * pseudo_inverse_rho_hat**2
+            * pseudo_inverse_rho_hat ** 2
             * (n + 1) ** 2
         )
     # MISEfhatBnd = estMSqrd * ((2 / np.sqrt(estMSqrd)) * (sampleSize * rhoHat) ** (-1 / 2) + 1 / n)
@@ -145,11 +145,11 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
     else:
         A_inter = A + regParam * np.ones_like(A) * regParam
         distVec = pairwise_distances(A_inter, A_inter, metric="manhattan") / n
-    L = np.ones_like(distVec) - distVec**2
+    L = np.ones_like(distVec) - distVec ** 2
     d = np.sum(L, axis=1)
     d = d[:, np.newaxis]
-    L_inter = np.outer(d**-0.5, d**-0.5) * L - np.outer(np.sqrt(d), np.sqrt(d)) / np.sqrt(
-        np.sum(d**2)
+    L_inter = np.outer(d ** -0.5, d ** -0.5) * L - np.outer(np.sqrt(d), np.sqrt(d)) / np.sqrt(
+        np.sum(d ** 2)
     )
     _, u = scipy.sparse.linalg.eigs(L_inter, k=1, which="LR")
     u = u.real.ravel()

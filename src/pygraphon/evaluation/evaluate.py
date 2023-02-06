@@ -1,6 +1,4 @@
-
 class Evaluate:
-
     def __init__(self, estimator, generator, metrics):
         self.estimator = estimator
         self.generator = generator
