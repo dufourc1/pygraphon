@@ -1,5 +1,6 @@
-PyGraphon |release| Documentation
-=================================
+###################################
+ PyGraphon |release| Documentation
+###################################
 
 .. toctree::
    :maxdepth: 2
@@ -8,11 +9,12 @@ PyGraphon |release| Documentation
 
    installation
    usage
-   cli
-   modules
+   api
 
-Indices and Tables
-------------------
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+********************
+ Indices and Tables
+********************
+
+-  :ref:`genindex`
+-  :ref:`modindex`
+-  :ref:`search`

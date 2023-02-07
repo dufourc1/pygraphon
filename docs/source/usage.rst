@@ -1,5 +1,5 @@
-Usage
-=====
-.. automodule:: pygraphon.api
-    :members:
-    :noindex:
+#######
+ Usage
+#######
+
+Fit graphons to graphs. No cli provided
