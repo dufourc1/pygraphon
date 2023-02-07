@@ -239,6 +239,5 @@ intersphinx_mapping = {
     "https://docs.python.org/3/": None,
 }
 
-autoclass_content = "both"
-
-
+autodoc_typehints = "description"
+typehints_document_rtype = False

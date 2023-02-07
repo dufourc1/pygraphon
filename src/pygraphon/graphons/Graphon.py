@@ -9,7 +9,7 @@ from pygraphon.utils.utils_func import copy_func
 
 
 class Graphon:
-    """Basic Graphon defined only by its function f(x,y).
+    r"""Basic Graphon defined only by its function :math:`f(x,y)`.
 
     If scaled, will initialize a scaled graphon with integral equal to 1.
     The initial_rho parameter is used to keep track of the original edge density of the graphon.
@@ -18,7 +18,7 @@ class Graphon:
     Parameters
     ----------
     function : Callable
-        graphon function f(x,y)
+        graphon function :math:`f:[0,1]^2 → [0,1]`
     scaled : bool
         Should the graphon be scaled (integrate to 1), by default True
     check : bool
@@ -29,6 +29,12 @@ class Graphon:
 
     ..  note::
         Note on rescaled graphons and the current implementation.
+
+        Internally, the graphon is always rescaled to have integral equal to 1 and be indentifiable.
+        However, when sampling from the graphon, the original edge density is used, meaning we generate an edge with 
+        :math:`Bern(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`, 
+        and :math:`f(\cdot,\cdot)` is :obj:`function` given at initialization.
+        to the init function.
     """
 
     def __init__(
