@@ -2,11 +2,23 @@
  Estimators
 ############
 
-General presentation of idea and interface.
+.. currentmodule:: pygraphon.estimators
 
-********************
- List of estimators
-********************
+.. autosummary::
+   :nosignatures:
+   :toctree: pygraphon.estimators
+   
+   LG
+   HistogramEstimator
+   NBDsmooth
+   SBA
+   USVT
 
-.. automodule:: pygraphon.graphons
+Estimator general interface
+----------------------------
+
+
+.. autoclass:: pygraphon.estimators.BaseEstimator.BaseEstimator
    :members:
+   :undoc-members:
+

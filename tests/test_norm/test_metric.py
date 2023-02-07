@@ -15,7 +15,7 @@ def test_cannot_use_loss_estimator_not_fitted():
 
 
 def test_can_run():
-    """Should run. """
+    """Should run."""
     graphon = Graphon(function=lambda x, y: 0.5)
     estimator = HistogramEstimator()
     A = graphon.draw(rho=1, n=30)

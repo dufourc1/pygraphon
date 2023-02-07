@@ -79,6 +79,9 @@ autosummary_generate = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
+add_module_names = False
+autodoc_member_order = 'bysource'
+
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
@@ -238,6 +241,4 @@ intersphinx_mapping = {
 
 autoclass_content = "both"
 
-# Don't sort alphabetically, explained at:
-# https://stackoverflow.com/questions/37209921/python-how-not-to-sort-sphinx-output-in-alphabetical-order
-autodoc_member_order = "bysource"
+

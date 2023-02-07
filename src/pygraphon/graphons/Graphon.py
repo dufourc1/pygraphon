@@ -25,6 +25,10 @@ class Graphon:
         Should we try to enforce scaled graphon, by default True
     initial_rho : Optional[float]
         initial edge density, by default None
+
+
+    ..  note::
+        Note on rescaled graphons and the current implementation.
     """
 
     def __init__(
@@ -34,28 +38,6 @@ class Graphon:
         scaled=True,
         check=True,
     ) -> None:
-        """Initialize a graphon defined only by its function f(x,y).
-
-        If scaled, will initialize a scaled graphon with integral equal to 1.
-        The initial_rho parameter is used to keep track of the original edge density of the graphon.
-        If additionaly check is true, will check if the graphon integrates to 1 and if not, will try to correct it.
-
-        Parameters
-        ----------
-        function : Callable
-            graphon function f(x,y)
-        scaled : bool
-            Should the graphon be scaled (integrate to 1), by default True
-        check : bool
-            Should we try to enforce scaled graphon, by default True
-        initial_rho : Optional[float]
-            initial edge density, by default None
-
-        Raises
-        ------
-        ValueError
-            if graphon does not integrate to 1 and cannot be automatically scaled
-        """
         self.integral_value = None
         self.graphon_function = function
         self.scaled = scaled
@@ -103,7 +85,7 @@ class Graphon:
         self.old_func = copy_func(self.graphon_function)
         self.graphon_function = lambda x, y: self.old_func(x, y) / integral
 
-    def check_graphon_integral(self) -> bool:
+    def check_graphon_integral(self):
         """Check if the graphon integrates to 1.
 
         Returns
