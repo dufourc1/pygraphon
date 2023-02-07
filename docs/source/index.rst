@@ -9,6 +9,7 @@
 
    installation
    usage
+   tutorials
    api
 
 ********************

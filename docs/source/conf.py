@@ -18,16 +18,18 @@ import re
 import sys
 from datetime import date
 
+import pygraphon
+
 sys.path.insert(0, os.path.abspath("../../src/pygraphon/"))
 
 # -- Project information -----------------------------------------------------
 
 project = "pygraphon"
-copyright = f"{date.today().year}, Charles Dufour"
+copyright = f"{date.today().year}, Charles Dufour & Arthur Verdeyme"
 author = "Charles Dufour"
 
 # The full version, including alpha/beta/rc tags.
-release = "0.0.1-dev"
+release = pygraphon.__version__
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -207,8 +209,8 @@ texinfo_documents = [
         "pygraphon",
         "PyGraphon Documentation",
         author,
-        "Charles Dufour",
-        "python library to work with graphon",
+        "Charles Dufour & Arthur Verdeyme",
+        "Python library to work with graphons",
         "Miscellaneous",
     ),
 ]
