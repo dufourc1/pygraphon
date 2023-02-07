@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.abspath("../../src/pygraphon/"))
 
 project = "pygraphon"
 copyright = f"{date.today().year}, Charles Dufour & Arthur Verdeyme"
-author = "Charles Dufour"
+author = "Charles Dufour & Arthur Verdeyme"
 
 # The full version, including alpha/beta/rc tags.
 release = pygraphon.__version__
