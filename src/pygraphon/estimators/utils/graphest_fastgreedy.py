@@ -367,16 +367,20 @@ def _delta_neg(habSqrdCola, thetaCola, habSqrdColb, thetaColb, habSqrdEntryab, t
 
 # works
 def _getSampleCounts(X, clusterInds):
-    """_summary_
+    """Get the number of edges between each pair of clusters.
 
-    Args:
-        X (_type_): adjacency matrix
-        clusterInds (_type_): cluster assignments
+    Parameters
+    ----------
+    X : np.array
+        adjacency matrix ?
+    clusterInds : np.array
+        cluster assignments
 
-    Returns:
-        _type_: _description_
+    Returns
+    -------
+    np.array
+        number of edges between each pair of clusters
     """
-
     numClusters = clusterInds.shape[0]
     Xsums = np.zeros((numClusters, numClusters), dtype=int)
     for b in range(1, numClusters):

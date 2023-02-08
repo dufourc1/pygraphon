@@ -30,7 +30,7 @@ class BaseMetric:
         pass
 
 
-class MSE_P_hat(BaseMetric):
+class MseProbaEdge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
         self.n_nodes = n_nodes

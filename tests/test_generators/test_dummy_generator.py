@@ -15,5 +15,4 @@ def test_dummy_generator_edge_density():
     """Should generate a list of adjacency matrices with the correct edge density."""
     generator = DummyGenerator()
     graphs = generator.generate(100, 1)
-    print(generator.graphon.integral())
     assert np.isclose(np.sum(graphs[0]) / (100 * 100), 0.5, atol=0.05)
