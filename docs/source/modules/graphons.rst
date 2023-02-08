@@ -49,8 +49,10 @@ We also provide a list of pre-implemented common graphons which are instances of
 
 
 
-.. autoclass:: pygraphon.graphons.Graphon.Graphon
+.. autoclass:: pygraphon.graphons.Graphon
+	:noindex:
 
-   .. automethod:: draw
+  	.. automethod:: draw
+		:noindex:
 
 

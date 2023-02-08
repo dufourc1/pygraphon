@@ -2,8 +2,8 @@
  PyGraphon |release| Documentation
 ###################################
 
-
-Welcome to the `PyGraphon <https://github.com/dufourc1/pygraphon>`_  documentation!
+Welcome to the `PyGraphon <https://github.com/dufourc1/pygraphon>`_
+documentation!
 
 This Python package is here to help you analyse graphs with graphons.
 

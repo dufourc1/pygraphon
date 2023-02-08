@@ -21,4 +21,5 @@ Estimator general interface
 .. autoclass:: pygraphon.estimators.BaseEstimator.BaseEstimator
    :members:
    :undoc-members:
+   :noindex:
 
