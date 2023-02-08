@@ -11,6 +11,62 @@ from pygraphon.estimators.utils.graphest_fastgreedy import graphest_fastgreedy
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
 
+class Assignment:
+    def __init__(self, labels: np.ndarray, adjacency: np.ndarray) -> None:
+        self.labels = labels
+        self.num_groups = len(np.unique(self.labels))
+        self.group_sizes: np.ndarray = np.bincount(self.labels)
+        self.counts, self.realized = self.compute_counts_realized(adjacency)
+        self.theta = self.realized / self.counts
+        self.likelihood = self.compute_likelihood()
+
+    def compute_counts_realized(self, adjacency: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Compute the number of edges and the number of realized edges between communities specified by labels."""
+        counts = np.zeros((len(np.unique(self.labels)), len(np.unique(self.labels))))
+        realized = np.zeros_like(counts)
+        for g in np.unique(self.labels):
+            for g_prime in range(g + 1, len(np.unique(self.labels))):
+                counts[g, g_prime] = self.group_sizes[g] * self.group_sizes[g_prime]
+                realized[g, g_prime] = np.sum(
+                    adjacency[self.labels == g, :][:, self.labels == g_prime]
+                )
+                realized[g_prime, g] = realized[g, g_prime]
+                counts[g_prime, g] = counts[g, g_prime]
+            counts[g, g] = self.group_sizes[g] * (self.group_sizes[g] - 1) / 2
+            realized[g, g] = np.sum(adjacency[self.labels == g, :][:, self.labels == g]) / 2
+
+        return counts, realized
+
+    def compute_log_likelihood(self) -> float:
+        """Compute the likelihood of the assignment."""
+        loglike = 0
+        for g in range(self.num_groups):
+            for g_prime in range(g, self.num_groups):
+                theta_hat = np.clip(self.theta[g, g_prime], 1e-16, 1 - 1e-16)
+                loglike += (
+                    theta_hat * np.log(theta_hat) + (1 - theta_hat) * np.log(1 - theta_hat)
+                ) * self.counts[g, g_prime]
+        return loglike
+
+    def update(self, swap: Tuple[int, int], adjacency: np.ndarray) -> None:
+        """Update the assignment after a swap of two node labels."""
+        self.labels[swap[0]], self.labels[swap[1]] = (
+            self.labels[swap[1]],
+            self.labels[swap[0]],
+        )
+        for g in np.unique(self.labels):
+            for g_prime in [self.labels[swap[0]], self.labels[swap[1]]]:
+                self.realized[g, g_prime] = np.sum(
+                    adjacency[self.labels == g, :][:, self.labels == g_prime]
+                )
+                if g == g_prime:
+                    self.realized[g, g_prime] /= 2
+                self.realized[g_prime, g] = self.realized[g, g_prime]
+
+        self.theta = self.realized / self.counts
+        self.likelihood = self.compute_log_likelihood()
+
+
 def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float = 1) -> float:
     c = min(4, np.sqrt(A.shape[0]) / 8)
     h, _ = oracbwplugin(A=A, c=c, type_=type_, alpha=alpha)
