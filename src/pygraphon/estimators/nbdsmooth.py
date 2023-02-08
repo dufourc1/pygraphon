@@ -20,7 +20,6 @@ class NBDsmooth(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
-
         n = adjacency_matrix.shape[0]
         h = np.sqrt(np.log(n) / n)
 

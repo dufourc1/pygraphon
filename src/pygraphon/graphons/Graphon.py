@@ -31,8 +31,8 @@ class Graphon:
         Note on rescaled graphons and the current implementation.
 
         Internally, the graphon is always rescaled to have integral equal to 1 and be indentifiable.
-        However, when sampling from the graphon, the original edge density is used, meaning we generate an edge with 
-        :math:`Bern(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`, 
+        However, when sampling from the graphon, the original edge density is used, meaning we generate an edge with
+        :math:`Bern(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`,
         and :math:`f(\cdot,\cdot)` is :obj:`function` given at initialization.
         to the init function.
     """

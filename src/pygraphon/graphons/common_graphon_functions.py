@@ -11,12 +11,12 @@ import numpy as np
 from .Graphon import Graphon
 
 graphon_product = Graphon(function=lambda x, y: x * y)
-graphon_exp_07 = Graphon(function=lambda x, y: np.exp(-(x ** 0.7 + y ** 0.7)))
+graphon_exp_07 = Graphon(function=lambda x, y: np.exp(-(x**0.7 + y**0.7)))
 graphon_polynomial = Graphon(
-    function=lambda x, y: 0.25 * (x ** 2 + y ** 2 + np.sqrt(x) + np.sqrt(y))
+    function=lambda x, y: 0.25 * (x**2 + y**2 + np.sqrt(x) + np.sqrt(y))
 )
 graphon_mean = Graphon(function=lambda x, y: 0.5 * (x + y))
-graphon_logit_sum = Graphon(function=lambda x, y: 1 / (1 + np.exp(-10 * (x ** 2 + y ** 2))))
+graphon_logit_sum = Graphon(function=lambda x, y: 1 / (1 + np.exp(-10 * (x**2 + y**2))))
 graphon_latent_distance = Graphon(function=lambda x, y: np.abs(x - y))
 graphon_logit_max_power = Graphon(
     function=lambda x, y: 1 / (1 + np.exp(-(max(x, y) ** 2 + min(x, y) ** 4)))

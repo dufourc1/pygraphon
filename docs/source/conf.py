@@ -25,8 +25,8 @@ sys.path.insert(0, os.path.abspath("../../src/pygraphon/"))
 # -- Project information -----------------------------------------------------
 
 project = "pygraphon"
-copyright = f"{date.today().year}, Charles Dufour & Arthur Verdeyme"
 author = "Charles Dufour & Arthur Verdeyme"
+copyright = f"{date.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags.
 release = pygraphon.__version__
@@ -82,7 +82,7 @@ autosummary_generate = True
 templates_path = ["_templates"]
 
 add_module_names = False
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -209,7 +209,6 @@ texinfo_documents = [
         "pygraphon",
         "PyGraphon Documentation",
         author,
-        "Charles Dufour & Arthur Verdeyme",
         "Python library to work with graphons",
         "Miscellaneous",
     ),

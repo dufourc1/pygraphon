@@ -7,10 +7,7 @@ import scipy
 from numba import njit
 from tqdm import tqdm
 
-from pygraphon.utils.utils_matrix import (
-    bound_away_from_one_and_zero_arrays,
-    upper_triangle_values,
-)
+from pygraphon.utils.utils_matrix import bound_away_from_one_and_zero_arrays, upper_triangle_values
 
 
 def graphest_fastgreedy(
@@ -163,7 +160,6 @@ def graphest_fastgreedy(
         currentLabelVec = np.copy(bestLabelVec)
 
         for m in range(numGreedySteps):
-
             # prepare to update quantities for trial clustering
             trialClusterInds = np.copy(currentClusterInds)
             trialLabelVec = np.copy(currentLabelVec)
@@ -186,7 +182,6 @@ def graphest_fastgreedy(
 
                 # swap and update the trial likelihood only if nodes i and j are in different clusters
                 if a != b:
-
                     trialLabelVec[i], trialLabelVec[j] = b, a
 
                     habSqrdCola = habSqrd[:, a]
@@ -354,7 +349,7 @@ def set_num_greedy_steps(n) -> Tuple[int, bool]:
         allInds = True
     else:
         # Only a random subset of pairs will be visited on each iteration
-        numGreedySteps = 2 * 10 ** 4
+        numGreedySteps = 2 * 10**4
         allInds = False
     return numGreedySteps, allInds
 

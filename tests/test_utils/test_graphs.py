@@ -16,7 +16,7 @@ from pygraphon.utils.utils_graph import (
 def test_get_adjacency_matrix_from_graph():
     """Check that the adjacency matrix is correct."""
     a = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
-    graph = nx.from_numpy_matrix(a)
+    graph = nx.from_numpy_array(a)
     assert np.allclose(get_adjacency_matrix_from_graph(graph), a)
 
 
