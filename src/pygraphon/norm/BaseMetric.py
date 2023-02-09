@@ -15,14 +15,17 @@ class BaseMetric:
         ajd_matrix: Optional[np.ndarray] = None,
         **kwargs,
     ):
-        if ajd_matrix is not None:
-            estimator.fit(adj_matrix=ajd_matrix, **kwargs)
         if not estimator.fitted:
-            raise ValueError("Estimator is not fitted and no adjacency matrix was provided")
-        return self._compute(graphon=graphon, estimated=estimator.graphon)
+            if ajd_matrix is None:
+                raise ValueError("Estimator is not fitted and no adjacency matrix was provided")
+            estimator.fit(adj_matrix=ajd_matrix, **kwargs)
+
+        return self._compute(
+            graphon=graphon, estimated=estimator.graphon, adjaceny_matrix=ajd_matrix
+        )
 
     @abstractclassmethod
-    def _compute(self, graphon: Graphon, estimated: Graphon):
+    def _compute(self, graphon: Graphon, estimated: Graphon, adjaceny_matrix: np.ndarray):
         pass
 
     @abstractclassmethod
@@ -35,7 +38,7 @@ class MseProbaEdge(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def _compute(self, graphon: Graphon, estimated: Graphon):
+    def _compute(self, graphon: Graphon, estimated: Graphon, adjaceny_matrix: np.ndarray):
         p_0 = graphon._get_edge_probabilities(self.n_nodes, exchangeable=False)
         p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean((p_0 - p_hat) ** 2)
