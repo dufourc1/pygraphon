@@ -33,7 +33,6 @@ class USVT(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
-
         rho = edge_density(adjacency_matrix)
         if rho == 0:
             raise ValueError("empty graph, cannot estimate graphon")

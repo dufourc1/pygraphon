@@ -15,7 +15,7 @@ __all__ = [
     "__version__",
 ]
 
-VERSION = "0.0.1-dev"
+VERSION = "0.1.0"
 __version__ = VERSION
 
 

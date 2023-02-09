@@ -9,7 +9,7 @@ from pygraphon.utils.utils_matrix import check_symmetric
 
 
 class StepGraphon(Graphon):
-    """A step function graphon, by giving the matrix representing the block model approxumation.
+    """A step function graphon defined by giving the matrix representing the block model approxumation.
 
     Parameters
     ----------
@@ -24,34 +24,18 @@ class StepGraphon(Graphon):
     def __init__(
         self, graphon: np.ndarray, bandwidthHist: float, initial_rho: float = None
     ) -> None:
-        """Create an instance of a step function graphon, by giving the matrix representing the block model approx.
-
-        Parameters
-        ----------
-        graphon : np.ndarray
-            np array representing the theta matrix
-        bandwidthHist : float
-            size of the groups (between 0 and 1), by default None
-        initial_rho : float
-            initial edge density (used to keep track in case of normalization), by default None
-
-        Raises
-        ------
-        ValueError
-            if the graphon is and the bandwidthHist are not compatible.
-        """
         # save args
         self.graphon = graphon
         self.bandwidthHist = bandwidthHist
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
             raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
 
-        self.areas = np.ones_like(self.graphon) * self.bandwidthHist ** 2
+        self.areas = np.ones_like(self.graphon) * self.bandwidthHist**2
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
         if self.remainder != 0:
             self.areas[:, -1] = self.bandwidthHist * self.remainder
             self.areas[-1, :] = self.bandwidthHist * self.remainder
-            self.areas[-1, -1] = self.remainder ** 2
+            self.areas[-1, -1] = self.remainder**2
 
         super().__init__(function=self.graphon_function_builder(), initial_rho=initial_rho)
 

@@ -232,7 +232,7 @@ class SimpleMomentEstimator(BaseEstimator):
         result = 0
         for i, j in list(product(range(K), repeat=2)):
             result += theta[i][j]
-        return result / K ** 2
+        return result / K**2
 
     @staticmethod
     def _cherry_density_moment_theoretical(theta: np.ndarray, areas: np.ndarray = None) -> float:

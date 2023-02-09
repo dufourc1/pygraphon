@@ -25,7 +25,6 @@ class HistogramEstimator(BaseEstimator):
     """
 
     def __init__(self, bandwithHist: float = None) -> None:
-
         super().__init__()
         self.bandwidthHist = bandwithHist
 

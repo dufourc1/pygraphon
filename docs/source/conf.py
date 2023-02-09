@@ -18,16 +18,18 @@ import re
 import sys
 from datetime import date
 
+import pygraphon
+
 sys.path.insert(0, os.path.abspath("../../src/pygraphon/"))
 
 # -- Project information -----------------------------------------------------
 
 project = "pygraphon"
-copyright = f"{date.today().year}, Charles Dufour"
-author = "Charles Dufour"
+author = "Charles Dufour & Arthur Verdeyme"
+copyright = f"{date.today().year}, {author}"
 
 # The full version, including alpha/beta/rc tags.
-release = "0.0.1-dev"
+release = pygraphon.__version__
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -74,10 +76,13 @@ extensions = [
 ]
 
 # generate autosummary pages
-autosummary_generate = True
+autosummary_generate = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+add_module_names = False
+autodoc_member_order = "bysource"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -204,8 +209,7 @@ texinfo_documents = [
         "pygraphon",
         "PyGraphon Documentation",
         author,
-        "Charles Dufour",
-        "python library to work with graphon",
+        "Python library to work with graphons",
         "Miscellaneous",
     ),
 ]
@@ -236,8 +240,5 @@ intersphinx_mapping = {
     "https://docs.python.org/3/": None,
 }
 
-autoclass_content = "both"
-
-# Don't sort alphabetically, explained at:
-# https://stackoverflow.com/questions/37209921/python-how-not-to-sort-sphinx-output-in-alphabetical-order
-autodoc_member_order = "bysource"
+autodoc_typehints = "description"
+typehints_document_rtype = False
