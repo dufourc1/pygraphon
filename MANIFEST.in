@@ -17,3 +17,5 @@ include Pipfile
 include requirements.txt
 exclude tox.ini .flake8 .bumpversion.cfg .readthedocs.yml CONTRIBUTING.rst
 exclude dev
+
+include docs/requirements.txt
