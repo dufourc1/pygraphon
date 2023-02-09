@@ -17,8 +17,7 @@ def all_metrics() -> List[BaseMetric]:
     return [MseProbaEdge()]
 
 
-if __name__ == "__main__":
-    metrics = all_metrics()
+def benchmark():
     for name, graphon in common_graphons.items():
         evaluator = Evaluate(
             graphon=graphon,
@@ -29,3 +28,7 @@ if __name__ == "__main__":
         for estimator in tqdm(all_estimators()):
             evaluator.evaluate(estimator=estimator, n_nodes=100, n_repetitions=1)
         print(evaluator)
+
+
+if __name__ == "__main__":
+    benchmark()
