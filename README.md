@@ -122,7 +122,7 @@ $ tox -q
 
 Additionally, these tests are automatically re-run with each commit in a [GitHub Action](https://github.com//pygraphon/actions?query=workflow%3ATests).
 
-### 📝 Documentation
+### 📝 Documentation
 
 The documentation is built with [Sphinx](https://www.sphinx-doc.org/en/master/). After installing the package in development mode, the documentation can be built locally with:
 
