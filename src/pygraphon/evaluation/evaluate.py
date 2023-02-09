@@ -1,6 +1,5 @@
 """Base class for evaluating the performance of an estimator."""
-from abc import abstractclassmethod
-from typing import List
+from typing import List, Union
 
 import numpy as np
 from tqdm import tqdm
@@ -13,15 +12,51 @@ from pygraphon.norm import BaseMetric
 class Evaluate:
     """Base class for evaluating the performance of an estimator."""
 
-    def __init__(self, graphon: Graphon, metrics: List[BaseMetric], progress_bar: bool = True):
+    def __init__(
+        self,
+        graphon: Graphon,
+        metrics: Union[List[BaseMetric], BaseMetric],
+        progress_bar: bool = True,
+        graphon_name: str = "Unnamed",
+    ):
         self.graphon = graphon
-        self.metrics = metrics
+        self.metrics = metrics if isinstance(metrics, list) else [metrics]
         self.progress_bar = progress_bar
+        self.graphon_name = graphon_name
+        self.results = {}
+        self.graphs = []
+        self.generated = False
 
-    @abstractclassmethod
+    def _generate_graphs(self, n_nodes: List[int], n_repetitions: int, random_state: int = 42):
+        """Generate graphs from the graphon.
+
+        Will use :py:obj:`self.graphon` to generate :py:obj:`n_repetitions` graphs
+        with :py:obj:`n_nodes` nodes and then report the metric values for each
+        graph and metrics.
+
+        Parameters:
+        ----------
+            n_samples: int
+                number of nodes in the graph
+            n_repetitions: int
+                number of times to run the evaluation
+        """
+        np.random.seed(random_state)
+        graphs = []
+        for n in n_nodes:
+            graphs.append(
+                [self.graphon.draw(rho=1.0, n=n, exchangeable=False) for _ in range(n_repetitions)]
+            )
+        self.graphs = graphs
+        self.generated = True
+
     def evaluate(
-        self, estimator: BaseEstimator, n_nodes: int, n_repetitions: int
-    ) -> List[np.ndarray]:
+        self,
+        estimator: BaseEstimator,
+        n_nodes: Union[List[int], int],
+        n_repetitions: int,
+        random_state: int = 42,
+    ):
         """Evaluate the performance of the estimator.
 
         Will use :py:obj:`self.graphon` to generate :py:obj:`n_repetitions` graphs
@@ -43,15 +78,42 @@ class Evaluate:
             length :py:obj:`n_repetitions` containing the metric values for
             each graph.
         """
-        results = [np.zeros(n_repetitions) for _ in range(len(self.metrics))]
-        for i in tqdm(range(n_repetitions), disable=not self.progress_bar):
-            graph = self.graphon.draw(rho=1.0, n=n_nodes, exchangeable=True)
-            estimator.fit(graph)
-            for j, metric in enumerate(self.metrics):
-                results[j][i] = metric(graphon=self.graphon, estimator=estimator, adj_matrix=graph)
+        np.random.seed(random_state)
+        if isinstance(n_nodes, int):
+            n_nodes = [n_nodes]
+        estimator_name = estimator.__class__.__name__
+        if estimator_name not in self.results:
+            self.results[estimator_name] = []
 
+        if not self.generated:
+            self._generate_graphs(n_nodes, n_repetitions, random_state)
+
+        results = [np.zeros((len(n_nodes), n_repetitions)) for _ in range(len(self.metrics))]
+        for i, _ in enumerate(tqdm(n_nodes, disable=not self.progress_bar)):
+            for j in range(n_repetitions):
+                graph = self.graphs[i][j]
+                estimator.fit(graph)
+                for k, metric in enumerate(self.metrics):
+                    results[k][i, j] = metric(
+                        graphon=self.graphon, estimator=estimator, adj_matrix=graph
+                    )
+        self.results[estimator_name] = results
         return results
 
-    @abstractclassmethod
-    def _save_resutls(self, results, path):
-        pass
+    def __str__(self):
+        """Return string representation of the evaluation.
+
+        Returns
+        -------
+        str
+            String representation of the evaluation.
+        """
+        string = f"Graphon: {self.graphon_name} \n"
+        for estimator in self.results:
+            string += f"  {estimator} \n"
+            for index_metric, metric in enumerate(self.metrics):
+                string += f"    {metric}, "
+                string += f"mean: {np.mean(self.results[estimator][index_metric]):.4f} "
+                string += f"std: {np.std(self.results[estimator][index_metric]):.4f} "
+                string += "\n"
+        return string
