@@ -4,7 +4,7 @@ from .EmpiricalDegrees import LG
 from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
-from .sas.SAS import SAS
+from .SAS import SAS
 from .sba import SBA
 from .UniversalSingularValueDecomposition import USVT
 

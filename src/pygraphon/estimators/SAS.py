@@ -43,9 +43,8 @@ class SAS(BaseEstimator):
         H = convolve2d(A, np.ones((h, h)) / (h**2), mode="same", boundary="symm")[::h, ::h]
 
         # total variation minimization
-        M2 = round(n / 2)
-        N2 = round(n / 2)
-        Hpad = np.pad(H, ((M2, M2), (N2, N2)), mode="symmetric")
+        n_half = round(n / 2)
+        Hpad = np.pad(H, ((n_half, n_half), (n_half, n_half)), mode="symmetric")
 
         graphon_matrix = denoise_tv_bregman(
             Hpad,
@@ -56,7 +55,7 @@ class SAS(BaseEstimator):
         )
 
         # crop to remove padding
-        graphon_matrix = graphon_matrix[M2 + 1 : -M2, N2 + 1 : -N2]
+        graphon_matrix = graphon_matrix[n_half:-n_half, n_half:-n_half]
 
         # resize the graphon to size of the adjacency matrix
         P_hat = resize(graphon_matrix, (n, n), order=0, mode="edge", anti_aliasing=False)
