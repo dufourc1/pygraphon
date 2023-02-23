@@ -30,7 +30,7 @@ username = None
 password = None
 
 
-def load_graph(*args, **kwargs):
+def _load_graph(*args, **kwargs):
     raise NotImplementedError()
 
 
@@ -74,7 +74,7 @@ def get_ns_network(k, token=None):
                 "zstandard module not installed, but it's required for zstd de-compression"
             )
         with cctx.stream_reader(f) as fc:
-            g = load_graph(fc, fmt="gt")
+            g = _load_graph(fc, fmt="gt")
 
     return g
 
