@@ -7,8 +7,9 @@ import scipy.sparse.linalg
 from scipy import stats
 from sklearn.metrics import pairwise_distances
 
-from pygraphon.estimators.utils.graphest_fastgreedy import graphest_fastgreedy
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
+
+from .graphest_fastgreedy import graphest_fastgreedy
 
 
 def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float = 1) -> float:

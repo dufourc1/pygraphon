@@ -5,9 +5,10 @@ from typing import Tuple
 import numpy as np
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
-from pygraphon.estimators.utils.nethist import nethist
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
+
+from .nethist import nethist
 
 
 class HistogramEstimator(BaseEstimator):
