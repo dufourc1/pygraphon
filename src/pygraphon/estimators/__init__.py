@@ -4,6 +4,7 @@ from .EmpiricalDegrees import LG
 from .HistogramEstimator import HistogramEstimator
 from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
+from .sas.SAS import SAS
 from .sba import SBA
 from .UniversalSingularValueDecomposition import USVT
 
@@ -15,4 +16,5 @@ __all__ = classes = [
     "NBDsmooth",
     "SBA",
     "USVT",
+    "SAS",
 ]
