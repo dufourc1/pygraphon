@@ -2,8 +2,9 @@
 from typing import Optional, Tuple, Union
 
 import numpy as np
-from loguru import logger
 from scipy.signal import convolve2d
+from skimage.restoration import denoise_tv_bregman
+from skimage.transform import resize
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons.StepGraphon import StepGraphon
@@ -23,12 +24,6 @@ class SAS(BaseEstimator):
         tol: float = 1e-3,
         isotropic: bool = True,
     ):
-        try:
-            import skimage  # noqa
-        except ImportError:
-            raise ImportError(
-                "The SAS estimator requires the skimage package. To install it, run: pip install scikit-image"
-            )
         super().__init__()
         self.h = h
         self.mu = mu
@@ -39,19 +34,14 @@ class SAS(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray, h=None
     ) -> Tuple[StepGraphon, np.ndarray]:
-
-        from skimage.restoration import denoise_tv_bregman
-        from skimage.transform import resize
-
         n = adjacency_matrix.shape[0]
         h = self._decide_h(n=n, h=h)
-        logger.debug(f"Using h={h}")
 
         A, idx = self.empirical_degree_sorting(adjacency_matrix)
 
         # histogram estimation
         H = convolve2d(A, np.ones((h, h)) / (h**2), mode="same", boundary="symm")[::h, ::h]
-        
+
         # total variation minimization
         M2 = round(n / 2)
         N2 = round(n / 2)
@@ -66,17 +56,17 @@ class SAS(BaseEstimator):
         )
 
         # crop to remove padding
-        graphon_matrix = graphon_matrix[M2+1:-M2, N2+1:-N2]
+        graphon_matrix = graphon_matrix[M2 + 1 : -M2, N2 + 1 : -N2]
 
         # resize the graphon to size of the adjacency matrix
-        P_hat = resize(graphon_matrix, (n, n), order=0, mode='edge', anti_aliasing=False)
+        P_hat = resize(graphon_matrix, (n, n), order=0, mode="edge", anti_aliasing=False)
 
         # sort back
         original_indices = np.argsort(idx)
         P_hat = P_hat[original_indices, :]
         P_hat = P_hat[:, original_indices]
 
-        return StepGraphon(graphon_matrix, bandwidthHist=1/graphon_matrix.shape[0]), P_hat
+        return StepGraphon(graphon_matrix, bandwidthHist=1 / graphon_matrix.shape[0]), P_hat
 
     def empirical_degree_sorting(self, A: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Sort the adjacency matrix by the empirical degree.
@@ -86,7 +76,9 @@ class SAS(BaseEstimator):
         Args:
             A (np.ndarray): Adjacency matrix
 
-        Returns:
+        Returns
+        -------
+        Tuple[np.ndarray, np.ndarray]
             np.ndarray: Sorted adjacency matrix
             np.ndarray: Index of the sorted adjacency matrix
         """
@@ -97,10 +89,15 @@ class SAS(BaseEstimator):
         return A_sorted, idx
 
     def _decide_h(self, n: int, h: Optional[Union[int, float]] = None) -> int:
-        """Decide the value of h based on algorithm paramemters and inpput."""
+        """Decide the value of h based on algorithm paramemters and inpput.
+
+        Returns
+        -------
+        int
+            Value of h
+        """
         if h is None:
             if self.h is None:
-                logger.info("Using default value for h: log(n)")
                 h = int(np.log(n))
             else:
                 if type(self.h) == float:
