@@ -7,7 +7,10 @@ import scipy
 from numba import njit
 from tqdm import tqdm
 
-from pygraphon.utils.utils_matrix import bound_away_from_one_and_zero_arrays, upper_triangle_values
+from pygraphon.utils.utils_matrix import (
+    bound_away_from_one_and_zero_arrays,
+    upper_triangle_values,
+)
 
 
 def graphest_fastgreedy(
@@ -129,9 +132,7 @@ def graphest_fastgreedy(
         pbar = range(maxNumRestarts)
 
     for mm in pbar:
-        oneTwoVec = np.array(rnd.uniform(size=numGreedySteps) > 2 / 3) + np.ones(
-            numGreedySteps, dtype=int
-        )
+        oneTwoVec = np.array(rnd.uniform(size=numGreedySteps) > 2 / 3)
 
         # random integers between 0 and n-1
         iVec = np.ceil(rnd.uniform(size=numGreedySteps) * n - 1).astype(int)
@@ -355,7 +356,7 @@ def set_num_greedy_steps(n) -> Tuple[int, bool]:
 
 
 # works
-@njit
+@njit(fastmath=True)
 def _delta_neg(habSqrdCola, thetaCola, habSqrdColb, thetaColb, habSqrdEntryab, thetaEntryab):
     return np.sum(
         habSqrdCola * (thetaCola * np.log(thetaCola) + (1 - thetaCola) * np.log(1 - thetaCola))
