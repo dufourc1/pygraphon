@@ -79,6 +79,8 @@ def plot_sample(
     Tuple[Figure, Axes]
         plotted sample
     """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(6, 5))
     x1, x2 = np.linspace(0, 1, resolution, endpoint=False), np.linspace(
         0, 1, resolution, endpoint=False
     )
@@ -117,11 +119,7 @@ def plot(
     Tuple[Figure, Axes]
         plot
     """
-    if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
-    sc = ax.imshow(graphon.graphon, cmap=plt.cm.get_cmap("jet"), aspect="auto")
-    fig.colorbar(sc, ax=ax)
-    return fig, ax
+    return plot_sample(graphon, fig=fig, ax=ax, colorbar=True, integrate_to_1=True)
 
 
 def _make_pretty(ax):
