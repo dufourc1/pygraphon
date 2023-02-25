@@ -41,6 +41,6 @@ def test_upper_triangle_values():
 def test_bound_away():
     """Check that the bound away from one and zero arrays is correct."""
     a = np.array([[0, 0.2, 0.3], [0.4, 0.5, 0.6], [1, 0.8, 4]])
-    bounded = bound_away_from_one_and_zero_arrays([a])[0]
+    bounded = bound_away_from_one_and_zero_arrays(a)
     assert np.all(bounded > 0)
     assert np.all(bounded < 1)

@@ -1,129 +1,16 @@
 """Implementation of network histogram estimator."""
-import random
-from copy import deepcopy
 from typing import List, Optional, Tuple
 
-import numba as nb
 import numpy as np
 import scipy
 import scipy.sparse.linalg
 from scipy import stats
 from sklearn.metrics import pairwise_distances
-from tqdm import tqdm
 
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
 from .graphest_fastgreedy import graphest_fastgreedy
-
-
-class Assignment:
-    def __init__(self, labels: np.ndarray, adjacency: np.ndarray) -> None:
-        self.labels = labels
-        self.num_groups = len(np.unique(self.labels.astype(int)))
-        self.group_sizes: np.ndarray = np.bincount(self.labels.astype(int))
-        self.counts, self.realized = self.compute_counts_realized(adjacency)
-        self.theta = self.realized / self.counts
-        self.likelihood = self.compute_log_likelihood()
-
-    def compute_counts_realized(self, adjacency: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Compute the number of edges and the number of realized edges between communities specified by labels.
-
-        Parameters
-        ----------
-        adjacency : np.ndarray
-            Adjacency matrix of the graph
-
-        Returns
-        -------
-        Tuple[np.ndarray, np.ndarray]
-            counts, realized
-        """
-        counts = np.zeros((self.num_groups, self.num_groups))
-        realized = np.zeros_like(counts)
-        for g in range(self.num_groups):
-            for g_prime in range(g + 1, self.num_groups):
-                counts[g, g_prime] = self.group_sizes[g] * self.group_sizes[g_prime]
-                realized[g, g_prime] = np.sum(
-                    adjacency[self.labels == g, :][:, self.labels == g_prime]
-                )
-                realized[g_prime, g] = realized[g, g_prime]
-                counts[g_prime, g] = counts[g, g_prime]
-            counts[g, g] = self.group_sizes[g] * (self.group_sizes[g] - 1) / 2
-            realized[g, g] = np.sum(adjacency[self.labels == g, :][:, self.labels == g]) / 2
-
-        return counts, realized
-
-    def compute_log_likelihood(self) -> float:
-        """Compute the likelihood of the assignment.
-
-        Returns
-        -------
-        float
-            log likelihood
-        """
-        return _log_likelihood(self.num_groups, self.theta, self.counts)
-
-    def update(self, swap: Tuple[int, int], adjacency: np.ndarray) -> None:
-        """Update the assignment after a swap of two node labels.
-
-        Parameters
-        ----------
-        swap : Tuple[int, int]
-            The two node labels that were swapped
-        adjacency : np.ndarray
-            Adjacency matrix of the graph
-
-        Returns
-        -------
-        None
-        """
-        self.labels[swap[0]], self.labels[swap[1]] = (
-            self.labels[swap[1]],
-            self.labels[swap[0]],
-        )
-        for g in range(self.num_groups):
-            for g_prime in [int(self.labels[swap[0]]), int(self.labels[swap[1]])]:
-                self.realized[g, g_prime] = np.sum(
-                    adjacency[self.labels == g, :][:, self.labels == g_prime]
-                )
-                if g == g_prime:
-                    self.realized[g, g_prime] /= 2
-                self.realized[g_prime, g] = self.realized[g, g_prime]
-
-        self.theta = self.realized / self.counts
-        self.likelihood = self.compute_log_likelihood()
-
-
-@nb.jit(nopython=True)
-def _log_likelihood(num_groups: int, theta, count) -> float:
-    """Compute the log likelihood of the assignment.
-
-    Parameters
-    ----------
-    num_groups : int
-        Number of groups
-    theta : np.ndarray
-        Estimated probabilities
-    count : np.ndarray
-        Number of edges between groups
-
-    Returns
-    -------
-    float
-        log likelihood
-    """
-    loglike = 0
-    for g in range(num_groups):
-        for g_prime in range(g, num_groups):
-            theta_hat = (
-                1e-16
-                if theta[g, g_prime] < 1e-16
-                else (1 - 1e-16 if theta[g, g_prime] > 1 - 1e-16 else theta[g, g_prime])
-            )
-            loglike += (
-                theta_hat * np.log(theta_hat) + (1 - theta_hat) * np.log(1 - theta_hat)
-            ) * count[g, g_prime]
-    return loglike
+from .greedy_readable import Assignment, greedy_opt
 
 
 def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float = 1) -> float:
@@ -280,7 +167,7 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
     idxInit = np.zeros(n)
     for i in range(k):
         idxInit[ind[i * h : min(n, (i + 1) * h)]] = i
-    return idxInit
+    return idxInit.astype(int)
 
 
 def nethist(
@@ -308,15 +195,12 @@ def nethist(
     """
     check_simple_adjacency_matrix(A)
 
-    # conversion for scipy functions
-    A = A.astype(float)
-
     # Compute necessary summaries from A
     n = A.shape[0]
     rhoHat = np.sum(A) / (n * (n - 1))
 
     # use data driven h
-    h = int(h) if h is not None else int(_oracle_analysis_badnwidth(A=A))
+    h = int(h) if h is not None else int(_oracle_analysis_badnwidth(A=A.astype(float)))
 
     # min h i s 2 so that no node is in its own group
     h = max(2, min(n, np.round(h)))
@@ -329,7 +213,14 @@ def nethist(
         lastGroupSize = n % h
 
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
-    return greedy_opt(A, idxInit), h, None
+    assert idxInit.min() == 0
+
+    assignment = Assignment(idxInit, A)
+    print("starting assignement", assignment.likelihood)
+    # best_assignment = greedy_opt(A, idxInit, maxNumRestarts=10)
+    # return best_assignment
+    # return best_assignment.labels, h, None
+    # return greedy_opt(A, idxInit, maxNumRestarts=500), h, None
     if trace:
         idx, _, trace = graphest_fastgreedy(
             A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
@@ -339,51 +230,3 @@ def nethist(
             A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
         )
     return idx, h, trace
-
-
-def greedy_opt(
-    A: np.ndarray,
-    inputLabelVec: np.ndarray,
-    absTol: float = 2.5 * 1e-4,
-    maxNumRestarts: int = 500,
-    *args,
-    **kwargs,
-) -> np.ndarray:
-    """Greedy optimization of the network histogram.
-
-    Parameters
-    ----------
-    A : np.ndarray
-        adjacency matrix
-    inputLabelVec : np.ndarray
-        initial guess of the node membership (block labels)
-    absTol : float
-        absolute tolerance for convergence, by default 2.5 * 1e-4
-    maxNumRestarts : int
-        number of steps, by default 500
-
-    Returns
-    -------
-    np.ndarray
-        optimized node membership (block labels)
-    """
-    n = A.shape[0]
-    sample_size = int(n * (n - 1) / 2)
-    normalized_tol = absTol / (sample_size / np.sum(A))
-    # Initialize the assignment
-    best_assignment = Assignment(inputLabelVec, A)
-    current_assignment = deepcopy(best_assignment)
-
-    for _ in tqdm(range(maxNumRestarts)):
-        i, j = random.sample(range(n), 2)
-        current_assignment.update((i, j), A)
-        if current_assignment.likelihood > best_assignment.likelihood:
-            if current_assignment.likelihood - best_assignment.likelihood <= normalized_tol:
-                best_assignment = deepcopy(current_assignment)
-                break
-            else:
-                best_assignment = deepcopy(current_assignment)
-        else:
-            current_assignment = deepcopy(best_assignment)
-
-    return best_assignment.labels
