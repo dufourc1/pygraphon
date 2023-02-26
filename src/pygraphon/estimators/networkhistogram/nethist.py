@@ -171,7 +171,7 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
 
 
 def nethist(
-    A: np.ndarray, h: int = None, verbose: bool = False, trace: bool = False
+    A: np.ndarray, h: int = None, verbose: bool = False, trace: bool = False, method: str = "mine"
 ) -> Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
@@ -215,18 +215,16 @@ def nethist(
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
     assert idxInit.min() == 0
 
-    assignment = Assignment(idxInit, A)
-    print("starting assignement", assignment.likelihood)
-    # best_assignment = greedy_opt(A, idxInit, maxNumRestarts=10)
-    # return best_assignment
-    # return best_assignment.labels, h, None
-    # return greedy_opt(A, idxInit, maxNumRestarts=500), h, None
-    if trace:
-        idx, _, trace = graphest_fastgreedy(
-            A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
-        )
+    if method == "mine":
+        best_assignment, bests, currents, overall_bests = greedy_opt(A, idxInit)
+        return best_assignment.labels, h, None
     else:
-        idx, _ = graphest_fastgreedy(
-            A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
-        )
-    return idx, h, trace
+        if trace:
+            idx, _, trace = graphest_fastgreedy(
+                A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
+            )
+        else:
+            idx, _ = graphest_fastgreedy(
+                A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
+            )
+        return idx, h, trace

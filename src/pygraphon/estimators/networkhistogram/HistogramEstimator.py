@@ -30,7 +30,7 @@ class HistogramEstimator(BaseEstimator):
         self.bandwidthHist = bandwithHist
 
     def _approximate_graphon_from_adjacency(
-        self, adjacency_matrix: np.ndarray, bandwidthHist: float = None
+        self, adjacency_matrix: np.ndarray, bandwidthHist: float = None, method: str = "mine"
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -49,7 +49,7 @@ class HistogramEstimator(BaseEstimator):
         rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
-        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist)
+        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist, method=method)
         return StepGraphon(graphon_matrix, bandwidthHist=h, initial_rho=rho), P
 
     def _approximate(
@@ -58,6 +58,7 @@ class HistogramEstimator(BaseEstimator):
         bandwidthHist: float = None,
         use_default_bandwidth: bool = False,
         return_membership: bool = False,
+        method: str = "mine",
     ) -> Tuple[Tuple[np.ndarray], float]:
         """Use function from Universality of block model approximation [1].
 
@@ -93,7 +94,7 @@ class HistogramEstimator(BaseEstimator):
             h = None
         else:
             h = int(bandwidthHist * adjacencyMatrix.shape[0])
-        groupmembership, h, _ = nethist(A=adjacencyMatrix, h=h)
+        groupmembership, h, _ = nethist(A=adjacencyMatrix, h=h, method=method)
 
         if bandwidthHist is None:
             bandwidthHist = h / adjacencyMatrix.shape[0]

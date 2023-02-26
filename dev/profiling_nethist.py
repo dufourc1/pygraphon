@@ -9,7 +9,7 @@ from pygraphon.graphons import graphon_logit_sum
 from pygraphon.utils.utils_graph import edge_density
 
 # Draw a graph from the graphon with a given density and number of vertices, see GraphonAbstract.py
-A = graphon_logit_sum.draw(rho=1, n=10000, exchangeable=False)
+A = graphon_logit_sum.draw(rho=1, n=400, exchangeable=False)
 
 n = A.shape[0]
 rho = edge_density(A)

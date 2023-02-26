@@ -13,7 +13,7 @@ EPS = np.spacing(1)
 class Assignment:
     def __init__(self, labels: np.ndarray, adjacency: np.ndarray) -> None:
         self.labels = labels - np.min(labels)  # 0-indexed
-        self.labels.astype(int)
+        self.labels = self.labels.astype(int)
         self.sample_size = adjacency.shape[0] * (adjacency.shape[0] - 1) / 2
         self.num_groups = len(np.unique(self.labels.astype(int)))
         self.group_sizes: np.ndarray = np.bincount(self.labels.astype(int))
@@ -75,28 +75,28 @@ class Assignment:
         -------
         None
         """
-
+        # important: we need to pass the unswapped labels to compute_counts_realized
         self.realized = update_realized_number(self.realized, self.labels, adjacency, swap)
         self.labels[swap[0]], self.labels[swap[1]] = (
             self.labels[swap[1]],
             self.labels[swap[0]],
         )
-
         self.theta = self.realized / self.counts
 
         self.likelihood = self.compute_log_likelihood()
-        other = Assignment(self.labels, adjacency)
-        self.copy_from_other(other)
 
     def copy_from_other(self, other):
         self.theta = np.copy(other.theta)
         self.likelihood = other.likelihood
         self.labels = np.copy(other.labels)
+        self.realized = np.copy(other.realized)
 
 
 @nb.jit(nopython=True)
 def update_realized_number(realized_edges, labels, adjacency, swap):
     """Update the realized_edges  between communities after a swap of two node labels.
+
+    The two node labels are supposed to be different.
 
     Parameters
     ----------
@@ -114,17 +114,29 @@ def update_realized_number(realized_edges, labels, adjacency, swap):
     np.ndarray
         Updated realized_edges
     """
-    for s in [0, 1]:
-        group_s = labels[swap[s]]
-        group_s_prime = labels[swap[1-s]]
-        for v in np.where(adjacency[swap[s], :] == 1)[0]:
-            group_v = labels[v]
+    group_node_1 = labels[swap[0]]
+    group_node_2 = labels[swap[1]]
 
-            realized_edges[group_s, group_v] -= 1
-            realized_edges[group_v, group_s] = realized_edges[group_s, group_v]
+    for i in range(adjacency.shape[0]):
+        if i == swap[0] or i == swap[1]:
+            continue
 
-            realized_edges[group_s_prime, group_v] += 1
-            realized_edges[group_v, group_s_prime] = realized_edges[group_s_prime, group_v]
+        if adjacency[swap[0], i] == adjacency[swap[1], i]:
+            continue
+
+        group_i = labels[i]
+        if adjacency[swap[0], i] == 1:
+            realized_edges[group_node_1, group_i] -= 1
+            realized_edges[group_i, group_node_1] = realized_edges[group_node_1, group_i]
+
+            realized_edges[group_node_2, group_i] += 1
+            realized_edges[group_i, group_node_2] = realized_edges[group_node_2, group_i]
+        if adjacency[swap[1], i] == 1:
+            realized_edges[group_node_2, group_i] -= 1
+            realized_edges[group_i, group_node_2] = realized_edges[group_node_2, group_i]
+
+            realized_edges[group_node_1, group_i] += 1
+            realized_edges[group_i, group_node_1] = realized_edges[group_node_1, group_i]
 
     return realized_edges
 
@@ -235,17 +247,15 @@ def greedy_opt(
             updated = False
             for swap_number in range(one_or_two_swaps[s]):
                 if swap_number == 0:
-                    if (
-                        index_i[s] != index_j[s]
-                        and current_assignment.labels[index_i[s]]
+                    if (index_i[s] != index_j[s]) and (
+                        current_assignment.labels[index_i[s]]
                         != current_assignment.labels[index_j[s]]
                     ):
                         current_assignment.update((index_i[s], index_j[s]), A)
                         updated = True
                 if swap_number == 1:
-                    if (
-                        index_j[s] != index_k[s]
-                        and current_assignment.labels[index_j[s]]
+                    if (index_j[s] != index_k[s]) and (
+                        current_assignment.labels[index_j[s]]
                         != current_assignment.labels[index_k[s]]
                     ):
                         current_assignment.update((index_j[s], index_k[s]), A)
@@ -268,12 +278,12 @@ def greedy_opt(
                     current_assignment.copy_from_other(best_assignment)
 
                 bests.append(best_assignment.likelihood)
-                
+
                 overall_bests.append(overall_best.likelihood)
 
                 if tol_small_improvement >= 3:
                     break
-        
+
         if best_assignment.likelihood > overall_best.likelihood:
             overall_best.copy_from_other(best_assignment)
         else:
@@ -286,4 +296,4 @@ def greedy_opt(
             global_non_improvements = 0
         if global_non_improvements >= 3:
             break
-    return overall_best#, bests, currents, overall_bests
+    return overall_best, bests, currents, overall_bests
