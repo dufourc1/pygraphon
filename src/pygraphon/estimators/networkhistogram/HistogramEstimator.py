@@ -25,14 +25,17 @@ class HistogramEstimator(BaseEstimator):
         [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
     """
 
-    def __init__(self, bandwithHist: float = None) -> None:
+    def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:
         super().__init__()
         self.bandwidthHist = bandwithHist
+        self.method = method
 
     def _approximate_graphon_from_adjacency(
         self,
         adjacency_matrix: np.ndarray,
         bandwidthHist: Optional[float] = None,
+        *args,
+        **kwargs,
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -51,7 +54,7 @@ class HistogramEstimator(BaseEstimator):
         rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
-        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist)
+        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist, *args, **kwargs)
         return StepGraphon(graphon_matrix, bandwidthHist=h, initial_rho=rho), P
 
     def _approximate(
@@ -59,6 +62,8 @@ class HistogramEstimator(BaseEstimator):
         adjacencyMatrix: np.ndarray,
         bandwidthHist: Optional[float] = None,
         use_default_bandwidth: bool = False,
+        *args,
+        **kwargs,
     ) -> Tuple[np.ndarray, np.ndarray, float]:
         """Use function from Universality of block model approximation [1].
 
@@ -93,7 +98,7 @@ class HistogramEstimator(BaseEstimator):
             h = None
         else:
             h = int(bandwidthHist * adjacencyMatrix.shape[0])
-        assignment, h = nethist(A=adjacencyMatrix, h=h)
+        assignment, h = nethist(A=adjacencyMatrix, h=h, method=self.method, *args, **kwargs)
 
         if bandwidthHist is None:
             bandwidthHist = h / adjacencyMatrix.shape[0]

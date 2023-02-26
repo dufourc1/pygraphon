@@ -4,6 +4,8 @@ from copy import deepcopy
 import numpy as np
 from tqdm import tqdm
 
+from pygraphon.utils.utils_graph import edge_density
+
 from .assignment import Assignment
 
 EPS = np.spacing(1)
@@ -14,10 +16,14 @@ def greedy_opt(
     inputLabelVec: np.ndarray,
     absTol: float = 2.5 * 1e-4,
     maxNumRestarts: int = 500,
+    past_non_improving: int = 3,
     *args,
     **kwargs,
 ) -> Assignment:
     """Greedy optimization of the network histogram.
+
+    This function reproduces the greedy optimization of the network histogram paper,
+    the two for loops are not necessary but are kept for sake of comparison with the original code.
 
     Parameters
     ----------
@@ -43,21 +49,22 @@ def greedy_opt(
     current_assignment = deepcopy(best_assignment)
     overall_best = deepcopy(best_assignment)
 
+    rho = edge_density(A)
     step_internal = 2 * 10**4 if n > 256 else n_obs
 
-    tol_small_improvement = 0
-    nb_improvements = 0
-    global_non_improvements = 0
+    past_best_likelihood = [overall_best.log_likelihood]
 
     pbar = tqdm(range(maxNumRestarts))
     for m in pbar:
         index_i = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
         index_j = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
         index_k = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
+
+        # decide if we do one or two swaps before checking if we improved
         one_or_two_swaps = np.array(np.random.uniform(size=step_internal) > 2 / 3) + 1
 
-        pbar.set_description(f"Likelihood: {best_assignment.log_likelihood/n_obs:.4f}")
-        before_inner_step = best_assignment.log_likelihood
+        pbar.set_description(f"Log likelihood: {best_assignment.log_likelihood/n_obs:.4f}")
+
         for s in range(step_internal):
             updated = False
             for swap_number in range(one_or_two_swaps[s]):
@@ -78,17 +85,9 @@ def greedy_opt(
 
             if updated:
                 if current_assignment.log_likelihood > best_assignment.log_likelihood:
-                    nb_improvements += 1
-                    if current_assignment.log_likelihood - best_assignment.log_likelihood < absTol:
-                        tol_small_improvement += 1
-                    else:
-                        tol_small_improvement = 0
                     best_assignment.copy_from_other(current_assignment)
                 else:
                     current_assignment.copy_from_other(best_assignment)
-
-                if tol_small_improvement >= 3:
-                    break
 
         if best_assignment.log_likelihood > overall_best.log_likelihood:
             overall_best.copy_from_other(best_assignment)
@@ -96,10 +95,17 @@ def greedy_opt(
             best_assignment.copy_from_other(overall_best)
             current_assignment.copy_from_other(overall_best)
 
-        if before_inner_step >= best_assignment.log_likelihood:
-            global_non_improvements += 1
-        else:
-            global_non_improvements = 0
-        if global_non_improvements >= 3:
-            break
+        past_best_likelihood.append(overall_best.log_likelihood)
+
+        if m % 5 == 0 and m > past_non_improving:
+            if np.all(
+                (
+                    np.array(past_best_likelihood[-1 - past_non_improving : -1])
+                    - np.array(past_best_likelihood[-past_non_improving:])
+                )
+                / rho
+                < absTol
+            ):
+                break
+
     return overall_best

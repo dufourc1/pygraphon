@@ -10,15 +10,16 @@ from sklearn.metrics import pairwise_distances
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
 from .assignment import Assignment
+from .graphest_fastgreedy import graphest_fastgreedy
 from .greedy_readable import greedy_opt
 
 
 def nethist(
     A: np.ndarray,
     h: Optional[int] = None,
-    verbose: bool = False,
-    trace: bool = False,
     method: str = "mine",
+    *args,
+    **kwargs,
 ) -> Tuple[Assignment, int]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
@@ -49,6 +50,9 @@ def nethist(
     # use data driven h
     h = int(h) if h is not None else int(_oracle_analysis_badnwidth(A=A.astype(float)))
 
+    print("h", h)
+    h = 72
+
     # min h i s 2 so that no node is in its own group
     h = max(2, min(n, np.round(h)))
 
@@ -61,7 +65,11 @@ def nethist(
 
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
 
-    best_assignment = greedy_opt(A, idxInit)
+    if method == "mine":
+        best_assignment = greedy_opt(A, idxInit, *args, **kwargs)
+    else:
+        labels, _ = graphest_fastgreedy(A, h, idxInit, *args, **kwargs)
+        best_assignment = Assignment(labels, A)
     return best_assignment, h
 
 

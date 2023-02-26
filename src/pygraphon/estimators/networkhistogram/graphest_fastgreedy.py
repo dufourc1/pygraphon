@@ -1,5 +1,5 @@
 """Greedy optimization procedure for the nethist estimator."""
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Tuple
 
 import numpy as np
 import numpy.random as rnd
@@ -21,7 +21,7 @@ def graphest_fastgreedy(
     maxNumRestarts: int = 500,
     verbose: bool = True,
     trace: bool = True,
-) -> Tuple[np.ndarray, int, Optional[Tuple[np.ndarray, np.ndarray]]]:
+) -> Tuple[np.ndarray, int]:
     """Implement likelihood-based optimization for nethist.
 
     Returns a list of cluster labels.
@@ -45,9 +45,8 @@ def graphest_fastgreedy(
 
     Returns
     -------
-    Tuple[np.ndarray, int, Optional[Tuple[np.ndarray, np.ndarray]]]
-        cluster labels, number of blocks,
-        and optionally the trace of the optimization (lls_trace, normalized_best_ll_trace)
+    Tuple[np.ndarray, int
+        cluster labels, number of blocks
 
     Raises
     ------
@@ -269,8 +268,6 @@ def graphest_fastgreedy(
             bestACounts = np.copy(currentACounts)
             bestClusterInds = np.copy(currentClusterInds)
             bestCount += 1
-        elif currentLL != bestLL:
-            print(f"No improvement in this round of greedy search: {mm}")
 
         if verbose:
             pbar.set_description(f"LL: {bestLL:.4f},  {bestCount} global improvements")
@@ -290,32 +287,32 @@ def graphest_fastgreedy(
             oldNormalizedBestLL = np.copy(normalizedBestLL)
             # if 3 consecutive likelihood improvements less than specified tolerance break
             if tolCounter >= 3:
-                if verbose:
-                    print(
-                        "3 consecutive likelihood improvements less than specified tolerance; quitting now"
-                    )
-                    print(f"Best LL: {bestLL:.4f}")
+                # if verbose:
+                # print(
+                #    "3 consecutive likelihood improvements less than specified tolerance; quitting now"
+                # )
+                # print(f"Best LL: {bestLL:.4f}")
                 break
             if allInds:
                 # local optimum likely reached in random-ordered greedy like likelihood search
                 if conseczeroImprovement == 2:
-                    if verbose:
-                        print(
-                            "Local optimum likely reached in random-ordered greedy likelihood search; quitting now"
-                        )
+                    # if verbose:
+                    # print(
+                    #    "Local optimum likely reached in random-ordered greedy likelihood search; quitting now"
+                    # )
                     break
             else:
                 # Local optimum likely reached in random ordere greedy like likelihood search
                 if conseczeroImprovement == np.ceil(k * scipy.special.binom(n, 2) / numGreedySteps):
-                    if verbose:
-                        print(
-                            "Local optimum likely reached in random-ordered greedy likelihood search; quitting now"
-                        )
+                    # if verbose:
+                    # print(
+                    #    "Local optimum likely reached in random-ordered greedy likelihood search; quitting now"
+                    # )
                     break
+
     if verbose:
         pbar.close()
-    if trace:
-        return bestLabelVec, k, {"best": lls_trace, "current": current_lls, "trials": trials_ll}
+
     return bestLabelVec, k
 
 
