@@ -1,6 +1,6 @@
 """Network histogram class."""
 from collections import Counter
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -30,7 +30,7 @@ class HistogramEstimator(BaseEstimator):
         self.bandwidthHist = bandwithHist
 
     def _approximate_graphon_from_adjacency(
-        self, adjacency_matrix: np.ndarray, bandwidthHist: float = None, method: str = "mine"
+        self, adjacency_matrix: np.ndarray, bandwidthHist: Optional[float] = None,
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -49,17 +49,15 @@ class HistogramEstimator(BaseEstimator):
         rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
-        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist, method=method)
+        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist)
         return StepGraphon(graphon_matrix, bandwidthHist=h, initial_rho=rho), P
 
     def _approximate(
         self,
         adjacencyMatrix: np.ndarray,
-        bandwidthHist: float = None,
+        bandwidthHist: Optional[float] = None,
         use_default_bandwidth: bool = False,
-        return_membership: bool = False,
-        method: str = "mine",
-    ) -> Tuple[Tuple[np.ndarray], float]:
+    ) -> Tuple[np.ndarray, np.ndarray, float]:
         """Use function from Universality of block model approximation [1].
 
         Approximate a graphon from a single adjacency matrix.
@@ -72,14 +70,13 @@ class HistogramEstimator(BaseEstimator):
             size of the block of the histogram. Defaults to None
         use_default_bandwidth : bool
             if True, use the default bandwidth. Defaults to False.
-        return_membership : bool
-            if true return also the node membership, by default False
+
 
         Returns
         -------
-        Tuple[Tuple[np.ndarray], float]
-            graphon_matrix, edge_probability_matrix, h. graphon_matrix is the block model
-            graphon and P is the edge probability matrix
+        Tuple[np.ndarray, np.ndarray, float]
+            graphon_matrix, edge_probability_matrix, h.
+            graphon_matrix is the block model graphon and P is the edge probability matrix
             corresponding to the adjacency matrix. h is the size of the block
 
         Sources
@@ -94,12 +91,13 @@ class HistogramEstimator(BaseEstimator):
             h = None
         else:
             h = int(bandwidthHist * adjacencyMatrix.shape[0])
-        groupmembership, h, _ = nethist(A=adjacencyMatrix, h=h, method=method)
+        assignment, h = nethist(A=adjacencyMatrix, h=h)
 
         if bandwidthHist is None:
             bandwidthHist = h / adjacencyMatrix.shape[0]
 
-        graphon_matrix = self._approximate_from_node_membership(adjacencyMatrix, groupmembership)
+        graphon_matrix = assignment.theta
+        groupmembership = assignment.labels
 
         # fills in the edge probability matrix from the value of the graphon
         edge_probability_matrix = np.zeros((len(groupmembership), len(groupmembership)))
@@ -109,8 +107,7 @@ class HistogramEstimator(BaseEstimator):
                     int(groupmembership[i]), int(groupmembership[j])
                 ]
                 edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
-        if return_membership:
-            return graphon_matrix, edge_probability_matrix, bandwidthHist, groupmembership
+
         return graphon_matrix, edge_probability_matrix, bandwidthHist
 
     @staticmethod

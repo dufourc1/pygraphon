@@ -271,9 +271,6 @@ def greedy_opt(
                     else:
                         tol_small_improvement = 0
                     best_assignment.copy_from_other(current_assignment)
-                    pbar.set_description(
-                        f"Likelihood: {best_assignment.likelihood/n_obs:.4f}, tol: {tol_small_improvement}, +: {nb_improvements}"
-                    )
                 else:
                     current_assignment.copy_from_other(best_assignment)
 
@@ -296,4 +293,4 @@ def greedy_opt(
             global_non_improvements = 0
         if global_non_improvements >= 3:
             break
-    return overall_best, bests, currents, overall_bests
+    return overall_best

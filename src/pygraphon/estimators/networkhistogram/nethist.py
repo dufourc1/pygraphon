@@ -1,5 +1,5 @@
 """Implementation of network histogram estimator."""
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import scipy
@@ -9,7 +9,6 @@ from sklearn.metrics import pairwise_distances
 
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
-from .graphest_fastgreedy import graphest_fastgreedy
 from .greedy_readable import Assignment, greedy_opt
 
 
@@ -171,8 +170,8 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
 
 
 def nethist(
-    A: np.ndarray, h: int = None, verbose: bool = False, trace: bool = False, method: str = "mine"
-) -> Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]:
+    A: np.ndarray, h: Optional[int] = None, verbose: bool = False, trace: bool = False, method: str = "mine"
+) -> Tuple[Assignment, int]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
     adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
@@ -213,18 +212,6 @@ def nethist(
         lastGroupSize = n % h
 
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
-    assert idxInit.min() == 0
 
-    if method == "mine":
-        best_assignment, bests, currents, overall_bests = greedy_opt(A, idxInit)
-        return best_assignment.labels, h, None
-    else:
-        if trace:
-            idx, _, trace = graphest_fastgreedy(
-                A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
-            )
-        else:
-            idx, _ = graphest_fastgreedy(
-                A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
-            )
-        return idx, h, trace
+    best_assignment = greedy_opt(A, idxInit)
+    return best_assignment, h
