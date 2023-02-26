@@ -18,8 +18,9 @@ def nethist(
     A: np.ndarray,
     h: Optional[int] = None,
     method: str = "mine",
-    *args,
-    **kwargs,
+    absTol: float = 2.5 * 1e-4,
+    maxNumIterations: int = 500,
+    past_non_improving: int = 3,
 ) -> Tuple[Assignment, int]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
@@ -31,10 +32,14 @@ def nethist(
         adjacency matrix
     h : int
         specifies the number of nodes in each histogram bin,, by default is optimized based on input.
-    verbose : bool
-        if True logs progress of optimization , by default False
-    trace : bool
-        if True trace the optimization, by default False
+    method : str
+        method to use for optimization. "mine" is the readable version of the algorithm, "theirs" is
+        the original version. Will be removed in future versions.
+    absTol : float
+        absolute tolerance for convergence
+    maxNumIterations : int
+        maximum number of iterations for the optimization (outer loop)
+
 
     Returns
     -------
@@ -50,9 +55,6 @@ def nethist(
     # use data driven h
     h = int(h) if h is not None else int(_oracle_analysis_badnwidth(A=A.astype(float)))
 
-    print("h", h)
-    h = 72
-
     # min h i s 2 so that no node is in its own group
     h = max(2, min(n, np.round(h)))
 
@@ -66,9 +68,17 @@ def nethist(
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
 
     if method == "mine":
-        best_assignment = greedy_opt(A, idxInit, *args, **kwargs)
+        best_assignment = greedy_opt(
+            A,
+            idxInit,
+            absTol=absTol,
+            maxNumIterations=maxNumIterations,
+            past_non_improving=past_non_improving,
+        )
     else:
-        labels, _ = graphest_fastgreedy(A, h, idxInit, *args, **kwargs)
+        labels, _ = graphest_fastgreedy(
+            A, h, idxInit, absTol=absTol, maxNumRestarts=maxNumIterations
+        )
         best_assignment = Assignment(labels, A)
     return best_assignment, h
 

@@ -34,8 +34,9 @@ class HistogramEstimator(BaseEstimator):
         self,
         adjacency_matrix: np.ndarray,
         bandwidthHist: Optional[float] = None,
-        *args,
-        **kwargs,
+        absTol: float = 2.5 * 1e-4,
+        maxNumIterations: int = 500,
+        past_non_improving: int = 3,
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -54,7 +55,13 @@ class HistogramEstimator(BaseEstimator):
         rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
-        graphon_matrix, P, h = self._approximate(adjacency_matrix, bandwidthHist, *args, **kwargs)
+        graphon_matrix, P, h = self._approximate(
+            adjacency_matrix,
+            bandwidthHist,
+            absTol=absTol,
+            maxNumIterations=maxNumIterations,
+            past_non_improving=past_non_improving,
+        )
         return StepGraphon(graphon_matrix, bandwidthHist=h, initial_rho=rho), P
 
     def _approximate(
@@ -62,8 +69,9 @@ class HistogramEstimator(BaseEstimator):
         adjacencyMatrix: np.ndarray,
         bandwidthHist: Optional[float] = None,
         use_default_bandwidth: bool = False,
-        *args,
-        **kwargs,
+        absTol: float = 2.5 * 1e-4,
+        maxNumIterations: int = 500,
+        past_non_improving: int = 3,
     ) -> Tuple[np.ndarray, np.ndarray, float]:
         """Use function from Universality of block model approximation [1].
 
@@ -98,7 +106,14 @@ class HistogramEstimator(BaseEstimator):
             h = None
         else:
             h = int(bandwidthHist * adjacencyMatrix.shape[0])
-        assignment, h = nethist(A=adjacencyMatrix, h=h, method=self.method, *args, **kwargs)
+        assignment, h = nethist(
+            A=adjacencyMatrix,
+            h=h,
+            method=self.method,
+            absTol=absTol,
+            maxNumIterations=maxNumIterations,
+            past_non_improving=past_non_improving,
+        )
 
         if bandwidthHist is None:
             bandwidthHist = h / adjacencyMatrix.shape[0]

@@ -7,10 +7,7 @@ import scipy
 from numba import njit
 from tqdm import tqdm
 
-from pygraphon.utils.utils_matrix import (
-    bound_away_from_one_and_zero_arrays,
-    upper_triangle_values,
-)
+from pygraphon.utils.utils_matrix import bound_away_from_one_and_zero_arrays, upper_triangle_values
 
 
 def graphest_fastgreedy(
@@ -107,9 +104,9 @@ def graphest_fastgreedy(
         sampleSize,
     )
 
-    print(f"Initial log-likelihood: {bestLL*sampleSize}")
-    print(f"fast normalized ll: {bestLL}")
-    print(f"Initial normalized log-likelihood: {bestLL*2*sampleSize/np.sum(A)}")
+    # print(f"Initial log-likelihood: {bestLL*sampleSize}")
+    # print(f"fast normalized ll: {bestLL}")
+    # print(f"Initial normalized log-likelihood: {bestLL*2*sampleSize/np.sum(A)}")
 
     oldNormalizedBestLL = bestLL * 2 * sampleSize / np.sum(A)
 

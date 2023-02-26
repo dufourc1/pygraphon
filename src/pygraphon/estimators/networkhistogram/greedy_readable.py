@@ -15,7 +15,7 @@ def greedy_opt(
     A: np.ndarray,
     inputLabelVec: np.ndarray,
     absTol: float = 2.5 * 1e-4,
-    maxNumRestarts: int = 500,
+    maxNumIterations: int = 500,
     past_non_improving: int = 3,
     *args,
     **kwargs,
@@ -33,7 +33,7 @@ def greedy_opt(
         initial guess of the node membership (block labels)
     absTol : float
         absolute tolerance for convergence, by default 2.5 * 1e-4
-    maxNumRestarts : int
+    maxNumIterations : int
         number of steps, by default 500
 
     Returns
@@ -54,7 +54,7 @@ def greedy_opt(
 
     past_best_likelihood = [overall_best.log_likelihood]
 
-    pbar = tqdm(range(maxNumRestarts))
+    pbar = tqdm(range(maxNumIterations))
     for m in pbar:
         index_i = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
         index_j = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)

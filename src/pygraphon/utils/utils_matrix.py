@@ -1,6 +1,6 @@
 """Random function to help with matrices."""
 from copy import copy
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -71,7 +71,7 @@ def bound_away_from_one_and_zero_arrays(array: np.ndarray, eps: float = EPS) -> 
 
     Parameters
     ----------
-    arrays : np.ndarray
+    array : np.ndarray
         array to bound
     eps : float
         gap to add to 0 and remove from 1, by default EPS (np.spacing(1))
