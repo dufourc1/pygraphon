@@ -1,3 +1,5 @@
+from math import log
+
 import networkx as nx
 import numpy as np
 
@@ -33,7 +35,7 @@ def test_bernlikelihood():
     """Test the fast stable bernoulli likelihood function."""
     x = np.array([0.1, 0.2, 0.3, 0.4])
     for input in x:
-        assert bernlikelihood(input) == input * np.log(input) + (1 - input) * np.log(1 - input)
+        assert bernlikelihood(input) == input * log(input) + (1 - input) * log(1 - input)
     assert bernlikelihood(0) == bernlikelihood(EPS)
     assert bernlikelihood(1) == bernlikelihood(1 - EPS)
 
