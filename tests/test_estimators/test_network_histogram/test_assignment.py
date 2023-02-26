@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 
-from pygraphon.estimators.networkhistogram.greedy_readable import (
+from pygraphon.estimators.networkhistogram.assignment import (
     EPS,
     Assignment,
     bernlikelihood,
@@ -66,7 +66,7 @@ def test_assignement():
     theoretical_ll = (
         6 * bernlikelihood(5 / 6) + 16 * bernlikelihood(2 / 16) + 6 * bernlikelihood(5 / 6)
     )
-    assert assignment.likelihood == theoretical_ll
+    assert assignment.log_likelihood == theoretical_ll
 
 
 def test_update_assignment():
@@ -86,7 +86,7 @@ def test_update_assignment():
     assert np.all(new_assignment.counts == np.array([[6, 16], [16, 6]]))
     assert np.all(assignment.theta == new_assignment.theta)
     assert np.all(new_assignment.theta == np.array([[2 / 6, 8 / 16], [8 / 16, 2 / 6]]))
-    assert assignment.likelihood == new_assignment.likelihood == theoretical_ll_post_update
+    assert assignment.log_likelihood == new_assignment.log_likelihood == theoretical_ll_post_update
 
 
 def test_update_realized_numnber_vs_assignment_creation():
@@ -124,4 +124,4 @@ def test_update_realized_numnber_vs_assignment_creation():
         assert np.all(assignment.realized == new_assignment.realized)
         assert np.all(assignment.counts == new_assignment.counts)
         assert np.all(assignment.theta == new_assignment.theta)
-        assert assignment.likelihood == new_assignment.likelihood
+        assert assignment.log_likelihood == new_assignment.log_likelihood
