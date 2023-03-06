@@ -6,6 +6,8 @@ import numpy as np
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons import Graphon
 
+from sklearn.metrics import roc_auc_score
+
 
 class BaseMetric:
     def __call__(
@@ -42,3 +44,16 @@ class MseProbaEdge(BaseMetric):
 
     def __str__(self):
         return "MSE on probabily matrix"
+    
+class AUC_Edge(BaseMetric):
+    def __init__(self, n_nodes: int = 100) -> None:
+        super().__init__()
+        self.n_nodes = n_nodes
+    def _compute(self, estimated: Graphon, adjacency_matrix: np.ndarray):
+        p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
+        if not adjacency_matrix.shape == p_hat.shape:
+            raise ValueError("Adjacency matrix and probabilities matrix have different shapes")
+        return roc_auc_score(adjacency_matrix, p_hat) #to be checked
+    def __str__(self):
+        return "AUC on probabily matrix"
+    
