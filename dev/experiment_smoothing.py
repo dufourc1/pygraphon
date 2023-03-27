@@ -45,7 +45,7 @@ def initialisation_hist(n, rho_n, graphon_matrix, bandwidth):
     A = graphon.draw(rho=rho_n, n=n, exchangeable=False)
 
     # Apply histogram anc connectivity matrix
-    hist = HistogramEstimator(bandwithHist=bandwidth)
+    hist = HistogramEstimator(bandwithHist=bandwidth, method = "mine")
     hist.fit(graph=A)
     hist_approx = hist.get_graphon()
     # P = hist.estimated_edge_connectivity_matrix
