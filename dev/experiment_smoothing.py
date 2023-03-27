@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pygraphon.utils.utils_graph import edge_density
 from sklearn.cluster import KMeans
-from pygraphon.estimators.HistogramEstimator import HistogramEstimator
+from pygraphon.estimators import HistogramEstimator
 
 
 def error_operator(rel_error, k):
