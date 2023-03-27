@@ -18,7 +18,9 @@ class HistogramEstimator(BaseEstimator):
 
     Args:
         bandwithHist (float, optional): size of the block of the histogram. If None, automatically derived
-            from the observation. Defaults to None.
+            from the observation. Defaults to None.¨
+        method (str, optional): method to use for the histogram. Defaults to "mine" (fast python version).
+            any other value will use the old matlab (converted to python line by line) version.
 
 
     Sources:
