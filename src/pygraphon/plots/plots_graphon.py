@@ -56,7 +56,7 @@ def plot_sample(
     ax: Axes = None,
     colorbar=False,
     integrate_to_1: bool = False,
-    cmap = "binary",
+    cmap="binary",
 ) -> Tuple[Figure, Axes]:
     """Plot a sample of the graphon.
 

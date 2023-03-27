@@ -169,11 +169,7 @@ def graphest_fastgreedy(
                     oldThetaColb = trialACounts[:, b] / habSqrdColb
                     oldThetaEntryab = np.array(trialACounts[a, b] / habSqrdEntryab)
 
-                    (
-                        oldThetaCola,
-                        oldThetaColb,
-                        oldThetaEntryab,
-                    ) = [
+                    (oldThetaCola, oldThetaColb, oldThetaEntryab,) = [
                         bound_away_from_one_and_zero_arrays(x)
                         for x in [oldThetaCola, oldThetaColb, oldThetaEntryab]
                     ]
