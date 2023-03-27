@@ -11,7 +11,6 @@ class CycleCount:
     """
 
     def __init__(self, L: float = 9) -> None:
-
         if L < 3:
             raise ValueError("input L should be an integer >= 3")
         if L >= 10:

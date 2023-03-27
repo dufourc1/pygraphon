@@ -1,0 +1,6 @@
+sphinx
+furo
+sphinx-rtd-theme
+sphinx-click
+sphinx-autodoc-typehints
+sphinx-automodapi

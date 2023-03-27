@@ -1,0 +1,1 @@
+from .BaseGenerator import DummyGenerator

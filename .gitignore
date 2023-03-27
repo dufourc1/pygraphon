@@ -318,4 +318,5 @@ $RECYCLE.BIN/
 
 scratch/
 env_39/
+py10_env/
 *.npy

@@ -9,14 +9,14 @@ from pygraphon.utils.utils_matrix import check_symmetric
 import math
 
 class StepGraphon(Graphon):
-    """A step function graphon, by giving the matrix representing the block model approxumation.
+    """A step function graphon defined by giving the matrix representing the block model approxumation.
 
     Parameters
     ----------
         graphon : np.ndarray
             np array representing the theta matrix
         bandwidthHist : float
-            size of the groups (between 0 and 1), by default None
+            size of the groups (between 0 and 1).
         initial_rho : float
             initial edge density (used to keep track in case of normalization), by default None
     """
@@ -24,24 +24,10 @@ class StepGraphon(Graphon):
     def __init__(
         self, graphon: np.ndarray, bandwidthHist: float, initial_rho: float = None
     ) -> None:
-        """Create an instance of a step function graphon, by giving the matrix representing the block model approx.
-
-        Parameters
-        ----------
-        graphon : np.ndarray
-            np array representing the theta matrix
-        bandwidthHist : float
-            size of the groups (between 0 and 1), by default None
-        initial_rho : float
-            initial edge density (used to keep track in case of normalization), by default None
-
-        Raises
-        ------
-        ValueError
-            if the graphon is and the bandwidthHist are not compatible.
-        """
         # save args
         self.graphon = graphon
+        if bandwidthHist > 1 or bandwidthHist <= 0:
+            raise ValueError("The bandwidth should be between 0 and 1.")
         self.bandwidthHist = bandwidthHist
         print("bandwidthHist", self.bandwidthHist, "graphon.shape", self.graphon.shape[0])
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):

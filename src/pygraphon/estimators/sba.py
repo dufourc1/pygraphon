@@ -26,7 +26,6 @@ class SBA(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
-
         n = adjacency_matrix.shape[0]
         k = 0
         set_index = set(range(n))

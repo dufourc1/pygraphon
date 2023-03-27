@@ -39,7 +39,7 @@ class BaseEstimator:
 
     def __init__(self) -> None:
         self.fitted = False
-        self.graphon = None
+        self.graphon: Graphon = None
         self.edge_connectivity = None
 
     def fit(self, graph: Union[nx.Graph, np.ndarray], *args, **kwargs):
