@@ -43,6 +43,7 @@ class StepGraphon(Graphon):
         # save args
         self.graphon = graphon
         self.bandwidthHist = bandwidthHist
+        print("bandwidthHist", self.bandwidthHist, "graphon.shape", self.graphon.shape[0])
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
             raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
 

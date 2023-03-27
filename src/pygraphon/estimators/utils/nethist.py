@@ -214,8 +214,8 @@ def nethist(
         lastGroupSize = n % h
 
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
-    print(h)
-    print(idxInit)
+    #print(h)
+    #print(idxInit)
     if trace:
         idx, _, trace = graphest_fastgreedy(
             A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
