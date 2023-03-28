@@ -1,6 +1,6 @@
 """Random function to help with matrices."""
 from copy import copy
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -64,17 +64,15 @@ def upper_triangle_values(array):
     return array[np.triu_indices(array.shape[0])]
 
 
-def bound_away_from_one_and_zero_arrays(
-    arrays: List[np.ndarray], eps: float = EPS
-) -> List[np.ndarray]:
+def bound_away_from_one_and_zero_arrays(array: np.ndarray, eps: float = EPS) -> np.ndarray:
     """Bound away from 1 and 0 in the log likelihood.
 
     This is done to avoid numerical issues.
 
     Parameters
     ----------
-    arrays : List[np.ndarray]
-        list of arrays to bound
+    array : np.ndarray
+        array to bound
     eps : float
         gap to add to 0 and remove from 1, by default EPS (np.spacing(1))
 
@@ -83,7 +81,6 @@ def bound_away_from_one_and_zero_arrays(
     List[np.ndarray]
         bounded arrays
     """
-    for array in arrays:
-        array[array <= 0] = eps
-        array[array >= 1] = 1 - eps
-    return arrays
+    array[array <= eps] = eps
+    array[array >= 1 - eps] = 1 - eps
+    return array

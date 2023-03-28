@@ -6,17 +6,17 @@ import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
 from pygraphon.utils.utils_matrix import check_symmetric
-import math
+
 
 class StepGraphon(Graphon):
-    """A step function graphon, by giving the matrix representing the block model approxumation.
+    """A step function graphon defined by giving the matrix representing the block model approxumation.
 
     Parameters
     ----------
         graphon : np.ndarray
             np array representing the theta matrix
         bandwidthHist : float
-            size of the groups (between 0 and 1), by default None
+            size of the groups (between 0 and 1).
         initial_rho : float
             initial edge density (used to keep track in case of normalization), by default None
     """
@@ -24,29 +24,22 @@ class StepGraphon(Graphon):
     def __init__(
         self, graphon: np.ndarray, bandwidthHist: float, initial_rho: float = None
     ) -> None:
-        """Create an instance of a step function graphon, by giving the matrix representing the block model approx.
-
-        Parameters
-        ----------
-        graphon : np.ndarray
-            np array representing the theta matrix
-        bandwidthHist : float
-            size of the groups (between 0 and 1), by default None
-        initial_rho : float
-            initial edge density (used to keep track in case of normalization), by default None
-
-        Raises
-        ------
-        ValueError
-            if the graphon is and the bandwidthHist are not compatible.
-        """
         # save args
         self.graphon = graphon
+        if bandwidthHist > 1 or bandwidthHist <= 0:
+            raise ValueError("The bandwidth should be between 0 and 1.")
         self.bandwidthHist = bandwidthHist
-        if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
 
-        assert self.graphon.shape[0] == int(math.ceil(1/bandwidthHist))
+        theoretical_size = int(math.ceil(1 / self.bandwidthHist))
+        if (
+            self.graphon.shape[0] != theoretical_size
+            and self.graphon.shape[0] != theoretical_size + 1
+        ):
+            raise ValueError(
+                f"The graphon matrix should have size consistent with the bandwidth: got {self.graphon.shape},"
+                + f"but bandwidth {self.bandwidthHist} asks for {theoretical_size} or {theoretical_size+1}."
+            )
+
 
         self.areas = np.ones_like(self.graphon) * self.bandwidthHist**2
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
@@ -56,7 +49,6 @@ class StepGraphon(Graphon):
             self.areas[-1, -1] = self.remainder**2
 
         super().__init__(function=self.graphon_function_builder(), initial_rho=initial_rho)
-
 
     def graphon_function_builder(self) -> Callable:
         """Build the graphon function f(x,y).

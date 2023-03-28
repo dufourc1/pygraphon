@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pygraphon.utils.utils_graph import edge_density
 from sklearn.cluster import KMeans
-from pygraphon.estimators.HistogramEstimator import HistogramEstimator
+from pygraphon.estimators import HistogramEstimator
 
 
 def error_operator(rel_error, k):
@@ -45,7 +45,7 @@ def initialisation_hist(n, rho_n, graphon_matrix, bandwidth):
     A = graphon.draw(rho=rho_n, n=n, exchangeable=False)
 
     # Apply histogram anc connectivity matrix
-    hist = HistogramEstimator(bandwithHist=bandwidth)
+    hist = HistogramEstimator(bandwithHist=bandwidth, method = "mine")
     hist.fit(graph=A)
     hist_approx = hist.get_graphon()
     # P = hist.estimated_edge_connectivity_matrix
@@ -95,6 +95,7 @@ def flat_to_tensor(avr_graphon, nclust_hist, nrow_tile, hist_approx, n):
     # X+X^T-diag(X) on axis (1,2) of tensor
     sym_KM_smooth_g = KM_smooth_g + np.transpose(KM_smooth_g, (0, 2, 1)) - diag_km
     # Get smooth graphon into correct form and \hat{pij} for the whole tensor
+    #print("Smoothing graphon for n=", n, "and bandwidth=", hist_approx.bandwidthHist, "")
     smoothed_graphons = [
         StepGraphon(
             graphon=sym_KM_smooth_g[i],

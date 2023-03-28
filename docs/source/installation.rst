@@ -1,22 +1,25 @@
-Installation
-============
-The most recent release can be installed from
-`PyPI <https://pypi.org/project/pygraphon>`_ with:
+##############
+ Installation
+##############
 
-.. code-block:: shell
+The most recent release can be installed from `PyPI
+<https://pypi.org/project/pygraphon>`_ with:
 
-    $ pip install pygraphon
+.. code:: shell
 
-The most recent code and data can be installed directly from GitHub with:
+   $ pip install pygraphon
 
-.. code-block:: shell
+The most recent code and data can be installed directly from GitHub
+with:
 
-    $ pip install git+https://github.com//pygraphon.git
+.. code:: shell
+
+   $ pip install git+https://github.com/dufourc1/pygraphon.git
 
 To install in development mode, use the following:
 
-.. code-block:: shell
+.. code:: shell
 
-    $ git clone git+https://github.com//pygraphon.git
-    $ cd pygraphon
-    $ pip install -e .
+   $ git clone git+https://github.com/dufourc1/pygraphon.git
+   $ cd pygraphon
+   $ pip install -e .
