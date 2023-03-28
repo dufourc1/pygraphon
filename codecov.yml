@@ -12,3 +12,5 @@ ignore:
   - "tests/*"
   - "src/pygraphon/plots/*" #no idea how to test that → not the most important 
   - "setup.py"
+  - "src/pygraphon/__init__.py"
+  - "src/pygraphon/version.py"
