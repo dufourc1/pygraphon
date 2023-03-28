@@ -13,13 +13,13 @@ class BaseMetric:
         self,
         graphon: Graphon,
         estimator: BaseEstimator,
-        ajd_matrix: Optional[np.ndarray] = None,
+        adj_matrix: Optional[np.ndarray] = None,
         **kwargs,
     ):
         if not estimator.fitted:
             raise ValueError("Estimator is not fitted and no adjacency matrix was provided")
         return self._compute(
-            graphon=graphon, estimated=estimator.graphon, adjacency_matrix=ajd_matrix
+            graphon=graphon, estimated=estimator.graphon, adjacency_matrix=adj_matrix
         )
 
     @abstractclassmethod
