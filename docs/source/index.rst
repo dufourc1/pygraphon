@@ -16,6 +16,7 @@ This Python package is here to help you analyse graphs with graphons.
    usage
    tutorials
    api
+   references
 
 ********************
  Indices and Tables

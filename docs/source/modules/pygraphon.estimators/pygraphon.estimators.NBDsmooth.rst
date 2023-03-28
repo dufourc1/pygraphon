@@ -1,5 +1,5 @@
-﻿pygraphon.estimators.NBDsmooth
-==============================
+﻿Neighborhood-smoothing estimator
+================================
 
 .. currentmodule:: pygraphon.estimators
 

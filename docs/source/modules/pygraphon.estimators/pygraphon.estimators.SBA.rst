@@ -1,5 +1,5 @@
-﻿pygraphon.estimators.SBA
-========================
+﻿SBA
+===
 
 .. currentmodule:: pygraphon.estimators
 

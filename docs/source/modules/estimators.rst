@@ -13,6 +13,7 @@
    NBDsmooth
    SBA
    USVT
+   SAS
 
 Estimator general interface
 ----------------------------
@@ -22,4 +23,3 @@ Estimator general interface
    :members:
    :undoc-members:
    :noindex:
-

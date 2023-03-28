@@ -1,5 +1,5 @@
-﻿pygraphon.estimators.LG
-=======================
+﻿Largest Gap Estimator
+=====================
 
 .. currentmodule:: pygraphon.estimators
 

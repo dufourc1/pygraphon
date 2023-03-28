@@ -72,8 +72,13 @@ extensions = [
     "sphinx_automodapi.automodapi",
     "sphinx_automodapi.smart_resolver",
     "sphinx.ext.napoleon",
-    #'texext',
+    "sphinxcontrib.bibtex"
 ]
+
+# citation style
+bibtex_bibfiles = ['refs.bib']
+bibtex_reference_style = 'author_year'
+bibtex_default_style = 'alpha'
 
 # generate autosummary pages
 autosummary_generate = False
