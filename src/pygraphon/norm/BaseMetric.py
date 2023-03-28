@@ -45,7 +45,7 @@ class MseProbaEdge(BaseMetric):
         return "MSE on probabily matrix"
 
 
-class AUC_Edge(BaseMetric):
+class AUCEdge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
         self.n_nodes = n_nodes
@@ -60,7 +60,7 @@ class AUC_Edge(BaseMetric):
         return "AUC on probabily matrix"
 
 
-class AUPRC_Edge(BaseMetric):
+class AUPRCEdge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
         self.n_nodes = n_nodes
