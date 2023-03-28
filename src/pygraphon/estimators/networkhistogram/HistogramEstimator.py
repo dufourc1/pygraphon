@@ -12,17 +12,13 @@ from .nethist import nethist
 
 
 class HistogramEstimator(BaseEstimator):
-    """Implements the histogram estimator from Universality of block model approximation [1].
+    """Implements the histogram estimator from Universality of block model approximation :cite:p:`olhede2014`.
 
     Approximate a graphon from a single adjacency matrix. Size of blocks can be  determined automaticaly.
 
     Args:
         bandwithHist (float, optional): size of the block of the histogram. If None, automatically derived
             from the observation. Defaults to None.
-
-
-    Sources:
-        [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
     """
 
     def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:

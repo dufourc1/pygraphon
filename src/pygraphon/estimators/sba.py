@@ -10,12 +10,14 @@ from pygraphon.utils.utils_graph import _approximate_P_from_node_membership
 
 
 class SBA(BaseEstimator):
-    """Estimate graphon base on SB approximation.
+    """Stochastic Block approximation :cite:p:`chan2014`.
 
     Parameters
     ----------
     delta : float, optional
         precision parameter larger than 0, by default 0.2
+
+
     """
 
     def __init__(self, delta: float = 0.2) -> None:

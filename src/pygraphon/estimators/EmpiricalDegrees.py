@@ -9,17 +9,12 @@ from pygraphon.utils.utils_graph import _approximate_P_from_node_membership
 
 
 class LG(BaseEstimator):
-    """Larget Gap algorithm estimates graphons based on empirical degrees [1].
+    """Larget Gap algorithm :cite:p:`channarond2012`.
 
     Parameters
     ----------
     K : int
         Number of blocks.
-
-    References
-    ----------
-    [1] Channarond, Antoine, Jean-Jacques Daudin, and Stéphane Robin. "Classification and estimation in the
-    stochastic blockmodel based on the empirical degrees." Electronic Journal of Statistics 6 (2012): 2574-2601.
     """
 
     def __init__(self, K: int) -> None:

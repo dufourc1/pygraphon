@@ -11,10 +11,7 @@ from pygraphon.graphons.StepGraphon import StepGraphon
 
 
 class SAS(BaseEstimator):
-    """Estimate graphons by sorting and smoothing.
-
-    A Consistent Histogram Estimator for Exchangeable Graph Models, Chan & Airoldi.
-    """
+    """Estimate graphons by sorting and smoothing :cite:p:`chan2014`."""
 
     def __init__(
         self,
