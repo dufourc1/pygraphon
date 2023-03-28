@@ -19,12 +19,11 @@ jobs:
       - name: Install dependencies
         run: pip install tox
       - name: Test with pytest
-        run: tox -e py -- --cov-report=xml
+        run: tox -e py 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
 
   lint:
     name: Lint
