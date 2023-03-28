@@ -1,8 +1,8 @@
 """Smoothing Network Histograms Class"""
 from pygraphon.estimators.BaseEstimator import BaseEstimator
-from pygraphon.estimators.HistogramEstimator import HistogramEstimator
-from pygraphon.estimators.utils.nethist import nethist
+from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
 from pygraphon.graphons.StepGraphon import StepGraphon
+from pygraphon.estimators.networkhistogram.nethist  import nethist
 from pygraphon.utils.utils_graph import edge_density
 
 import numpy as np
