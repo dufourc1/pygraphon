@@ -1,6 +1,6 @@
 """norm for graphons."""
 
-from .BaseMetric import BaseMetric, MseProbaEdge, AUC_Edge, AUPRC_Edge
+from .BaseMetric import AUC_Edge, AUPRC_Edge, BaseMetric, MseProbaEdge
 
 __all__ = classes = [
     "BaseMetric",
