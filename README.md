@@ -22,7 +22,7 @@
 				<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pygraphon" />
 		</a>
 		<a href="https://github.com/dufourc1/pygraphon/blob/master/LICENSE">
-				<img alt="PyPI - License" src="https://img.shields.io/pypi/l/PyGraphon" />
+				<img alt="PyPI - License" src="https://img.shields.io/pypi/l/pygraphon" />
 		</a>
 		<a href='https://pygraphon.readthedocs.io/en/latest/?badge=latest'>
 				<img src='https://readthedocs.org/projects/pygraphon/badge/?version=latest' alt='Documentation Status' />
