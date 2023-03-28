@@ -1,5 +1,5 @@
 """Implementation of network histogram estimator."""
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import scipy
@@ -9,7 +9,78 @@ from sklearn.metrics import pairwise_distances
 
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
+from .assignment import Assignment
 from .graphest_fastgreedy import graphest_fastgreedy
+from .greedy_readable import greedy_opt
+
+
+def nethist(
+    A: np.ndarray,
+    h: Optional[int] = None,
+    method: str = "mine",
+    absTol: float = 2.5 * 1e-4,
+    maxNumIterations: int = 500,
+    past_non_improving: int = 3,
+) -> Tuple[Assignment, int]:
+    """Compute the network histogram of an N-by-N adjacency matrix.
+
+    adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        adjacency matrix
+    h : int
+        specifies the number of nodes in each histogram bin,, by default is optimized based on input.
+    method : str
+        method to use for optimization. "mine" is the readable version of the algorithm, "theirs" is
+        the original version. Will be removed in future versions.
+    absTol : float
+        absolute tolerance for convergence
+    maxNumIterations : int
+        maximum number of iterations for the optimization (outer loop)
+
+
+    Returns
+    -------
+    Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]
+        [idx,h] return the vector of group membership of the nodes and the parameter h
+    """
+    check_simple_adjacency_matrix(A)
+
+    # Compute necessary summaries from A
+    n = A.shape[0]
+    rhoHat = np.sum(A) / (n * (n - 1))
+
+    # use data driven h
+    h = int(h) if h is not None else int(_oracle_analysis_badnwidth(A=A.astype(float)))
+
+    # min h i s 2 so that no node is in its own group
+    h = max(2, min(n, np.round(h)))
+
+    lastGroupSize = n % h
+
+    # step down h to avoid singleton group
+    while lastGroupSize == 1 and h > 2:
+        h = h - 1
+        lastGroupSize = n % h
+
+    idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
+
+    if method == "mine":
+        best_assignment = greedy_opt(
+            A,
+            idxInit,
+            absTol=absTol,
+            maxNumIterations=maxNumIterations,
+            past_non_improving=past_non_improving,
+        )
+    else:
+        labels, _ = graphest_fastgreedy(
+            A, h, idxInit, absTol=absTol, maxNumRestarts=maxNumIterations
+        )
+        best_assignment = Assignment(labels, A)
+    return best_assignment, h
 
 
 def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float = 1) -> float:
@@ -166,61 +237,4 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
     idxInit = np.zeros(n)
     for i in range(k):
         idxInit[ind[i * h : min(n, (i + 1) * h)]] = i
-    return idxInit
-
-
-def nethist(
-    A: np.ndarray, h: int = None, verbose: bool = False, trace: bool = False
-) -> Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]:
-    """Compute the network histogram of an N-by-N adjacency matrix.
-
-    adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
-
-    Parameters
-    ----------
-    A : np.ndarray
-        adjacency matrix
-    h : int
-        specifies the number of nodes in each histogram bin,, by default is optimized based on input.
-    verbose : bool
-        if True logs progress of optimization , by default False
-    trace : bool
-        if True trace the optimization, by default False
-
-    Returns
-    -------
-    Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]
-        [idx,h] return the vector of group membership of the nodes and the parameter h
-    """
-    check_simple_adjacency_matrix(A)
-
-    # conversion for scipy functions
-    A = A.astype(float)
-
-    # Compute necessary summaries from A
-    n = A.shape[0]
-    rhoHat = np.sum(A) / (n * (n - 1))
-
-    # use data driven h
-    h = int(h) if h is not None else _oracle_analysis_badnwidth(A=A)
-
-    # min h i s 2 so that no node is in its own group
-    h = max(2, min(n, np.round(h)))
-
-    lastGroupSize = n % h
-
-    # step down h to avoid singleton group
-    while lastGroupSize == 1 and h > 2:
-        h = h - 1
-        lastGroupSize = n % h
-
-    idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
-    if trace:
-        idx, _, trace = graphest_fastgreedy(
-            A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
-        )
-    else:
-        idx, _ = graphest_fastgreedy(
-            A=A, hbar=h, inputLabelVec=idxInit, verbose=verbose, trace=trace
-        )
-    return idx, h, trace
+    return idxInit.astype(int)

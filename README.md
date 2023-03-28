@@ -30,7 +30,6 @@
 		<a href='https://github.com/psf/black'>
 				<img src='https://img.shields.io/badge/code%20style-black-000000.svg' alt='Code style: black' />
 		</a>
-	<a href="https://deepsource.io/gh/dufourc1/pygraphon/?ref=repository-badge}" target="_blank"><img alt="DeepSource" title="DeepSource" src="https://deepsource.io/gh/dufourc1/pygraphon.svg/?label=active+issues&show_trend=true&token=lp6MCoxjOCXI4DUzy9XWTv04"/></a>
 </p>
 
 Welcome to the documentation of our Python library for estimating graphons from observed data! Our library provides a powerful set of tools for estimating graphons, which are a type of object used to model large, random graphs, from observed data.
