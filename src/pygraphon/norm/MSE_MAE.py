@@ -3,6 +3,7 @@ import numpy as np
 from pygraphon.graphons import Graphon
 from pygraphon.norm.BaseMetric import BaseMetric
 
+
 class MseProbaEdge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
@@ -15,6 +16,7 @@ class MseProbaEdge(BaseMetric):
 
     def __str__(self):
         return "MSE on probabily matrix"
+
 
 class MaeProbaEdge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:

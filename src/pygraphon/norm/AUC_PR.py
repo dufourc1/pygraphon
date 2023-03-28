@@ -4,6 +4,7 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from pygraphon.graphons import Graphon
 from pygraphon.norm.BaseMetric import BaseMetric
 
+
 class AUCEdge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
