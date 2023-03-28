@@ -7,6 +7,8 @@ from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons import Graphon
 
 from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+
 
 
 class BaseMetric:
@@ -17,14 +19,12 @@ class BaseMetric:
         ajd_matrix: Optional[np.ndarray] = None,
         **kwargs,
     ):
-        if ajd_matrix is not None:
-            estimator.fit(adj_matrix=ajd_matrix, **kwargs)
         if not estimator.fitted:
             raise ValueError("Estimator is not fitted and no adjacency matrix was provided")
-        return self._compute(graphon=graphon, estimated=estimator.graphon)
+        return self._compute(graphon=graphon, estimated=estimator.graphon, adjacency_matrix=ajd_matrix)
 
     @abstractclassmethod
-    def _compute(self, graphon: Graphon, estimated: Graphon):
+    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
         pass
 
     @abstractclassmethod
@@ -37,7 +37,7 @@ class MseProbaEdge(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def _compute(self, graphon: Graphon, estimated: Graphon):
+    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
         p_0 = graphon._get_edge_probabilities(self.n_nodes, exchangeable=False)
         p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean((p_0 - p_hat) ** 2)
@@ -49,11 +49,27 @@ class AUC_Edge(BaseMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
         self.n_nodes = n_nodes
-    def _compute(self, estimated: Graphon, adjacency_matrix: np.ndarray):
+        
+    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
         p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
         if not adjacency_matrix.shape == p_hat.shape:
             raise ValueError("Adjacency matrix and probabilities matrix have different shapes")
-        return roc_auc_score(adjacency_matrix, p_hat) #to be checked
+        return roc_auc_score(adjacency_matrix, p_hat)
+    
     def __str__(self):
         return "AUC on probabily matrix"
+    
+class AUPRC_Edge(BaseMetric):
+    def __init__(self, n_nodes: int = 100) -> None:
+        super().__init__()
+        self.n_nodes = n_nodes
+        
+    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
+        p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
+        if not adjacency_matrix.shape == p_hat.shape:
+            raise ValueError("Adjacency matrix and probabilities matrix have different shapes")
+        return average_precision_score(adjacency_matrix, p_hat)
+    
+    def __str__(self):
+        return "AUPRC on probabily matrix"
     
