@@ -17,7 +17,7 @@ class DummyEstimator(BaseEstimator):
 
 
 class DummyMetric(BaseMetric):
-    def _compute(self, graphon, estimated, adjaceny_matrix):
+    def _compute(self, graphon, estimated, adjacency_matrix):
         return 0.5
 
     def __str__(self):
