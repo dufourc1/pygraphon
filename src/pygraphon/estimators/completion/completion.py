@@ -4,7 +4,9 @@ from typing import Optional, Tuple
 import numpy as np
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
-from pygraphon.graphons import Graphon
+from pygraphon.graphons import StepGraphon
+
+from .optspace import OptSpace
 
 
 class Completion(BaseEstimator):
@@ -23,8 +25,14 @@ class Completion(BaseEstimator):
         self.iternumber = iternumber
         self.progress = progress
         self.adjust = adjust
+        self.solver = OptSpace(n_components=rank, tol=tol, max_iterations=iternumber)
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
-    ) -> Tuple[Graphon, np.ndarray]:
-        raise NotImplementedError()
+    ) -> Tuple[StepGraphon, np.ndarray]:
+        U, S, V = self.solver.solve(adjacency_matrix)
+        print(U.shape, S.shape, V.shape)
+        P_hat = U.dot(S).dot(V.T)
+        np.clip(P_hat, 0, 1, out=P_hat)
+        graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
+        return graphon_hat, P_hat

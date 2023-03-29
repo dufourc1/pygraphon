@@ -1,5 +1,6 @@
 """Estimators of graphons."""
 
+from .completion import Completion
 from .EmpiricalDegrees import LG
 from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
@@ -17,4 +18,5 @@ __all__ = classes = [
     "SBA",
     "USVT",
     "SAS",
+    "Completion",
 ]

@@ -9,6 +9,7 @@ from pygraphon.estimators import (
     SAS,
     SBA,
     USVT,
+    Completion,
     HistogramEstimator,
     NBDsmooth,
     SimpleMomentEstimator,
@@ -102,3 +103,11 @@ class TestApiSAS(TestApiHistogramEstimator):
     @pytest.fixture
     def estimator(self):
         return SAS()
+
+
+class TestApiCompletion(TestApiHistogramEstimator):
+    """Test api for Completion estimator."""
+
+    @pytest.fixture
+    def estimator(self):
+        return Completion()
