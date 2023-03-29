@@ -2,12 +2,13 @@
  Norm
 ######
 
-.. currentmodule:: pygraphon.norm
 
 .. autosummary::
    :nosignatures:
    :toctree: ../generated
 
-   {% for name in pygraphon.norm.classes %}
-     {{ name }}
-   {% endfor %}
+.. automodule:: pygraphon.norm
+   :members:
+
+.. automethod:: pygraphon.norm.BaseMetric.__call__
+
