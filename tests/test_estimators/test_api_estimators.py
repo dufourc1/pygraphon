@@ -7,7 +7,6 @@ import pytest
 from pygraphon.estimators import (
     LG,
     SAS,
-    SBA,
     USVT,
     Completion,
     HistogramEstimator,
@@ -87,14 +86,6 @@ class TestApiLG(TestApiHistogramEstimator):
     @pytest.fixture
     def estimator(self):
         return LG(K=3)
-
-
-class TestApiSBA(TestApiHistogramEstimator):
-    """Test api for SBA estimator."""
-
-    @pytest.fixture
-    def estimator(self):
-        return SBA()
 
 
 class TestApiSAS(TestApiHistogramEstimator):

@@ -6,7 +6,6 @@ from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
 from .SAS import SAS
-from .sba import SBA
 from .UniversalSingularValueDecomposition import USVT
 
 __all__ = classes = [
@@ -15,7 +14,6 @@ __all__ = classes = [
     "MomentEstimator",
     "SimpleMomentEstimator",
     "NBDsmooth",
-    "SBA",
     "USVT",
     "SAS",
     "Completion",

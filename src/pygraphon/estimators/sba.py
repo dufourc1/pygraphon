@@ -28,6 +28,7 @@ class SBA(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
+        raise NotImplementedError("Only valid for multiple graphs")
         membership = self._compute_membership(adjacency_matrix)
         # format output and return
         P_hat = _approximate_P_from_node_membership(adjacency_matrix, membership)
@@ -58,7 +59,7 @@ class SBA(BaseEstimator):
             )
 
             # find the close nodes and add them to the community
-            close_j = non_clustered_indices[np.where(distances < self.delta**2)[0]]
+            close_j = non_clustered_indices[np.where(distances <= self.delta**2)[0]]
             for j in close_j:
                 membership[j] = k
                 set_index.remove(j)
