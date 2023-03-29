@@ -24,6 +24,5 @@ Implemented estimators
    LG
    HistogramEstimator
    NBDsmooth
-   SBA
    USVT
    SAS
