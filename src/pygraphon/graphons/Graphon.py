@@ -32,7 +32,7 @@ class Graphon:
 
         Internally, the graphon is always rescaled to have integral equal to 1 and be indentifiable.
         However, when sampling from the graphon, the original edge density is used, meaning we generate an edge with
-        :math:`Bern(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`,
+        :math:`\operatorname{Bern}(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`,
         and :math:`f(\cdot,\cdot)` is :obj:`function` given at initialization.
         to the init function.
     """
@@ -118,8 +118,8 @@ class Graphon:
         Parameters
         ----------
         rho : float
-            edge density of the realized graph (if `1` will return a graph
-            with edge density = `self.initial_rho` )
+            edge density of the realized graph (if :math:`1` will return a graph
+            with edge density = :attr:`self.initial_rho` )
         n : int
              number of vertices of the realized graph
         exchangeable : bool
@@ -135,7 +135,7 @@ class Graphon:
 
     @staticmethod
     def _generate_adjacency_matrix(n, probs, rho):
-        """Generate adjacency matrix A_ij = 1 with probability rho*probs_ij.
+        """Generate adjacency matrix :math:`A_{ij} = 1` with probability :attr:`rho*probs_ij`.
 
         Parameters
         ----------

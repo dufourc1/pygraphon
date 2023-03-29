@@ -16,7 +16,7 @@ class StepGraphon(Graphon):
         graphon : np.ndarray
             np array representing the theta matrix
         bandwidthHist : float
-            size of the groups (between 0 and 1), by default None
+            size of the groups (between 0 and 1).
         initial_rho : float
             initial edge density (used to keep track in case of normalization), by default None
     """
@@ -26,6 +26,8 @@ class StepGraphon(Graphon):
     ) -> None:
         # save args
         self.graphon = graphon
+        if bandwidthHist > 1 or bandwidthHist <= 0:
+            raise ValueError("The bandwidth should be between 0 and 1.")
         self.bandwidthHist = bandwidthHist
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
             raise ValueError("The graphon matrix should have size consisten with the bandwidth.")

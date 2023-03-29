@@ -8,7 +8,7 @@ from pygraphon.graphons import Graphon
 
 
 class Completion(BaseEstimator):
-    """Estimate graphons via matrix completion scheme."""
+    """Estimate graphons via matrix completion scheme :cite:p:`Keshavan2010`."""
 
     def __init__(
         self,

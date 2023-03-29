@@ -4,15 +4,6 @@
 
 .. currentmodule:: pygraphon.estimators
 
-.. autosummary::
-   :nosignatures:
-   :toctree: pygraphon.estimators
-   
-   LG
-   HistogramEstimator
-   NBDsmooth
-   SBA
-   USVT
 
 Estimator general interface
 ----------------------------
@@ -23,3 +14,16 @@ Estimator general interface
    :undoc-members:
    :noindex:
 
+Implemented estimators
+----------------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: pygraphon.estimators
+   
+   LG
+   HistogramEstimator
+   NBDsmooth
+   SBA
+   USVT
+   SAS
