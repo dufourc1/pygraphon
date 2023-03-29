@@ -30,7 +30,7 @@ class LG(BaseEstimator):
         if K > adjacency_matrix.shape[0]:
             raise ValueError("K must be smaller than the number of nodes")
 
-        communities = self._find_communities(adjacency_matrix)
+        communities = self._find_communities_matlab(adjacency_matrix)
         P_hat = _approximate_P_from_node_membership(adjacency_matrix, communities)
 
         graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
@@ -69,3 +69,42 @@ class LG(BaseEstimator):
         for i, block in enumerate(blocks):
             communities[block] = i
         return communities
+
+    def _find_communities_matlab(self,G):
+        blocks =  estimate_blocks_largest_gap(G, self.K)
+        communities = np.zeros(G.shape[0])
+        for i, block in enumerate(blocks):
+            communities[block] = i
+        return communities
+
+
+def estimate_blocks_largest_gap(G, Q):
+    '''
+    Estimates the blocks of a graph using the largest gaps in the sorted normalized degree sequence.
+
+    Args:
+    - G: adjacency matrix of the graph
+    - Q: number of blocks to estimate
+
+    Returns:
+    - B: list of block assignments
+    '''
+
+    if G.ndim > 2:
+        G = np.sum(G, axis=2)
+
+    n = G.shape[0]
+
+    Deg = np.sum(G - np.diag(np.diag(G)), axis=1) # degree
+    DegNorm = Deg / (n - 1) # normalized degree
+    idx = np.argsort(DegNorm) # sort normalized degree
+
+    DegNormDiff = np.diff(DegNorm) # difference
+    I = np.argsort(DegNormDiff)[::-1] # find Q-1 largest gaps
+    ii = np.concatenate(([0], np.sort(I[0:Q-1]), [n])) # ii = Q-1 indices of largest gaps
+
+    B = [None] * Q
+    for q in range(Q):
+        B[q] = idx[ii[q]+1:ii[q+1]]
+
+    return B

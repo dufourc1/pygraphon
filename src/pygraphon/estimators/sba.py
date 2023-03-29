@@ -28,6 +28,13 @@ class SBA(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
+        membership = self._compute_membership(adjacency_matrix)
+        # format output and return
+        P_hat = _approximate_P_from_node_membership(adjacency_matrix, membership)
+        graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
+        return graphon_hat, P_hat
+
+    def _compute_membership(self, adjacency_matrix: np.ndarray) -> np.ndarray:
         n = adjacency_matrix.shape[0]
         k = 0
         set_index = set(range(n))
@@ -57,11 +64,7 @@ class SBA(BaseEstimator):
                 set_index.remove(j)
             # update community number
             k += 1
-
-        # format output and return
-        P_hat = _approximate_P_from_node_membership(adjacency_matrix, membership)
-        graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
-        return graphon_hat, P_hat
+        return membership
 
     def _compute_dij(
         self, index_i: int, index_j: List[int], adjacency_matrix: np.ndarray
