@@ -1,5 +1,5 @@
-﻿pygraphon.graphons.Graphon
-==========================
+﻿Graphon
+=======
 
 .. currentmodule:: pygraphon.graphons
 

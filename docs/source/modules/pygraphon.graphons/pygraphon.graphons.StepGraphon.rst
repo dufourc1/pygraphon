@@ -1,5 +1,5 @@
-﻿pygraphon.graphons.StepGraphon
-==============================
+﻿StepGraphon
+===========
 
 .. currentmodule:: pygraphon.graphons
 

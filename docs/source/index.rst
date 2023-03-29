@@ -20,7 +20,6 @@ By providing a powerful set of tools for estimating graphons from observed data,
    :name: start
 
    installation
-   usage
    tutorials
    api
    references

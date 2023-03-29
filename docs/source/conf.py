@@ -72,7 +72,10 @@ extensions = [
     "sphinx_automodapi.automodapi",
     "sphinx_automodapi.smart_resolver",
     "sphinx.ext.napoleon",
-    "sphinxcontrib.bibtex"
+    "sphinxcontrib.bibtex",
+    "sphinx_copybutton",
+    "sphinx_inline_tabs",
+    "sphinx_togglebutton"
 ]
 
 # citation style
@@ -125,7 +128,7 @@ html_theme = "furo"
 # documentation.
 #
 html_theme_options = {
-    # "source_repository": "https://github.com/pradyunsg/furo/",
+    "source_repository": "https://github.com/dufourc1/pygraphon",
     "source_branch": "main",
     "source_directory": "docs/",
 }
