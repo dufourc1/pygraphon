@@ -17,24 +17,21 @@ class Completion(BaseEstimator):
         rank: Optional[int] = None,
         tol: float = 1e-3,
         iternumber: int = 20,
-        progress: bool = False,
-        adjust: bool = True,
     ) -> None:
         self.rank = rank
         self.tol = tol
         self.iternumber = iternumber
-        self.progress = progress
-        self.adjust = adjust
-        self.solver = OptSpace(n_components=rank, tol=tol, max_iterations=iternumber)
+        self.solver = OptSpace(n_components=rank, tol=tol, max_iterations=iternumber, sign=1)
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
         # solve using OptSpace
-        U, S, V = self.solver.solve(adjacency_matrix)
-        P_hat = U.dot(S).dot(V.T)
+        U, S, V = self.solver.solve(2 * (adjacency_matrix - 0.5))
+        P_hat = ((U @ S @ V.T) + 1) / 2
 
         # adjust P_hat to be a valid probability matrix
         np.clip(P_hat, 0, 1, out=P_hat)
+
         graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
         return graphon_hat, P_hat

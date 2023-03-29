@@ -104,7 +104,6 @@ class OptSpace(object):
         self.sign = sign
 
     def solve(self, obs):
-        obs = obs.astype(np.float64)
         # adjust iteration indexing by one
         self.max_iterations += 1
         # Convert any nan input to zeros
