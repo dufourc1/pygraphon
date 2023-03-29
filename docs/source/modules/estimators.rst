@@ -4,6 +4,19 @@
 
 .. currentmodule:: pygraphon.estimators
 
+
+Estimator general interface
+----------------------------
+
+
+.. autoclass:: pygraphon.estimators.BaseEstimator.BaseEstimator
+   :members:
+   :undoc-members:
+   :noindex:
+
+Implemented estimators
+----------------------
+
 .. autosummary::
    :nosignatures:
    :toctree: pygraphon.estimators
@@ -14,12 +27,3 @@
    SBA
    USVT
    SAS
-
-Estimator general interface
-----------------------------
-
-
-.. autoclass:: pygraphon.estimators.BaseEstimator.BaseEstimator
-   :members:
-   :undoc-members:
-   :noindex:

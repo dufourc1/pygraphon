@@ -15,9 +15,8 @@ By providing a powerful set of tools for estimating graphons from observed data,
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
-   :name: start
+   :maxdepth: 1
+   :caption: Useful links
 
    installation
    tutorials

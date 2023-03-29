@@ -12,7 +12,6 @@ graphons and step graphons.
 
 .. autosummary::
    :nosignatures:
-   :toctree: pygraphon.graphons
    
    Graphon
    StepGraphon
@@ -45,14 +44,7 @@ We also provide a list of pre-implemented common graphons which are instances of
    
    
 
-
-
-
-
-.. autoclass:: pygraphon.graphons.Graphon
-	:noindex:
-
-  	.. automethod:: draw
-		:noindex:
+.. automodule:: pygraphon.graphons
+	:members:
 
 
