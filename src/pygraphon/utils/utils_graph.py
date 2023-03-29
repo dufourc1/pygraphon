@@ -96,16 +96,16 @@ def _approximate_P_from_node_membership(
     # compute the actual values of the graphon approximation
     groups = np.unique(node_memberships)
     countGroups = Counter(node_memberships)
-    ngroups = len(groups)
     P = np.zeros_like(adjacencyMatrix)
-    values = np.zeros((ngroups, ngroups))
     node_memberships = node_memberships.astype(int)
+    ngroups = max(node_memberships) + 1
+    values = np.zeros((ngroups, ngroups))
     # compute the number of links between groups i and j / all possible
     # links
     for i in range(ngroups):
         for j in np.arange(i, ngroups):
             total = countGroups[groups[i]] * countGroups[groups[j]]
-            values[i,j] = (
+            values[i, j] = (
                 np.sum(
                     adjacencyMatrix[np.where(node_memberships == groups[i])[0]][
                         :, np.where(node_memberships == groups[j])[0]
@@ -113,12 +113,9 @@ def _approximate_P_from_node_membership(
                 )
                 / total
             )
-            values[j,i] = values[i,j]
+            values[j, i] = values[i, j]
 
     for i in range(P.shape[0]):
         for j in range(P.shape[1]):
-            P[i, j] = values[node_memberships[i],node_memberships[j]]
+            P[i, j] = values[node_memberships[i], node_memberships[j]]
     return P
-
-
-
