@@ -12,6 +12,12 @@
 		<a href="https://github.com/dufourc1/pygraphon/actions/workflows/build.yml">
 			<img alt="Build" src="https://github.com/dufourc1/pygraphon/workflows/build/badge.svg" />
 		</a>
+		<a href="https://codecov.io/gh/dufourc1/pygraphon" > 
+			<img src="https://codecov.io/gh/dufourc1/pygraphon/branch/master/graph/badge.svg?token=MDWJ6F86US"/> 
+		</a>
+		<a href='https://pygraphon.readthedocs.io/en/latest/?badge=latest'>
+				<img src='https://readthedocs.org/projects/pygraphon/badge/?version=latest' alt='Documentation Status' />
+		</a>
 		<a href="https://github.com/cthoyt/cookiecutter-python-package">
 				<img alt="Cookiecutter template from @cthoyt" src="https://img.shields.io/badge/Cookiecutter-python--package-yellow" /> 
 		</a>
@@ -22,10 +28,7 @@
 				<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pygraphon" />
 		</a>
 		<a href="https://github.com/dufourc1/pygraphon/blob/master/LICENSE">
-				<img alt="PyPI - License" src="https://img.shields.io/pypi/l/PyGraphon" />
-		</a>
-		<a href='https://pygraphon.readthedocs.io/en/latest/?badge=latest'>
-				<img src='https://readthedocs.org/projects/pygraphon/badge/?version=latest' alt='Documentation Status' />
+				<img alt="PyPI - License" src="https://img.shields.io/pypi/l/pygraphon" />
 		</a>
 		<a href='https://github.com/psf/black'>
 				<img src='https://img.shields.io/badge/code%20style-black-000000.svg' alt='Code style: black' />

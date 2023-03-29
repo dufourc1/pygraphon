@@ -10,14 +10,12 @@ from sklearn.metrics import pairwise_distances
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
 from .assignment import Assignment
-from .graphest_fastgreedy import graphest_fastgreedy
 from .greedy_readable import greedy_opt
 
 
 def nethist(
     A: np.ndarray,
     h: Optional[int] = None,
-    method: str = "mine",
     absTol: float = 2.5 * 1e-4,
     maxNumIterations: int = 500,
     past_non_improving: int = 3,
@@ -32,9 +30,6 @@ def nethist(
         adjacency matrix
     h : int
         specifies the number of nodes in each histogram bin,, by default is optimized based on input.
-    method : str
-        method to use for optimization. "mine" is the readable version of the algorithm, "theirs" is
-        the original version. Will be removed in future versions.
     absTol : float
         absolute tolerance for convergence
     maxNumIterations : int
@@ -67,19 +62,13 @@ def nethist(
 
     idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
 
-    if method == "mine":
-        best_assignment = greedy_opt(
-            A,
-            idxInit,
-            absTol=absTol,
-            maxNumIterations=maxNumIterations,
-            past_non_improving=past_non_improving,
-        )
-    else:
-        labels, _ = graphest_fastgreedy(
-            A, h, idxInit, absTol=absTol, maxNumRestarts=maxNumIterations
-        )
-        best_assignment = Assignment(labels, A)
+    best_assignment = greedy_opt(
+        A,
+        idxInit,
+        absTol=absTol,
+        maxNumIterations=maxNumIterations,
+        past_non_improving=past_non_improving,
+    )
     return best_assignment, h
 
 

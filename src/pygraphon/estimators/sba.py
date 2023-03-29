@@ -10,7 +10,7 @@ from pygraphon.utils.utils_graph import _approximate_P_from_node_membership
 
 
 class SBA(BaseEstimator):
-    """Stochastic Block approximation :cite:p:`chan2014`.
+    """Stochastic Block approximation :cite:p:`Airoldi2013`.
 
     Parameters
     ----------

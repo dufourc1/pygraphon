@@ -62,6 +62,10 @@ class SAS(BaseEstimator):
         P_hat = P_hat[original_indices, :]
         P_hat = P_hat[:, original_indices]
 
+        # map to [0, 1]
+        np.clip(P_hat, 0, 1, out=P_hat)
+        np.clip(graphon_matrix, 0, 1, out=graphon_matrix)
+
         return StepGraphon(graphon_matrix, bandwidthHist=1 / graphon_matrix.shape[0]), P_hat
 
     def empirical_degree_sorting(self, A: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:

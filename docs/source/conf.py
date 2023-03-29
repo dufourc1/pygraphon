@@ -18,8 +18,6 @@ import re
 import sys
 from datetime import date
 
-import pygraphon
-
 sys.path.insert(0, os.path.abspath("../../src/pygraphon/"))
 
 # -- Project information -----------------------------------------------------
@@ -72,7 +70,10 @@ extensions = [
     "sphinx_automodapi.automodapi",
     "sphinx_automodapi.smart_resolver",
     "sphinx.ext.napoleon",
-    "sphinxcontrib.bibtex"
+    "sphinxcontrib.bibtex",
+    "sphinx_copybutton",
+    "sphinx_inline_tabs",
+    "sphinx_togglebutton"
 ]
 
 # citation style
@@ -120,16 +121,32 @@ pygments_style = "sphinx"
 #
 html_theme = "furo"
 
+html_title = "PyGraphon documentation"
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 html_theme_options = {
-    # "source_repository": "https://github.com/pradyunsg/furo/",
+    "source_repository": "https://github.com/dufourc1/pygraphon",
     "source_branch": "main",
     "source_directory": "docs/",
+    "footer_icons": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/dufourc1/pygraphon",
+            "html": "",
+            "class": "fa-brands fa-solid fa-github fa-2x",
+        }
+     ],
 }
 
+
+html_css_files = [
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
+]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

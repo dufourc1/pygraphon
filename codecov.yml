@@ -1,0 +1,16 @@
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: 70%
+        threshold: 5%
+        if_ci_failed: error
+
+ignore:
+  - "docs/*"
+  - "tests/*"
+  - "src/pygraphon/plots/*" #no idea how to test that → not the most important 
+  - "setup.py"
+  - "src/pygraphon/__init__.py"
+  - "src/pygraphon/version.py"

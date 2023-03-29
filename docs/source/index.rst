@@ -13,14 +13,10 @@ In addition to estimation, our library also provides tools for working with esti
 
 By providing a powerful set of tools for estimating graphons from observed data, our library can help researchers and practitioners gain new insights into the structure and behavior of complex networks. Whether you're analyzing social networks, biological networks, or transportation networks, our library has something to offer.
 
-
 .. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
-   :name: start
+   :maxdepth: 1
 
    installation
-   usage
    tutorials
    api
    references

@@ -24,7 +24,8 @@ class HistogramEstimator(BaseEstimator):
     def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:
         super().__init__()
         self.bandwidthHist = bandwithHist
-        self.method = method
+        if method != "mine":
+            DeprecationWarning("method other than 'mine' are deprecated")
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -105,7 +106,6 @@ class HistogramEstimator(BaseEstimator):
         assignment, h = nethist(
             A=adjacencyMatrix,
             h=h,
-            method=self.method,
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
