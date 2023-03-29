@@ -30,9 +30,11 @@ class Completion(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
+        # solve using OptSpace
         U, S, V = self.solver.solve(adjacency_matrix)
-        print(U.shape, S.shape, V.shape)
         P_hat = U.dot(S).dot(V.T)
+
+        # adjust P_hat to be a valid probability matrix
         np.clip(P_hat, 0, 1, out=P_hat)
         graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
         return graphon_hat, P_hat

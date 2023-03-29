@@ -19,10 +19,10 @@ from pygraphon.utils.utils_matrix import check_symmetric
 
 
 @pytest.fixture(scope="module")
-def sbm_3():
+def sbm_3(n=10):
     """Return a 3-block SBM."""
     return nx.stochastic_block_model(
-        [10, 10, 10], [[0.5, 0.1, 0.1], [0.1, 0.5, 0.1], [0.1, 0.1, 0.5]], seed=0
+        [n, n, n], [[0.8, 0.1, 0.1], [0.1, 0.8, 0.1], [0.1, 0.1, 0.8]], seed=0
     )
 
 

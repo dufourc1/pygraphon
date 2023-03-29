@@ -14,8 +14,10 @@ from numpy.linalg import norm
 from scipy.sparse.linalg import svds
 
 
+# flake8: noqa
 class OptSpace(object):
     """
+    Optsace is a python eqquivalent of the R package OptSpace.
 
     OptSpace is a matrix completion algorithm based on a singular value
     decomposition (SVD) optimized on a local manifold. It has been shown to
@@ -30,7 +32,6 @@ class OptSpace(object):
     observed values and P is a function such that
     the errors between Y and USV are only computed
     on the nonzero entries.
-
     """
 
     def __init__(
@@ -103,7 +104,6 @@ class OptSpace(object):
         self.sign = sign
 
     def solve(self, obs):
-
         obs = obs.astype(np.float64)
         # adjust iteration indexing by one
         self.max_iterations += 1
@@ -126,8 +126,6 @@ class OptSpace(object):
             # check estimate again
             if self.n_components >= min(n, m) - 1:
                 warnings.warn("Your matrix is estimated " "to be high-rank.", RuntimeWarning)
-            # print rank estimate
-            print("Estimated rank is %i" % self.n_components)
 
         # raise future warning if hard set
         elif isinstance(self.n_components, int):
