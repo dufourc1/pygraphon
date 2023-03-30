@@ -6,6 +6,8 @@ from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEs
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
 
+import matplotlib.pyplot as plt
+
 import numpy as np
 from sklearn.cluster import KMeans
 
@@ -44,14 +46,13 @@ class SmoothNetHist(BaseEstimator):
             approximated graphon from the histogram estimator, not matrix of connection Pij of size n x n
         """
         if bandwidthHist is None:
-            bandwidthHist = self.bandwidthHist
+            bandwidthHist = self.bandwidth
         hist = HistogramEstimator(bandwithHist=bandwidthHist, method=self.method)
         hist.fit(graph=adjacency_matrix)
-        hist_approx = hist.get_graphon()
-        return hist_approx
+        return hist
     
     def _smoothing_histLC(self, 
-                          hist_approx : StepGraphon,
+                          hist_approx : HistogramEstimator,
                           A : np.ndarray
                           ):
         """Smoothing of the histogram estimator using k-means++ [1].
