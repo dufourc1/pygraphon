@@ -52,7 +52,7 @@ class SmoothNetHist(BaseEstimator):
         return hist
     
     def _smoothing_histLC(self, 
-                          hist_approx : HistogramEstimator,
+                          hist : HistogramEstimator,
                           A : np.ndarray
                           ):
         """Smoothing of the histogram estimator using k-means++ [1].
@@ -74,6 +74,7 @@ class SmoothNetHist(BaseEstimator):
         ----------
         [1] Arthur, D. and Vassilvitskii, S. (2007). k-means++: The Advantages of Careful Seeding.
         """
+        hist_approx = hist.get_graphon()
         nrow_tile = hist_approx.graphon.shape[0]
         flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
 
