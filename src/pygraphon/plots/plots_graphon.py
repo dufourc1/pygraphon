@@ -92,9 +92,14 @@ def plot_sample(
         for j, y in enumerate(x2):
             result[i, j] = graphon.graphon_function(x, y)
     if integrate_to_1:
+        vmin = 0
+        vmax = 1
+    else:
         result *= graphon.initial_rho
+        vmin = None
+        vmax = None
 
-    im = ax.imshow(result, cmap=colormap, vmin=0, vmax=1)
+    im = ax.imshow(result, cmap=colormap, vmin=vmin, vmax=vmax)
     if colorbar:
         _add_colorbar(im, ax=ax)
     return fig, ax
