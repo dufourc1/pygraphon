@@ -4,3 +4,4 @@ sphinx-rtd-theme
 sphinx-click
 sphinx-autodoc-typehints
 sphinx-automodapi
+sphinxcontrib-bibtex

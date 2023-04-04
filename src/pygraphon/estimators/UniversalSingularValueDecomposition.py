@@ -9,20 +9,12 @@ from pygraphon.utils.utils_graph import edge_density
 
 
 class USVT(BaseEstimator):
-    """Estimate graphons  via Universal Singular Value Thresholding [1].
+    """Universal Singular Value Thresholding :cite:p:`Chatterjee2015`.
 
     Parameters
     ----------
     eta : float
         Threshold for singular values. Must be between 0 and 1.
-
-
-    References
-    ----------
-    [1] Chatterjee, Sourav. "Matrix estimation by universal singular value thresholding."
-        The Annals of Statistics 43.1 (2015): 177-214.
-    [2] Xu, Jiaming. "Rates of convergence of spectral methods for graphon estimation."
-        International Conference on Machine Learning. PMLR, 2018.
     """
 
     def __init__(self, eta: float = 0.01) -> None:

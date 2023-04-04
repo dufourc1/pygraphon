@@ -63,7 +63,7 @@ def greedy_opt(
         # decide if we do one or two swaps before checking if we improved
         one_or_two_swaps = np.array(np.random.uniform(size=step_internal) > 2 / 3) + 1
 
-        pbar.set_description(f"Log likelihood: {best_assignment.log_likelihood/n_obs:.4f}")
+        pbar.set_description(f"Log likelihood: {best_assignment.log_likelihood*2/np.sum(A):.4f}")
 
         for s in range(step_internal):
             updated = False

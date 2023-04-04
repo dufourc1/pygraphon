@@ -9,6 +9,8 @@ from mpl_toolkits import axes_grid1
 from pygraphon.graphons.Graphon import Graphon
 from pygraphon.graphons.StepGraphon import StepGraphon
 
+from .utils import make_0_1
+
 
 # noqa: DAR101
 def _add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
@@ -56,7 +58,11 @@ def plot_sample(
     ax: Axes = None,
     colorbar=False,
     integrate_to_1: bool = False,
+<<<<<<< HEAD
     cmap="binary",
+=======
+    colormap: str = "binary",
+>>>>>>> master
 ) -> Tuple[Figure, Axes]:
     """Plot a sample of the graphon.
 
@@ -89,18 +95,32 @@ def plot_sample(
     for i, x in enumerate(x1):
         for j, y in enumerate(x2):
             result[i, j] = graphon.graphon_function(x, y)
-    if not integrate_to_1:
+    if integrate_to_1:
+        vmin = 0
+        vmax = 1
+    else:
         result *= graphon.initial_rho
+        vmin = None
+        vmax = None
 
+<<<<<<< HEAD
     im = ax.imshow(result, cmap=cmap, vmin=0, vmax=1)
+=======
+    im = ax.imshow(result, cmap=colormap, vmin=vmin, vmax=vmax)
+>>>>>>> master
     if colorbar:
         _add_colorbar(im, ax=ax)
-    _make_pretty(ax)
     return fig, ax
 
 
 def plot(
-    graphon: StepGraphon, fig: Figure = None, ax: Axes = None, figsize: Tuple[int, int] = (6, 5)
+    graphon: StepGraphon,
+    fig: Figure = None,
+    ax: Axes = None,
+    figsize: Tuple[int, int] = (6, 5),
+    colormap: str = "binary",
+    integrate_to_1: bool = False,
+    show_colorbar: bool = False,
 ) -> Tuple[Figure, Axes]:
     """Plot the graphon.
 
@@ -120,19 +140,13 @@ def plot(
     Tuple[Figure, Axes]
         plot
     """
-    return plot_sample(graphon, fig=fig, ax=ax, colorbar=True, integrate_to_1=True)
-
-
-def _make_pretty(ax):
-    """Remove the figure frame, x- and y-ticks, and set the aspect to equal.
-
-    Parameters
-    ----------
-    ax :  Axes
-        matplotlib ax, by default None
-    """
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_aspect("equal")
-    ax.get_figure().set_facecolor("w")
-    ax.set_frame_on(False)
+    fig, ax = plot_sample(
+        graphon,
+        fig=fig,
+        ax=ax,
+        colorbar=show_colorbar,
+        integrate_to_1=integrate_to_1,
+        colormap=colormap,
+    )
+    make_0_1(ax)
+    return fig, ax

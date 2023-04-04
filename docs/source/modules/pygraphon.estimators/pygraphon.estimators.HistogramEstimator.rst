@@ -1,5 +1,5 @@
-﻿pygraphon.estimators.HistogramEstimator
-=======================================
+﻿Network histogram estimator 
+===========================
 
 .. currentmodule:: pygraphon.estimators
 

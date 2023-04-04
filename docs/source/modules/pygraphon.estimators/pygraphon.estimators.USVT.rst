@@ -1,5 +1,5 @@
-﻿pygraphon.estimators.USVT
-=========================
+﻿USVT
+====
 
 .. currentmodule:: pygraphon.estimators
 

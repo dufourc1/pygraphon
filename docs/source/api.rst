@@ -12,4 +12,3 @@
    modules/norm
    modules/plots
    modules/utils
-   modules/generators

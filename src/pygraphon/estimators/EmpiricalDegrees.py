@@ -9,17 +9,12 @@ from pygraphon.utils.utils_graph import _approximate_P_from_node_membership
 
 
 class LG(BaseEstimator):
-    """Larget Gap algorithm estimates graphons based on empirical degrees [1].
+    """Larget Gap algorithm :cite:p:`channarond2012`.
 
     Parameters
     ----------
     K : int
         Number of blocks.
-
-    References
-    ----------
-    [1] Channarond, Antoine, Jean-Jacques Daudin, and Stéphane Robin. "Classification and estimation in the
-    stochastic blockmodel based on the empirical degrees." Electronic Journal of Statistics 6 (2012): 2574-2601.
     """
 
     def __init__(self, K: int) -> None:
@@ -56,21 +51,28 @@ class LG(BaseEstimator):
         np.ndarray
             Node membership of each community.
         """
-        # compute degrees and sort them
-        degrees = adjacency_matrix.sum(axis=0) / (adjacency_matrix.shape[0] - 1)
-        indices_sorted = np.argsort(degrees)
-        degrees_sorted = degrees[indices_sorted]
+        num_nodes = adjacency_matrix.shape[0]
 
-        # find the K biggest differences between consecutive degrees and find corresponding indices
-        ind = np.argpartition(np.diff(degrees_sorted), -self.K + 1)[-self.K + 1 :]
-        gaps_indices = [0] + list(ind) + [adjacency_matrix.shape[0] - 1]
+        # Compute the degree and normalized degree sequences
+        degrees = np.sum(adjacency_matrix - np.diag(np.diag(adjacency_matrix)), axis=1)
+        normalized_degrees = degrees / (num_nodes - 1)
 
-        # assign the nodes to the blocks
-        blocks = []
-        for i in range(self.K):
-            blocks.append(indices_sorted[gaps_indices[i] : gaps_indices[i + 1]])
+        # Sort the nodes based on their normalized degree
+        node_indices = np.argsort(normalized_degrees)
 
-        communities = np.zeros(adjacency_matrix.shape[0])
-        for i, block in enumerate(blocks):
+        # Compute the largest gaps in the normalized degree sequence
+        degree_differences = np.diff(normalized_degrees)
+        largest_gap_indices = np.argsort(degree_differences)[::-1][: self.K - 1]
+        block_boundaries = np.concatenate(([0], np.sort(largest_gap_indices), [num_nodes]))
+
+        # Assign nodes to blocks based on their degree sequence
+        block_assignments = [
+            node_indices[block_boundaries[i] + 1 : block_boundaries[i + 1]] for i in range(self.K)
+        ]
+
+        # Assign communities based on the block assignments
+        communities = np.zeros(num_nodes, dtype=int)
+        for i, block in enumerate(block_assignments):
             communities[block] = i
+
         return communities

@@ -9,13 +9,7 @@ from pygraphon.graphons import StepGraphon
 
 
 class NBDsmooth(BaseEstimator):
-    """Estimate graphon by neighborhood smoothing [1].
-
-    References
-    ----------
-    [1] Zhang, Yuan, Elizaveta Levina, and Ji Zhu. "Estimating network edge probabilities by neighbourhood smoothing."
-    Biometrika 104.4 (2017): 771-783.
-    """
+    """Estimate graphon by neighborhood smoothing :cite:p:`Zhang2015`."""
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray

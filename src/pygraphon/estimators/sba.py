@@ -10,12 +10,14 @@ from pygraphon.utils.utils_graph import _approximate_P_from_node_membership
 
 
 class SBA(BaseEstimator):
-    """Estimate graphon base on SB approximation.
+    """Stochastic Block approximation :cite:p:`Airoldi2013`.
 
     Parameters
     ----------
     delta : float, optional
         precision parameter larger than 0, by default 0.2
+
+
     """
 
     def __init__(self, delta: float = 0.2) -> None:
@@ -26,6 +28,14 @@ class SBA(BaseEstimator):
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray
     ) -> Tuple[StepGraphon, np.ndarray]:
+        raise NotImplementedError("Only valid for multiple graphs")
+        membership = self._compute_membership(adjacency_matrix)
+        # format output and return
+        P_hat = _approximate_P_from_node_membership(adjacency_matrix, membership)
+        graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
+        return graphon_hat, P_hat
+
+    def _compute_membership(self, adjacency_matrix: np.ndarray) -> np.ndarray:
         n = adjacency_matrix.shape[0]
         k = 0
         set_index = set(range(n))
@@ -49,17 +59,13 @@ class SBA(BaseEstimator):
             )
 
             # find the close nodes and add them to the community
-            close_j = non_clustered_indices[np.where(distances < self.delta**2)[0]]
+            close_j = non_clustered_indices[np.where(distances <= self.delta**2)[0]]
             for j in close_j:
                 membership[j] = k
                 set_index.remove(j)
             # update community number
             k += 1
-
-        # format output and return
-        P_hat = _approximate_P_from_node_membership(adjacency_matrix, membership)
-        graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
-        return graphon_hat, P_hat
+        return membership
 
     def _compute_dij(
         self, index_i: int, index_j: List[int], adjacency_matrix: np.ndarray

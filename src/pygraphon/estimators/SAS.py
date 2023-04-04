@@ -11,10 +11,7 @@ from pygraphon.graphons.StepGraphon import StepGraphon
 
 
 class SAS(BaseEstimator):
-    """Estimate graphons by sorting and smoothing.
-
-    A Consistent Histogram Estimator for Exchangeable Graph Models, Chan & Airoldi.
-    """
+    """Estimate graphons by sorting and smoothing :cite:p:`chan2014`."""
 
     def __init__(
         self,
@@ -64,6 +61,10 @@ class SAS(BaseEstimator):
         original_indices = np.argsort(idx)
         P_hat = P_hat[original_indices, :]
         P_hat = P_hat[:, original_indices]
+
+        # map to [0, 1]
+        np.clip(P_hat, 0, 1, out=P_hat)
+        np.clip(graphon_matrix, 0, 1, out=graphon_matrix)
 
         return StepGraphon(graphon_matrix, bandwidthHist=1 / graphon_matrix.shape[0]), P_hat
 

@@ -12,12 +12,13 @@ from .nethist import nethist
 
 
 class HistogramEstimator(BaseEstimator):
-    """Implements the histogram estimator from Universality of block model approximation [1].
+    """Implements the histogram estimator from Universality of block model approximation :cite:p:`olhede2014`.
 
     Approximate a graphon from a single adjacency matrix. Size of blocks can be  determined automaticaly.
 
     Args:
         bandwithHist (float, optional): size of the block of the histogram. If None, automatically derived
+<<<<<<< HEAD
             from the observation. Defaults to None.¨
         method (str, optional): method to use for the histogram. Defaults to "mine" (fast python version).
             any other value will use the old matlab (converted to python line by line) version.
@@ -25,12 +26,16 @@ class HistogramEstimator(BaseEstimator):
 
     Sources:
         [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
+=======
+            from the observation. Defaults to None.
+>>>>>>> master
     """
 
     def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:
         super().__init__()
         self.bandwidthHist = bandwithHist
-        self.method = method
+        if method != "mine":
+            DeprecationWarning("method other than 'mine' are deprecated")
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -111,7 +116,6 @@ class HistogramEstimator(BaseEstimator):
         assignment, h = nethist(
             A=adjacencyMatrix,
             h=h,
-            method=self.method,
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,

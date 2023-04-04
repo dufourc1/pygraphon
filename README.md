@@ -12,6 +12,12 @@
 		<a href="https://github.com/dufourc1/pygraphon/actions/workflows/build.yml">
 			<img alt="Build" src="https://github.com/dufourc1/pygraphon/workflows/build/badge.svg" />
 		</a>
+		<a href="https://codecov.io/gh/dufourc1/pygraphon" > 
+			<img src="https://codecov.io/gh/dufourc1/pygraphon/branch/master/graph/badge.svg?token=MDWJ6F86US"/> 
+		</a>
+		<a href='https://pygraphon.readthedocs.io/en/latest/?badge=latest'>
+				<img src='https://readthedocs.org/projects/pygraphon/badge/?version=latest' alt='Documentation Status' />
+		</a>
 		<a href="https://github.com/cthoyt/cookiecutter-python-package">
 				<img alt="Cookiecutter template from @cthoyt" src="https://img.shields.io/badge/Cookiecutter-python--package-yellow" /> 
 		</a>
@@ -22,10 +28,7 @@
 				<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pygraphon" />
 		</a>
 		<a href="https://github.com/dufourc1/pygraphon/blob/master/LICENSE">
-				<img alt="PyPI - License" src="https://img.shields.io/pypi/l" />
-		</a>
-		<a href='https://pygraphon.readthedocs.io/en/latest/?badge=latest'>
-				<img src='https://readthedocs.org/projects/pygraphon/badge/?version=latest' alt='Documentation Status' />
+				<img alt="PyPI - License" src="https://img.shields.io/pypi/l/pygraphon" />
 		</a>
 		<a href='https://github.com/psf/black'>
 				<img src='https://img.shields.io/badge/code%20style-black-000000.svg' alt='Code style: black' />
@@ -37,8 +40,6 @@ Welcome to the documentation of our Python library for estimating graphons from 
 Graphons are a powerful tool for modeling real-world networks, as they can capture the complex, often random structure of these networks in a flexible and scalable way. However, estimating graphons from observed data can be a challenging task, especially when dealing with large and complex networks.
 
 Our library specializes in providing algorithms and tools for estimating graphons from observed data, making it easier to work with these objects in a practical setting. We provide a range of estimation methods that are well-suited to different types of data, including methods based on moments, spectral methods, and maximum likelihood estimation.
-
-Our library also provides tools for preprocessing data, such as data normalization, denoising, and data discretization. These preprocessing tools can help improve the accuracy and reliability of graphon estimation methods, especially when dealing with noisy or incomplete data.
 
 In addition to estimation, our library also provides tools for working with estimated graphons, including visualization tools and algorithms for computing various graph statistics from estimated graphons.
 
