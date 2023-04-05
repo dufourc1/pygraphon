@@ -103,6 +103,7 @@ class HistogramEstimator(BaseEstimator):
             h = None
         else:
             h = int(bandwidthHist * adjacencyMatrix.shape[0])
+
         assignment, h = nethist(
             A=adjacencyMatrix,
             h=h,
@@ -111,8 +112,8 @@ class HistogramEstimator(BaseEstimator):
             past_non_improving=past_non_improving,
         )
 
-        if bandwidthHist is None:
-            bandwidthHist = h / adjacencyMatrix.shape[0]
+        
+        bandwidthHist = h / adjacencyMatrix.shape[0]
 
         graphon_matrix = assignment.theta
         groupmembership = assignment.labels
