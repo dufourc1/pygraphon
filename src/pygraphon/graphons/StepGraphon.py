@@ -41,7 +41,6 @@ class StepGraphon(Graphon):
                 + f"but bandwidth {self.bandwidthHist} asks for {theoretical_size} or {theoretical_size+1}."
             )
 
-
         self.areas = compute_areas_histogram(self.graphon, self.bandwidthHist)
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
 
