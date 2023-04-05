@@ -6,6 +6,7 @@ import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
 from pygraphon.utils.utils_matrix import check_symmetric
+from pygraphon.utils.utils_graphon import compute_areas_histogram
 
 
 class StepGraphon(Graphon):
@@ -32,12 +33,8 @@ class StepGraphon(Graphon):
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
             raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
 
-        self.areas = np.ones_like(self.graphon) * self.bandwidthHist**2
+        self.areas = compute_areas_histogram(self.graphon, self.bandwidthHist)
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
-        if self.remainder != 0:
-            self.areas[:, -1] = self.bandwidthHist * self.remainder
-            self.areas[-1, :] = self.bandwidthHist * self.remainder
-            self.areas[-1, -1] = self.remainder**2
 
         super().__init__(function=self.graphon_function_builder(), initial_rho=initial_rho)
 
