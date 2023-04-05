@@ -5,8 +5,8 @@ from typing import Callable
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils.utils_matrix import check_symmetric
 from pygraphon.utils.utils_graphon import compute_areas_histogram
+from pygraphon.utils.utils_matrix import check_symmetric
 
 
 class StepGraphon(Graphon):

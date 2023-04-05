@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def compute_areas_histogram(theta, bandwidth):
     """Compute the areas of the histogram.
 
