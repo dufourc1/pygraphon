@@ -6,7 +6,6 @@ from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
-from pygraphon.utils.utils_graphon import compute_areas_histogram
 from pygraphon.estimators.networkhistogram.nethist import nethist
 
 import numpy as np
@@ -53,13 +52,14 @@ class SmoothNetHist(BaseEstimator):
             approximated graphon, matrix of connection Pij of size n x n, and bandwidth of the histogram.
         """
 
-        first_fit = self._first_approximate_graphon_from_adjacency(
+        first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
             adjacencyMatrix, bandwidthHist, absTol, maxNumIterations, past_non_improving, use_default_bandwidth)
         tensor_graphon = self._smoothing_histLC(
-            first_fit[0], adjacencyMatrix, number_link_communities)
+            first_fit_graphon, adjacencyMatrix, number_link_communities)
+        # Convert the tensor of graphon to a tensor of Pij matrix ordered by the assignments.
         tensor_P = np.array(
             [self._from_graphon_to_adjacency(
-                tensor_graphon[i], first_fit[1]) for i in tensor_graphon.shape[0]]
+                tensor_graphon[i], assignment) for i in tensor_graphon.shape[0]]
         )
         # Select the best graphon from the tensor
         best_graphon_matrix = self._select_best_graphon(
@@ -146,12 +146,11 @@ class SmoothNetHist(BaseEstimator):
         ----------
         [1] Arthur, D. and Vassilvitskii, S. (2007). k-means++: The Advantages of Careful Seeding.
         """
-
+        # Flattening the graphon and the areas
         nrow_tile = hist_approx.graphon.shape[0]
         flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
         
-
         # Clustering according to kmeans
         nclust_hist = len(np.unique(flat_graphon))
         if number_link_communities is None:  # if None, test all possible number of link communities smoothing
@@ -225,9 +224,7 @@ class SmoothNetHist(BaseEstimator):
             )
             for i in range(nclust_hist)
         ]
-
         return smoothed_graphons
-        raise NotImplementedError("Should return tensor of smoothed graphons")
 
     def _from_graphon_to_adjacency(
             self,
@@ -265,12 +262,55 @@ class SmoothNetHist(BaseEstimator):
 
     def _select_best_graphon(self, tensor_graphon: np.ndarray, adjacencyMatrix: np.ndarray, number_link_communities: Optional[int] = None):
         if number_link_communities is None:
-            raise NotImplementedError(
-                "Metric for selecting the best graphon is not implemented yet.")
-            best_graphon_matrix = tensor_graphon[np.argmin(
-                np.sum(np.abs(tensor_graphon - adjacencyMatrix), axis=1))]
+            k = tensor_graphon.shape[0]
+            bic_score = np.zeros(k)
+            for i in range(k):
+                num_par = len(np.unique(tensor_graphon[i])) #SHOULD BE TESTED
+                log_likelihood_value = log_likelihood(tensor_graphon[i], adjacencyMatrix)
+                bic_score[i] = bic(log_likelihood_value, adjacencyMatrix.shape[0], num_par)
+            best_graphon_matrix = tensor_graphon[np.argmin(bic_score)]
         else:
             best_graphon_matrix = tensor_graphon
-        raise NotImplementedError(
-            "automatic selection of the best graphon is not implemented yet, need to add MSE from pull request")
         return best_graphon_matrix
+    
+
+def log_likelihood(probs: np.ndarray, A: np.ndarray, eps:float = 1e-10) -> float:
+    """Compute the log-likelihood of the graphon given the adjacency matrix.
+
+    Suppose probs and A are aligned.
+
+    Parameters
+    ----------
+    probs : np.ndarray
+        edge probability matrix
+    A : np.ndarray
+        adjacency matrix of the graph
+    eps : float
+        small value to avoid numerical issues
+
+    Returns
+    -------
+    float
+        log-likelihood of the graphon given the adjacency matrix
+    """
+    probs_stable = np.clip(probs, eps, 1 - eps)
+    return np.sum(A * np.log(probs_stable) + (1 - A) * np.log(1 - probs_stable))
+
+def bic(log_likelihood_val: float, n: int, num_par: int) -> float:
+    """Compute the BIC score of the graphon.
+
+    Parameters
+    ----------
+    log_likelihood_val : float
+        log-likelihood of the graphon given the adjacency matrix
+    n : int
+        number of nodes of the graph
+    num_par : int
+        number of parameters of the graphon
+
+    Returns
+    -------
+    float
+        BIC score of the graphon
+    """
+    return -2 * log_likelihood_val + num_par * np.log(n*(n-1)/2)
