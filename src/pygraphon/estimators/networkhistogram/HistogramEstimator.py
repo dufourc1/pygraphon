@@ -112,7 +112,6 @@ class HistogramEstimator(BaseEstimator):
             past_non_improving=past_non_improving,
         )
 
-        
         bandwidthHist = h / adjacencyMatrix.shape[0]
 
         graphon_matrix = assignment.theta
