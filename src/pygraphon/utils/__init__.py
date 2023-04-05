@@ -6,6 +6,7 @@ from .utils_graph import (
     edge_density,
     get_adjacency_matrix_from_graph,
 )
+from .utils_graphon import compute_areas_histogram
 from .utils_maths import generate_all_permutations
 from .utils_matrix import (
     bound_away_from_one_and_zero_arrays,
@@ -24,4 +25,5 @@ __all__ = [
     "get_adjacency_matrix_from_graph",
     "check_simple_adjacency_matrix",
     "edge_density",
+    "compute_areas_histogram",
 ]
