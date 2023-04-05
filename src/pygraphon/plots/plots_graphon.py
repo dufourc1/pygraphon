@@ -58,11 +58,7 @@ def plot_sample(
     ax: Axes = None,
     colorbar=False,
     integrate_to_1: bool = False,
-<<<<<<< HEAD
-    cmap="binary",
-=======
     colormap: str = "binary",
->>>>>>> master
 ) -> Tuple[Figure, Axes]:
     """Plot a sample of the graphon.
 
@@ -103,11 +99,7 @@ def plot_sample(
         vmin = None
         vmax = None
 
-<<<<<<< HEAD
-    im = ax.imshow(result, cmap=cmap, vmin=0, vmax=1)
-=======
     im = ax.imshow(result, cmap=colormap, vmin=vmin, vmax=vmax)
->>>>>>> master
     if colorbar:
         _add_colorbar(im, ax=ax)
     return fig, ax
