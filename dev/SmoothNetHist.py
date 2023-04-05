@@ -6,6 +6,7 @@ from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
+from pygraphon.utils.utils_graphon import compute_areas_histogram
 from pygraphon.estimators.networkhistogram.nethist import nethist
 
 import numpy as np
@@ -42,7 +43,7 @@ class SmoothNetHist(BaseEstimator):
         Parameters
         ----------
         adjacency_matrix : np.ndarray
-            adjancency matrix of the graph
+            adjacency matrix of the graph
         bandwidthHist : float
             size of the blocks (between 0 and 1), by default None
 
@@ -118,52 +119,6 @@ class SmoothNetHist(BaseEstimator):
             assignment_nethist.theta, bandwidthHist=h, initial_rho=rho)
         return graphon_nethist, assignment_nethist
 
-    def _select_best_graphon(self, tensor_graphon: np.ndarray, adjacencyMatrix: np.ndarray, number_link_communities: Optional[int] = None):
-        if number_link_communities is None:
-            raise NotImplementedError(
-                "Metric for selecting the best graphon is not implemented yet.")
-            best_graphon_matrix = tensor_graphon[np.argmin(
-                np.sum(np.abs(tensor_graphon - adjacencyMatrix), axis=1))]
-        else:
-            best_graphon_matrix = tensor_graphon
-        raise NotImplementedError(
-            "automatic selection of the best graphon is not implemented yet, need to add MSE from pull request")
-        return best_graphon_matrix
-
-    def _from_graphon_to_adjacency(
-            self,
-            graphon_matrix: np.ndarray,
-            assignment_nethist: np.ndarray,
-    ) -> np.ndarray:
-        """From a graphon matrix to an adjacency matrix.
-
-        Parameters
-        ----------
-        graphon_matrix : np.ndarray
-            graphon matrix
-        assignment_nethist : np.ndarray
-            assignment of the histogram estimator
-        n : int
-            number of nodes
-
-        Returns
-        -------
-        edge_probability_matrix : np.ndarray
-            matrix of connection Pij of size n x n"""
-        
-        groupmembership = assignment_nethist.labels
-
-        # fills in the edge probability matrix from the value of the graphon
-        edge_probability_matrix = np.zeros(
-            (len(groupmembership), len(groupmembership)))
-        for i in range(edge_probability_matrix.shape[0]):
-            for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
-                edge_probability_matrix[i, j] = graphon_matrix[
-                    int(groupmembership[i]), int(groupmembership[j])
-                ]
-                edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
-        return edge_probability_matrix
-
     def _smoothing_histLC(self,
                           hist_approx: StepGraphon,
                           A: np.ndarray,
@@ -194,6 +149,8 @@ class SmoothNetHist(BaseEstimator):
 
         nrow_tile = hist_approx.graphon.shape[0]
         flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
+        flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
+        
 
         # Clustering according to kmeans
         nclust_hist = len(np.unique(flat_graphon))
@@ -210,7 +167,7 @@ class SmoothNetHist(BaseEstimator):
                     )
                     for j in range(i + 1):  # average tiles of same community
                         avr_graphon[i][kmeans.labels_ ==
-                                       j] = flat_graphon[kmeans.labels_ == j].mean()
+                                       j] = np.sum(flat_graphon[kmeans.labels_ == j]*flat_areas[kmeans.labels_ == j])/np.sum(flat_areas[kmeans.labels_ == j])
 
         else:  # else, test only the number of link communities smoothing given by the user
             avr_graphon = np.asarray(flat_graphon.copy())
@@ -219,7 +176,7 @@ class SmoothNetHist(BaseEstimator):
             )
             for j in range(number_link_communities):
                 avr_graphon[kmeans.labels_ ==
-                            j] = flat_graphon[kmeans.labels_ == j].mean()
+                            j] = np.sum(flat_graphon[kmeans.labels_ == j]*flat_areas[kmeans.labels_ == j])/np.sum(flat_areas[kmeans.labels_ == j])
                 
         return self._flat_to_tensor(avr_graphon, hist_approx, A.shape[0])
 
@@ -271,3 +228,49 @@ class SmoothNetHist(BaseEstimator):
 
         return smoothed_graphons
         raise NotImplementedError("Should return tensor of smoothed graphons")
+
+    def _from_graphon_to_adjacency(
+            self,
+            graphon_matrix: np.ndarray,
+            assignment_nethist: np.ndarray,
+    ) -> np.ndarray:
+        """From a graphon matrix to an adjacency matrix.
+
+        Parameters
+        ----------
+        graphon_matrix : np.ndarray
+            graphon matrix
+        assignment_nethist : np.ndarray
+            assignment of the histogram estimator
+        n : int
+            number of nodes
+
+        Returns
+        -------
+        edge_probability_matrix : np.ndarray
+            matrix of connection Pij of size n x n"""
+        
+        groupmembership = assignment_nethist.labels
+
+        # fills in the edge probability matrix from the value of the graphon
+        edge_probability_matrix = np.zeros(
+            (len(groupmembership), len(groupmembership)))
+        for i in range(edge_probability_matrix.shape[0]):
+            for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
+                edge_probability_matrix[i, j] = graphon_matrix[
+                    int(groupmembership[i]), int(groupmembership[j])
+                ]
+                edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
+        return edge_probability_matrix
+
+    def _select_best_graphon(self, tensor_graphon: np.ndarray, adjacencyMatrix: np.ndarray, number_link_communities: Optional[int] = None):
+        if number_link_communities is None:
+            raise NotImplementedError(
+                "Metric for selecting the best graphon is not implemented yet.")
+            best_graphon_matrix = tensor_graphon[np.argmin(
+                np.sum(np.abs(tensor_graphon - adjacencyMatrix), axis=1))]
+        else:
+            best_graphon_matrix = tensor_graphon
+        raise NotImplementedError(
+            "automatic selection of the best graphon is not implemented yet, need to add MSE from pull request")
+        return best_graphon_matrix
