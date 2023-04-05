@@ -13,7 +13,7 @@ def test_compute_areas_histogram():
     areas = compute_areas_histogram(theta, bandwidth)
     assert np.allclose(areas, theoretical_areas)
 
-def test_compute_areas_histogram_remainder():
+def test_compute_areas_histogram_notzero():
     """Check that the areas of the histogram are correct when the remainder is zero."""
     bandwidth = 1/3
     theoretical_areas = bandwidth**2 * np.ones((3, 3))
