@@ -47,7 +47,7 @@ class SmoothNetHist(BaseEstimator):
                                             maxNumIterations: int = 500,
                                             past_non_improving: int = 3,
                                             use_default_bandwidth: bool = False,
-                                            ) -> Tuple[StepGraphon, np.ndarray, float]:
+                                            ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
         Parameters
@@ -60,7 +60,7 @@ class SmoothNetHist(BaseEstimator):
         Returns
         -------
         Tuple[StepGraphon, np.ndarray]
-            approximated graphon, matrix of connection Pij of size n x n, and bandwidth of the original histogram.
+            approximated graphon, matrix of connection Pij of size n x n
         """
 
         first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
@@ -75,7 +75,7 @@ class SmoothNetHist(BaseEstimator):
         # Select the best graphon from the tensor
         graphon_matrix = self._select_best_graphon(
             tensor_P, adjacencyMatrix, number_link_communities)
-        return StepGraphon(graphon_matrix, bandwidthHist=first_fit_graphon.bandwidthHist, initial_rho= edge_density(adjacencyMatrix)) , graphon_matrix, first_fit_graphon.bandwidthHist
+        return StepGraphon(graphon_matrix, bandwidthHist=first_fit_graphon.bandwidthHist, initial_rho= edge_density(adjacencyMatrix)) , graphon_matrix
 
     def _first_approximate_graphon_from_adjacency(
         self,
@@ -122,10 +122,12 @@ class SmoothNetHist(BaseEstimator):
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
         )
+        bandwidthHist = h / adjacencyMatrix.shape[0]
+
         # ---------------------------------------------------------------------------------------------
         # Return the graphon from first fit nethist.
         graphon_nethist = StepGraphon(
-            assignment_nethist.theta, bandwidthHist=h, initial_rho=rho)
+            assignment_nethist.theta, bandwidthHist=bandwidthHist, initial_rho=rho)
         return graphon_nethist, assignment_nethist
 
     def _smoothing_histLC(self,
