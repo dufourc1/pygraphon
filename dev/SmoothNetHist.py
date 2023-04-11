@@ -49,7 +49,7 @@ class SmoothNetHist(BaseEstimator):
         Returns
         -------
         Tuple[StepGraphon, np.ndarray]
-            approximated graphon, matrix of connection Pij of size n x n, and bandwidth of the histogram.
+            approximated graphon, matrix of connection Pij of size n x n, and bandwidth of the original histogram.
         """
 
         first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
@@ -62,11 +62,9 @@ class SmoothNetHist(BaseEstimator):
                 tensor_graphon[i], assignment) for i in tensor_graphon.shape[0]]
         )
         # Select the best graphon from the tensor
-        best_graphon_matrix = self._select_best_graphon(
+        graphon_matrix = self._select_best_graphon(
             tensor_P, adjacencyMatrix, number_link_communities)
-        raise NotImplementedError(
-            "The tuple returned by this function is not correct, the first argument is not StepGraphon")
-        return
+        return StepGraphon(graphon_matrix, bandwidthHist=first_fit_graphon.bandwidthHist, initial_rho= edge_density(adjacencyMatrix)) , graphon_matrix, first_fit_graphon.bandwidthHist
 
     def _first_approximate_graphon_from_adjacency(
         self,
@@ -260,7 +258,28 @@ class SmoothNetHist(BaseEstimator):
                 edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
         return edge_probability_matrix
 
-    def _select_best_graphon(self, tensor_graphon: np.ndarray, adjacencyMatrix: np.ndarray, number_link_communities: Optional[int] = None):
+    def _select_best_graphon(
+            self,
+            tensor_graphon: np.ndarray,
+            adjacencyMatrix: np.ndarray,
+            number_link_communities: Optional[int] = None,
+            ) -> np.ndarray:
+        """Select the best graphon from the tensor of graphons by BIC.
+
+        Parameters
+        ----------
+        tensor_graphon : np.ndarray
+            tensor of smoothed graphons
+        adjacencyMatrix : np.ndarray
+            adjacency matrix of the graph
+        number_link_communities : Optional[int], optional
+            number of link communities, by default None
+        
+        Returns
+        -------
+        best_graphon_matrix : np.ndarray
+            best graphon matrix selected by the BIC.
+        """
         if number_link_communities is None:
             k = tensor_graphon.shape[0]
             bic_score = np.zeros(k)
@@ -286,7 +305,7 @@ def log_likelihood(probs: np.ndarray, A: np.ndarray, eps:float = 1e-10) -> float
     A : np.ndarray
         adjacency matrix of the graph
     eps : float
-        small value to avoid numerical issues
+        small value to avoid numerical issues with log(0)
 
     Returns
     -------
