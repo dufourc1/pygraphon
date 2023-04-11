@@ -22,6 +22,17 @@ class SmoothNetHist(BaseEstimator):
 
         bandwidth (float): bandwidth of the graphon.
 
+    Functions:
+
+        _approximate_graphon_from_adjacency(): Estimate the graphon function from an adjacency matrix using Smoothing.
+        _first_approximate_graphon_from_adjacency(): First histogram fit of the graphon function.
+        _smoothing_histLC(): Smoothing the histogram using the theory of edge clustering.
+        _flat_to_tensor(): Convert a list of flat vector to a tensor, each slice representing a Pij matrix.
+        _from_graphon_to_adjacency(): Convert a graphon to a Pij matrix, given node assignments.
+        _select_best_graphon(): Select the best graphon from a tensor of Pij matrix, using BIC.
+        _log_likelihood(): Compute the log likelihood of a Pij matrix.
+        _bic(): Compute the BIC of a Pij matrix.
+
     """
 
     def __init__(self, bandwidth: Optional[float] = None) -> None:
@@ -229,7 +240,7 @@ class SmoothNetHist(BaseEstimator):
             graphon_matrix: np.ndarray,
             assignment_nethist: np.ndarray,
     ) -> np.ndarray:
-        """From a graphon matrix to an adjacency matrix.
+        """From a graphon matrix to an edge probability matrix.
 
         Parameters
         ----------
