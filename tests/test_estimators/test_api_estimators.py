@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pytest
 
+from dev import SmoothNetHist
 from pygraphon.estimators import (
     LG,
     SAS,
@@ -102,3 +103,11 @@ class TestApiCompletion(TestApiHistogramEstimator):
     @pytest.fixture
     def estimator(self):
         return Completion()
+
+
+class TestApiSmoothNetHist(TestApiHistogramEstimator):
+    """Test api for SmoothNetHist estimator."""
+
+    @pytest.fixture
+    def estimator(self):
+        return SmoothNetHist()
