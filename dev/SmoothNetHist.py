@@ -67,10 +67,12 @@ class SmoothNetHist(BaseEstimator):
             adjacencyMatrix, bandwidthHist, absTol, maxNumIterations, past_non_improving, use_default_bandwidth)
         tensor_graphon = self._smoothing_histLC(
             first_fit_graphon, adjacencyMatrix, number_link_communities)
+        if not len(np.unique(tensor_graphon[-1].get_graphon()))==len(tensor_graphon):
+            raise ValueError("The number of smoothed graphon is not equal to the number of link communities")
         # Convert the tensor of graphon to a tensor of Pij matrix ordered by the assignments.
         tensor_P = np.array(
             [self._from_graphon_to_adjacency(
-                tensor_graphon[i], assignment) for i in tensor_graphon.shape[0]]
+                tensor_graphon[i], assignment) for i in range(len(tensor_graphon))]#as tensor graphon is a list of StepGraphon
         )
         # Select the best graphon from the tensor
         graphon_matrix = self._select_best_graphon(
@@ -194,7 +196,7 @@ class SmoothNetHist(BaseEstimator):
                         avr_graphon: np.ndarray,
                         hist_approx: StepGraphon,
                         n: int
-                        ):
+                        ): #-> List[StepGraphon]:
         """Convert the flattened smoothed histograms to a tensor containing all possible smoothing.
 
         Parameters
@@ -208,8 +210,8 @@ class SmoothNetHist(BaseEstimator):
 
         Returns
         -------
-        P_smooth : np.ndarray
-            matrix of connection Pij of size n x n for each smoothed graphon
+        smoothed_graphon : list of StepGraphon
+            list of smoothed graphon in increasing order of number of link communities,
         """
 
         nrow_tile = hist_approx.graphon.shape[0]
@@ -239,7 +241,7 @@ class SmoothNetHist(BaseEstimator):
 
     def _from_graphon_to_adjacency(
             self,
-            graphon_matrix: np.ndarray,
+            graphon_matrix: StepGraphon, #graphon matrix is not in (0,1) so create problem
             assignment_nethist: np.ndarray,
     ) -> np.ndarray:
         """From a graphon matrix to an edge probability matrix.
@@ -258,6 +260,7 @@ class SmoothNetHist(BaseEstimator):
         edge_probability_matrix : np.ndarray
             matrix of connection Pij of size n x n"""
         
+        scaled_graphon = graphon_matrix.graphon*graphon_matrix.initial_rho
         groupmembership = assignment_nethist.labels
 
         # fills in the edge probability matrix from the value of the graphon
@@ -265,7 +268,7 @@ class SmoothNetHist(BaseEstimator):
             (len(groupmembership), len(groupmembership)))
         for i in range(edge_probability_matrix.shape[0]):
             for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
-                edge_probability_matrix[i, j] = graphon_matrix[
+                edge_probability_matrix[i, j] = scaled_graphon[
                     int(groupmembership[i]), int(groupmembership[j])
                 ]
                 edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
