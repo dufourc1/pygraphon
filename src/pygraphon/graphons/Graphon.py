@@ -1,4 +1,6 @@
 """Graphon based on a continuous function."""
+import math
+import warnings
 from copy import deepcopy
 from typing import Callable, Optional
 
@@ -24,7 +26,8 @@ class Graphon:
     check : bool
         Should we try to enforce scaled graphon, by default True
     initial_rho : Optional[float]
-        initial edge density, by default None
+        initial edge density, by default None. Should be in ]0,1[ if given. The function is
+        expected to integrate to 1 if scaled is True and initial_rho is not None.
 
 
     ..  note::
@@ -35,6 +38,9 @@ class Graphon:
         :math:`\operatorname{Bern}(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`,
         and :math:`f(\cdot,\cdot)` is :obj:`function` given at initialization.
         to the init function.
+
+        if :py:obj:`initial_rho` is given but the function does not integrate to 1, the integral of the function is used
+        instead of :py:obj:`initial_rho` for consistency.
     """
 
     def __init__(
@@ -44,15 +50,28 @@ class Graphon:
         scaled=True,
         check=True,
     ) -> None:
-        self.integral_value = None
         self.graphon_function = function
         self.scaled = scaled
+        self.integral_value = deepcopy(self.integral())
 
         # remember the original edge density of the graphon
         if initial_rho is None:
-            self.initial_rho = deepcopy(self.integral())
+            self.initial_rho = deepcopy(self.integral_value)
+        # sanitiy check on initial_rho
         else:
-            self.initial_rho = deepcopy(initial_rho)
+            if initial_rho < 0 or initial_rho > 1:
+                raise ValueError("Initial edge density must be in  ]0,1[")
+
+            if scaled and not math.isclose(self.integral_value, 1):
+                warnings.warn(
+                    "function provided does not integrate to 1, disregarding initial_rho, replacing with "
+                    + "integral_value of given function",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                self.initial_rho = deepcopy(self.integral_value)
+            else:
+                self.initial_rho = deepcopy(initial_rho)
 
         if check:
             self.check_graphon()
@@ -112,26 +131,38 @@ class Graphon:
         integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
         return integral
 
-    def draw(self, rho: float, n: int, exchangeable: bool = True) -> np.ndarray:
+    def draw(self, n: int, exchangeable: bool = True, rho: Optional[float] = None) -> np.ndarray:
         """Draw a graph from the graphon with a given density and number of vertices.
 
         Parameters
         ----------
-        rho : float
-            edge density of the realized graph (if :math:`1` will return a graph
-            with edge density = :attr:`self.initial_rho` )
         n : int
              number of vertices of the realized graph
         exchangeable : bool
             if True, the graph generated is exchangeable. Defaults to True.
+        rho : Optional[float]
+            edge density of the realized graph (if :py:obj:`None`, will use draw from the unormalized graphon
+            with density :py:attr:`initial_rho`)
 
         Returns
         -------
         np.ndarray
             adjacency matrix of the realized graph (nxn)
+
+
+        Raises
+        ------
+        ValueError
+            if :py:obj:`rho` is not in :math:`]0,1[`
         """
-        probs = self._get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
-        return self._generate_adjacency_matrix(n, probs, rho)
+        probs = self.get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
+        if rho is None:
+            scale = 1
+        else:
+            if rho < 0 or rho > 1:
+                raise ValueError("Edge density must be in  ]0,1[")
+            scale = rho / self.initial_rho
+        return self._generate_adjacency_matrix(n, probs, scale)
 
     @staticmethod
     def _generate_adjacency_matrix(n, probs, rho):
@@ -174,7 +205,41 @@ class Graphon:
         a[np.tril_indices(n, -1)] = a.T[np.tril_indices(n, -1)]
         return a
 
-    def _get_edge_probabilities(
+    def _get_edge_probabilities(self, n, latentVarArray, wholeMatrix=True):
+        """Generate a matrix P_ij with  0 =< i,j <= n-1.
+
+        Parameters
+        ----------
+        n : int
+            number of nodes in the edge probability matrix returned
+        latentVarArray : np.ndarray
+            array of latent variables (n) used to generate the edge probabilities
+
+        Returns
+        -------
+        np.ndarray
+            matrix of edge probabilities (nxn)
+        """
+        # generate edge probabilities from latent variables array
+        probs = np.zeros((int(n * (n - 1) / 2), 1)).reshape(-1)
+
+        # TODO: performance
+        # Now we iterate over the probabilities array and call the function for each
+        # latent variable. Way to do that in a vectorized fashion to avoid for
+        # loop ?
+        I, J = np.triu_indices(n, 1)
+        for index, nodes in enumerate(zip(I, J)):
+            probs[index] = self.graphon_function(latentVarArray[nodes[0]], latentVarArray[nodes[1]])
+        probs *= self.initial_rho
+
+        if wholeMatrix:
+            P = np.zeros((n, n))
+            P[np.triu_indices(n, 1)] = probs
+            P[np.tril_indices(n, -1)] = P.T[np.tril_indices(n, -1)]
+            return P
+        return probs
+
+    def get_edge_probabilities(
         self,
         n: int,
         exchangeable: bool = True,
@@ -201,24 +266,7 @@ class Graphon:
             np.random.uniform(0, 1, size=n) if exchangeable else np.array([i / n for i in range(n)])
         )
 
-        # generate edge probabilities from latent variables array
-        probs = np.zeros((int(n * (n - 1) / 2), 1)).reshape(-1)
-
-        # TODO: performance
-        # Now we iterate over the probabilities array and call the function for each
-        # latent variable. Way to do that in a vectorized fashion to avoid for
-        # loop ?
-        I, J = np.triu_indices(n, 1)
-        for index, nodes in enumerate(zip(I, J)):
-            probs[index] = self.graphon_function(latentVarArray[nodes[0]], latentVarArray[nodes[1]])
-        probs *= self.initial_rho
-
-        if wholeMatrix:
-            P = np.zeros((n, n))
-            P[np.triu_indices(n, 1)] = probs
-            P[np.tril_indices(n, -1)] = P.T[np.tril_indices(n, -1)]
-            return P
-        return probs
+        return self._get_edge_probabilities(n, latentVarArray, wholeMatrix)
 
     def __add__(self, other):
         """Add and normalize two graphons.

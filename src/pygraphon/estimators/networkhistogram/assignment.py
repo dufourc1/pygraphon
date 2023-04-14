@@ -89,6 +89,26 @@ class Assignment:
         self.labels = np.copy(other.labels)
         self.realized = np.copy(other.realized)
 
+    def labels_to_latent_variables(self) -> np.ndarray:
+        """Convert the labels to latent variables for a stochastic block model.
+
+        The nodes in the same community are assigned to the same latent variable.
+
+        Returns
+        -------
+        np.ndarray
+            Latent variables
+        """
+        n = self.labels.shape[0]
+        latent_variables = np.zeros_like(self.labels, dtype=float)
+        offset = 0
+
+        for i in range(self.num_groups):
+            group_size_0_1 = self.group_sizes[i] / n
+            latent_variables[np.where(self.labels == i)] = offset + group_size_0_1 / 2
+            offset += group_size_0_1
+        return latent_variables
+
 
 #########################
 # Numba compiled functions

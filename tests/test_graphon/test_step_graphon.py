@@ -50,12 +50,12 @@ class TestRegularGraphon:
 
     def test_edge_probability_between_0_and_1(self, step_graphon):
         """Test that the edge probability is correct."""
-        P_ij = step_graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+        P_ij = step_graphon.get_edge_probabilities(n=20, wholeMatrix=False)
         assert np.all(P_ij <= 1)
         assert np.all(P_ij >= 0)
 
     def test_edge_probability_correct(self, step_graphon):
-        P_small = step_graphon._get_edge_probabilities(n=4, wholeMatrix=True, exchangeable=False)
+        P_small = step_graphon.get_edge_probabilities(n=4, wholeMatrix=True, exchangeable=False)
         P_theoric = np.array(
             [[0, 0.8, 0.2, 0.2], [0.8, 0, 0.2, 0.2], [0.2, 0.2, 0, 0.8], [0.2, 0.2, 0.8, 0]]
         )
@@ -112,6 +112,6 @@ class TestIrregularGraphon(TestRegularGraphon):
 
     def test_edge_probability_between_0_and_1(self, irregular_step_graphon):
         """Test that the edge probability is correct."""
-        P_ij = irregular_step_graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+        P_ij = irregular_step_graphon.get_edge_probabilities(n=20, wholeMatrix=False)
         assert np.all(P_ij <= 1)
         assert np.all(P_ij >= 0)

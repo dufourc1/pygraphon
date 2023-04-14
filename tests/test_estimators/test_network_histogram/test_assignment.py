@@ -123,3 +123,12 @@ def test_update_realized_numnber_vs_assignment_creation():
         assert np.all(assignment.counts == new_assignment.counts)
         assert np.all(assignment.theta == new_assignment.theta)
         assert assignment.log_likelihood == new_assignment.log_likelihood
+
+
+def test_assignment_to_latent():
+    """Test the conversion from assignment to latent."""
+    A, node_labels = get_adj_and_labels()
+    assignment = Assignment(node_labels, A)
+    latent = assignment.labels_to_latent_variables()
+    assert np.all(latent[0:4] < 0.5)
+    assert np.all(latent[4:] > 0.5)

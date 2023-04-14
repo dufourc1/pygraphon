@@ -6,8 +6,6 @@
 We provide general classes for two different types of graphon. General
 graphons and step graphons. 
 
-
-
 .. currentmodule:: pygraphon.graphons
 
 .. autosummary::
@@ -47,4 +45,21 @@ We also provide a list of pre-implemented common graphons which are instances of
 .. automodule:: pygraphon.graphons
 	:members:
 
+
+
+Internal representation details:
+--------------------------------
+
+For statistical identifiability reasons, when given a function :math:`f:[0,1]^2 \mapsto [0,1]` we internaly use the scaled graphon 
+:math:`\tilde{f}:[0,1]^2 \mapsto \mathbb{R}^{+}` defined as:
+
+.. math::
+
+   \tilde{f}(x,y) = \frac{f(x,y)}{\rho},
+
+
+where :math:`\rho = \iint_{[0,1]^2} f(x,y)dxdy`.
+
+In the :py:class:`Graphon` class, :py:attr:`~Graphon.graphon` is the scaled graphon :math:`\tilde{f}` and 
+:py:attr:`~Graphon.initial_rho` is the value of :math:`\rho`.
 
