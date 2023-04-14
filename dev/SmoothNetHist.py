@@ -4,9 +4,12 @@ from typing import Optional, Tuple
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
+from pygraphon.estimators.networkhistogram.assignment import Assignment
+
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
 from pygraphon.estimators.networkhistogram.nethist import nethist
+
 
 import numpy as np
 
@@ -71,13 +74,18 @@ class SmoothNetHist(BaseEstimator):
             raise ValueError("The number of smoothed graphon is not equal to the number of link communities")
         # Convert the tensor of graphon to a tensor of Pij matrix ordered by the assignments.
         tensor_P = np.array(
-            [self._from_graphon_to_adjacency(
-                tensor_graphon[i], assignment) for i in range(len(tensor_graphon))]#as tensor graphon is a list of StepGraphon
-        )
+            [
+            tensor_graphon[i]._get_edge_probabilities(
+            n = adjacencyMatrix.shape[0], 
+            latentVarArray = assignment.labels_to_latent_variables
+            ) 
+            for i in range(len(tensor_graphon))
+            ]
+            )
         # Select the best graphon from the tensor
-        graphon_matrix = self._select_best_graphon(
+        pij_matrix = self._select_best_graphon(
             tensor_P, adjacencyMatrix, number_link_communities)
-        return StepGraphon(graphon_matrix, bandwidthHist=first_fit_graphon.bandwidthHist, initial_rho= edge_density(adjacencyMatrix)) , graphon_matrix
+        return StepGraphon(pij_matrix, bandwidthHist=first_fit_graphon.bandwidthHist, initial_rho= first_fit_graphon.initial_rho) , pij_matrix
 
     def _first_approximate_graphon_from_adjacency(
         self,
@@ -87,7 +95,7 @@ class SmoothNetHist(BaseEstimator):
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
         use_default_bandwidth: bool = False,
-    ) -> Tuple[StepGraphon, np.ndarray]:
+    ) -> Tuple[StepGraphon, Assignment]:
         """Estimate the graphon function f(x,y) from an adjacency matrix from a first histogram from [1].
 
         Parameters
@@ -276,7 +284,7 @@ class SmoothNetHist(BaseEstimator):
 
     def _select_best_graphon(
             self,
-            tensor_graphon: np.ndarray,
+            tensor_pij: np.ndarray,
             adjacencyMatrix: np.ndarray,
             number_link_communities: Optional[int] = None,
             ) -> np.ndarray:
@@ -284,8 +292,8 @@ class SmoothNetHist(BaseEstimator):
 
         Parameters
         ----------
-        tensor_graphon : np.ndarray
-            tensor of smoothed graphons
+        tensor_pij : np.ndarray
+            tensor of smoothed graphons, in Pij form (n x n)
         adjacencyMatrix : np.ndarray
             adjacency matrix of the graph
         number_link_communities : Optional[int], optional
@@ -293,20 +301,20 @@ class SmoothNetHist(BaseEstimator):
         
         Returns
         -------
-        best_graphon_matrix : np.ndarray
+        best_pij_matrix : np.ndarray
             best graphon matrix selected by the BIC.
         """
         if number_link_communities is None:
-            k = tensor_graphon.shape[0]
+            k = tensor_pij.shape[0]
             bic_score = np.zeros(k)
             for i in range(k):
-                num_par = len(np.unique(tensor_graphon[i])) #SHOULD BE TESTED
-                log_likelihood_value = log_likelihood(tensor_graphon[i], adjacencyMatrix)
+                num_par = len(np.unique(tensor_pij[i])) #SHOULD BE TESTED
+                log_likelihood_value = log_likelihood(tensor_pij[i], adjacencyMatrix)
                 bic_score[i] = bic(log_likelihood_value, adjacencyMatrix.shape[0], num_par)
-            best_graphon_matrix = tensor_graphon[np.argmin(bic_score)]
+            best_pij_matrix = tensor_pij[np.argmin(bic_score)]
         else:
-            best_graphon_matrix = tensor_graphon
-        return best_graphon_matrix
+            best_pij_matrix = tensor_pij
+        return best_pij_matrix
     
 
 def log_likelihood(probs: np.ndarray, A: np.ndarray, eps:float = 1e-10) -> float:
