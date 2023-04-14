@@ -1,4 +1,6 @@
 """Graphon based on a continuous function."""
+import math
+import warnings
 from copy import deepcopy
 from typing import Callable, Optional
 
@@ -24,7 +26,8 @@ class Graphon:
     check : bool
         Should we try to enforce scaled graphon, by default True
     initial_rho : Optional[float]
-        initial edge density, by default None
+        initial edge density, by default None. Should be in ]0,1[ if given. The function is
+        expected to integrate to 1 if scaled is True and initial_rho is not None.
 
 
     ..  note::
@@ -35,6 +38,9 @@ class Graphon:
         :math:`\operatorname{Bern}(\rho f(x,y))`, where :obj:`rho` is the user given parameter in  :py:meth:`draw`,
         and :math:`f(\cdot,\cdot)` is :obj:`function` given at initialization.
         to the init function.
+
+        if :py:obj:`initial_rho` is given but the function does not integrate to 1, the integral of the function is used
+        instead of :py:obj:`initial_rho` for consistency.
     """
 
     def __init__(
@@ -44,15 +50,24 @@ class Graphon:
         scaled=True,
         check=True,
     ) -> None:
-        self.integral_value = None
         self.graphon_function = function
         self.scaled = scaled
+        self.integral_value = deepcopy(self.integral())
 
         # remember the original edge density of the graphon
         if initial_rho is None:
-            self.initial_rho = deepcopy(self.integral())
+            self.initial_rho = deepcopy(self.integral_value)
+        # sanitiy check on initial_rho
         else:
-            self.initial_rho = deepcopy(initial_rho)
+            if initial_rho < 0 or initial_rho > 1:
+                raise ValueError("Initial edge density must be in  ]0,1[")
+
+            if scaled and not math.isclose(self.integral_value, 1):
+                warnings.warn("function provided does not integrate to 1, disregarding initial_rho, replacing with " +
+                              "integral_value of given function", UserWarning)
+                self.initial_rho = deepcopy(self.integral_value)
+            else:
+                self.initial_rho = deepcopy(initial_rho)
 
         if check:
             self.check_graphon()
@@ -112,18 +127,18 @@ class Graphon:
         integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
         return integral
 
-    def draw(self, rho: float, n: int, exchangeable: bool = True) -> np.ndarray:
+    def draw(self, n: int, exchangeable: bool = True, rho: Optional[float] = None) -> np.ndarray:
         """Draw a graph from the graphon with a given density and number of vertices.
 
         Parameters
         ----------
-        rho : float
-            edge density of the realized graph (if :math:`1` will return a graph
-            with edge density = :attr:`self.initial_rho` )
         n : int
              number of vertices of the realized graph
         exchangeable : bool
             if True, the graph generated is exchangeable. Defaults to True.
+        rho : Optional[float]
+            edge density of the realized graph (if :py:obj:`None`, will use draw from the unormalized graphon
+            with density :py:attr:`initial_rho`)
 
         Returns
         -------
@@ -131,6 +146,12 @@ class Graphon:
             adjacency matrix of the realized graph (nxn)
         """
         probs = self._get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
+        if rho is None:
+            rho = 1
+        else:
+            if rho < 0 or rho > 1:
+                raise ValueError("Edge density must be in  ]0,1[")
+            rho = rho / self.initial_rho
         return self._generate_adjacency_matrix(n, probs, rho)
 
     @staticmethod

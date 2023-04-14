@@ -6,7 +6,6 @@ import numpy as np
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons.StepGraphon import StepGraphon
-from pygraphon.utils.utils_graph import edge_density
 
 from .nethist import nethist
 
@@ -49,7 +48,6 @@ class HistogramEstimator(BaseEstimator):
         Tuple[StepGraphon, np.ndarray]
             approximated graphon and matrix of connection Pij of size n x n
         """
-        rho = edge_density(adjacency_matrix)
         if bandwidthHist is None:
             bandwidthHist = self.bandwidthHist
         graphon_matrix, P, h = self._approximate(
@@ -59,7 +57,7 @@ class HistogramEstimator(BaseEstimator):
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
         )
-        return StepGraphon(graphon_matrix, bandwidthHist=h, initial_rho=rho), P
+        return StepGraphon(graphon_matrix, bandwidthHist=h), P
 
     def _approximate(
         self,

@@ -2,6 +2,8 @@
 
 """Test of graphons classes."""
 
+import math
+
 import numpy as np
 import pytest
 
@@ -27,11 +29,11 @@ class TestGraphon:
         """Test that the step graphon is correctly instantiated."""
         # compute theoretical quantities
         integral = 0.5
-        assert np.allclose(graphon.initial_rho, integral)
+        assert math.isclose(graphon.initial_rho, integral)
 
     def test_normalized(self, graphon):
         """Test that the step graphon is normalized."""
-        assert np.allclose(graphon.integral(), 1)
+        assert math.isclose(graphon.integral(), 1)
 
     def test_edge_probability_between_0_and_1(self, graphon):
         """Test that the edge probability is correct."""
@@ -46,3 +48,18 @@ class TestGraphon:
         )
         np.fill_diagonal(P_theoric, 0)
         assert np.allclose(P_small, P_theoric)
+
+
+def test_no_initial_rho_given():
+    """Test that the initial rho is computed."""
+    graphon = Graphon(lambda x, y: 0.5)
+    assert math.isclose(graphon.initial_rho, 0.5)
+
+
+def test_raise_warning_incompatible_initial_rho():
+    """Test that a warning is raised if the initial rho is not compatible."""
+    with pytest.warns(UserWarning):
+        graphon = Graphon(lambda x, y: 0.5, initial_rho=0.2)
+    assert math.isclose(graphon.initial_rho, 0.5)
+    P = graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+    assert np.all(P == 0.5)
