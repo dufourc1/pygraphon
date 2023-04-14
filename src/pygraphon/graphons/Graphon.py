@@ -155,7 +155,7 @@ class Graphon:
         ValueError
             if :py:obj:`rho` is not in :math:`]0,1[`
         """
-        probs = self._get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
+        probs = self.get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
         if rho is None:
             scale = 1
         else:
@@ -205,7 +205,41 @@ class Graphon:
         a[np.tril_indices(n, -1)] = a.T[np.tril_indices(n, -1)]
         return a
 
-    def _get_edge_probabilities(
+    def _get_edge_probabilities(self, n, latentVarArray, wholeMatrix=True):
+        """Generate a matrix P_ij with  0 =< i,j <= n-1.
+
+        Parameters
+        ----------
+        n : int
+            number of nodes in the edge probability matrix returned
+        latentVarArray : np.ndarray
+            array of latent variables (n) used to generate the edge probabilities
+
+        Returns
+        -------
+        np.ndarray
+            matrix of edge probabilities (nxn)
+        """
+        # generate edge probabilities from latent variables array
+        probs = np.zeros((int(n * (n - 1) / 2), 1)).reshape(-1)
+
+        # TODO: performance
+        # Now we iterate over the probabilities array and call the function for each
+        # latent variable. Way to do that in a vectorized fashion to avoid for
+        # loop ?
+        I, J = np.triu_indices(n, 1)
+        for index, nodes in enumerate(zip(I, J)):
+            probs[index] = self.graphon_function(latentVarArray[nodes[0]], latentVarArray[nodes[1]])
+        probs *= self.initial_rho
+
+        if wholeMatrix:
+            P = np.zeros((n, n))
+            P[np.triu_indices(n, 1)] = probs
+            P[np.tril_indices(n, -1)] = P.T[np.tril_indices(n, -1)]
+            return P
+        return probs
+
+    def get_edge_probabilities(
         self,
         n: int,
         exchangeable: bool = True,
@@ -232,24 +266,7 @@ class Graphon:
             np.random.uniform(0, 1, size=n) if exchangeable else np.array([i / n for i in range(n)])
         )
 
-        # generate edge probabilities from latent variables array
-        probs = np.zeros((int(n * (n - 1) / 2), 1)).reshape(-1)
-
-        # TODO: performance
-        # Now we iterate over the probabilities array and call the function for each
-        # latent variable. Way to do that in a vectorized fashion to avoid for
-        # loop ?
-        I, J = np.triu_indices(n, 1)
-        for index, nodes in enumerate(zip(I, J)):
-            probs[index] = self.graphon_function(latentVarArray[nodes[0]], latentVarArray[nodes[1]])
-        probs *= self.initial_rho
-
-        if wholeMatrix:
-            P = np.zeros((n, n))
-            P[np.triu_indices(n, 1)] = probs
-            P[np.tril_indices(n, -1)] = P.T[np.tril_indices(n, -1)]
-            return P
-        return probs
+        return self._get_edge_probabilities(n, latentVarArray, wholeMatrix)
 
     def __add__(self, other):
         """Add and normalize two graphons.

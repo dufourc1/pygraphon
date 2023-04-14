@@ -38,12 +38,12 @@ class TestGraphon:
 
     def test_edge_probability_between_0_and_1(self, graphon):
         """Test that the edge probability is correct."""
-        P_ij = graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+        P_ij = graphon.get_edge_probabilities(n=20, wholeMatrix=False)
         assert np.all(P_ij <= 1)
         assert np.all(P_ij >= 0)
 
     def test_edge_probability_correct(self, graphon, function):
-        P_small = graphon._get_edge_probabilities(n=4, wholeMatrix=True, exchangeable=False)
+        P_small = graphon.get_edge_probabilities(n=4, wholeMatrix=True, exchangeable=False)
         P_theoric = np.array([function(x / 4, y / 4) for x in range(4) for y in range(4)]).reshape(
             4, 4
         )
@@ -64,7 +64,7 @@ def test_raise_warning_incompatible_initial_rho():
     with pytest.warns(UserWarning):
         graphon = Graphon(lambda x, y: 0.5, initial_rho=0.2)
     assert math.isclose(graphon.initial_rho, 0.5)
-    P = graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+    P = graphon.get_edge_probabilities(n=20, wholeMatrix=False)
     assert np.all(P == 0.5)
 
 
@@ -73,7 +73,7 @@ def test_initial_rho_with_normalized_f():
     initial_rho = 0.3
     graphon = Graphon(lambda x, y: 1, initial_rho=initial_rho)
     assert initial_rho == graphon.initial_rho
-    P = graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+    P = graphon.get_edge_probabilities(n=20, wholeMatrix=False)
     assert np.all(P == initial_rho)
 
 

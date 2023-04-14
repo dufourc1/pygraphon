@@ -10,8 +10,8 @@ class MseProbaEdge(BaseMetric):
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
-        p_0 = graphon._get_edge_probabilities(self.n_nodes, exchangeable=False)
-        p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
+        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False)
+        p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean((p_0 - p_hat) ** 2)
 
     def __str__(self):
@@ -24,8 +24,8 @@ class MaeProbaEdge(BaseMetric):
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
-        p_0 = graphon._get_edge_probabilities(self.n_nodes, exchangeable=False)
-        p_hat = estimated._get_edge_probabilities(self.n_nodes, exchangeable=False)
+        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False)
+        p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean(np.abs(p_0 - p_hat))
 
     def __str__(self):
