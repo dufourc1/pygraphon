@@ -51,7 +51,7 @@ Internal representation details:
 --------------------------------
 
 For statistical identifiability reasons, when given a function :math:`f:[0,1]^2 \mapsto [0,1]` we internaly use the scaled graphon 
-:math:`\tilde{f:[0,1]^2 \mapsto \mathbb{R}^{+}}` defined as:
+:math:`\tilde{f}:[0,1]^2 \mapsto \mathbb{R}^{+}` defined as:
 
 .. math::
 

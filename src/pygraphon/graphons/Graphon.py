@@ -63,8 +63,12 @@ class Graphon:
                 raise ValueError("Initial edge density must be in  ]0,1[")
 
             if scaled and not math.isclose(self.integral_value, 1):
-                warnings.warn("function provided does not integrate to 1, disregarding initial_rho, replacing with " +
-                              "integral_value of given function", UserWarning)
+                warnings.warn(
+                    "function provided does not integrate to 1, disregarding initial_rho, replacing with "
+                    + "integral_value of given function",
+                    UserWarning,
+                    stacklevel=2,
+                )
                 self.initial_rho = deepcopy(self.integral_value)
             else:
                 self.initial_rho = deepcopy(initial_rho)
@@ -144,6 +148,12 @@ class Graphon:
         -------
         np.ndarray
             adjacency matrix of the realized graph (nxn)
+
+
+        Raises
+        ------
+        ValueError
+            if :py:obj:`rho` is not in :math:`]0,1[`
         """
         probs = self._get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
         if rho is None:

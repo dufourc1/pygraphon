@@ -1,6 +1,6 @@
 """Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
 import math
-from typing import Callable
+from typing import Callable, Optional
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from pygraphon.utils.utils_matrix import check_symmetric
 
 
 class StepGraphon(Graphon):
-    """A step function graphon defined by giving the matrix representing the block model approxumation.
+    """A step function graphon defined by giving the matrix representing the block model approximation.
 
     Parameters
     ----------
@@ -18,12 +18,12 @@ class StepGraphon(Graphon):
             np array representing the theta matrix
         bandwidthHist : float
             size of the groups (between 0 and 1).
-        initial_rho : float
+        initial_rho : Optional[float]
             initial edge density (used to keep track in case of normalization), by default None
     """
 
     def __init__(
-        self, graphon: np.ndarray, bandwidthHist: float, initial_rho: float = None
+        self, graphon: np.ndarray, bandwidthHist: float, initial_rho: Optional[float] = None
     ) -> None:
         # save args
         self.graphon = graphon
