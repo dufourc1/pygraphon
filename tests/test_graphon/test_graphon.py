@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from pygraphon.graphons.Graphon import Graphon
+from pygraphon.utils import edge_density
 
 
 @pytest.fixture(scope="class")
@@ -54,6 +55,8 @@ def test_no_initial_rho_given():
     """Test that the initial rho is computed."""
     graphon = Graphon(lambda x, y: 0.5)
     assert math.isclose(graphon.initial_rho, 0.5)
+    with pytest.raises(ValueError):
+        graphon = Graphon(lambda x, y: 0.5, initial_rho=-1)
 
 
 def test_raise_warning_incompatible_initial_rho():
@@ -63,3 +66,25 @@ def test_raise_warning_incompatible_initial_rho():
     assert math.isclose(graphon.initial_rho, 0.5)
     P = graphon._get_edge_probabilities(n=20, wholeMatrix=False)
     assert np.all(P == 0.5)
+
+
+def test_initial_rho_with_normalized_f():
+    """Test that initial rho is not modified if close but different."""
+    initial_rho = 0.3
+    graphon = Graphon(lambda x, y: 1, initial_rho=initial_rho)
+    assert initial_rho == graphon.initial_rho
+    P = graphon._get_edge_probabilities(n=20, wholeMatrix=False)
+    assert np.all(P == initial_rho)
+
+
+def test_draw_rho():
+    """Test that the draw rho is correct."""
+    graphon = Graphon(lambda x, y: 1)
+    n = 1000
+    np.random.seed(0)
+    A = graphon.draw(n=n, rho=0.8)
+    assert math.isclose(edge_density(A), 0.8, abs_tol=0.01)
+    A = graphon.draw(n=n, rho=0.2)
+    assert math.isclose(edge_density(A), 0.2, abs_tol=0.01)
+    A = graphon.draw(n=n)
+    assert edge_density(A) == 1

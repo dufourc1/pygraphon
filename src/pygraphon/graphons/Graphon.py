@@ -157,12 +157,12 @@ class Graphon:
         """
         probs = self._get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
         if rho is None:
-            rho = 1
+            scale = 1
         else:
             if rho < 0 or rho > 1:
                 raise ValueError("Edge density must be in  ]0,1[")
-            rho = rho / self.initial_rho
-        return self._generate_adjacency_matrix(n, probs, rho)
+            scale = rho / self.initial_rho
+        return self._generate_adjacency_matrix(n, probs, scale)
 
     @staticmethod
     def _generate_adjacency_matrix(n, probs, rho):
