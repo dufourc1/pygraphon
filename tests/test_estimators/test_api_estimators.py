@@ -72,6 +72,14 @@ class TestApiUSVT(TestApiHistogramEstimator):
         return USVT()
 
 
+class TestApiUSVTSparse(TestApiHistogramEstimator):
+    """Test api for USVT estimator."""
+
+    @pytest.fixture
+    def estimator(self):
+        return USVT(regime="sparse")
+
+
 class TestApiNBDsmooth(TestApiHistogramEstimator):
     """Test api for NBDsmooth estimator."""
 

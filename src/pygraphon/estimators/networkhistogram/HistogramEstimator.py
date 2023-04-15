@@ -11,9 +11,10 @@ from .nethist import nethist
 
 
 class HistogramEstimator(BaseEstimator):
-    """Implements the histogram estimator from Universality of block model approximation :cite:p:`olhede2014`.
+    """Histogram estimator from  :cite:p:`olhede2014`.
 
-    Approximate a graphon from a single adjacency matrix. Size of blocks can be  determined automaticaly.
+    Approximate a graphon from a single adjacency matrix. Size of blocks can be  determined automaticaly or
+    provided by the user.
 
     Args:
         bandwithHist (float, optional): size of the block of the histogram. If None, automatically derived
