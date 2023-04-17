@@ -144,7 +144,7 @@ class SmoothNetHist(BaseEstimator):
                           hist_approx: StepGraphon,
                           A: np.ndarray,
                           number_link_communities: Optional[int] = None
-                          ):
+                          )-> list[StepGraphon]:
         """Smoothing of the histogram estimator using k-means++ [1].
 
         Parameters
@@ -204,7 +204,7 @@ class SmoothNetHist(BaseEstimator):
                         avr_graphon: np.ndarray,
                         hist_approx: StepGraphon,
                         n: int
-                        ): #-> List[StepGraphon]:
+                        ) -> list[StepGraphon]:
         """Convert the flattened smoothed histograms to a tensor containing all possible smoothing.
 
         Parameters
@@ -247,44 +247,9 @@ class SmoothNetHist(BaseEstimator):
         ]
         return smoothed_graphons
 
-    def _from_graphon_to_adjacency(
-            self,
-            graphon_matrix: StepGraphon, #graphon matrix is not in (0,1) so create problem
-            assignment_nethist: np.ndarray,
-    ) -> np.ndarray:
-        """From a graphon matrix to an edge probability matrix.
-
-        Parameters
-        ----------
-        graphon_matrix : np.ndarray
-            graphon matrix
-        assignment_nethist : np.ndarray
-            assignment of the histogram estimator
-        n : int
-            number of nodes
-
-        Returns
-        -------
-        edge_probability_matrix : np.ndarray
-            matrix of connection Pij of size n x n"""
-        
-        scaled_graphon = graphon_matrix.graphon*graphon_matrix.initial_rho
-        groupmembership = assignment_nethist.labels
-
-        # fills in the edge probability matrix from the value of the graphon
-        edge_probability_matrix = np.zeros(
-            (len(groupmembership), len(groupmembership)))
-        for i in range(edge_probability_matrix.shape[0]):
-            for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
-                edge_probability_matrix[i, j] = scaled_graphon[
-                    int(groupmembership[i]), int(groupmembership[j])
-                ]
-                edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
-        return edge_probability_matrix
-
     def _select_best_graphon(
             self,
-            tensor_pij: np.ndarray,
+            tensor_pij: list(np.ndarray),
             adjacencyMatrix: np.ndarray,
             number_link_communities: Optional[int] = None,
             ) -> np.ndarray:
