@@ -1,0 +1,5 @@
+2023-03-27 10:30:21.723 | INFO     | __main__:<module>:123 - constant
+2023-03-27 10:30:21.723 | INFO     | __main__:<module>:124 - <class 'str'>
+2023-03-27 10:30:21.724 | INFO     | __main__:main:40 - Starting experiment
+2023-03-27 10:30:21.726 | Level 20 | __main__:flush:35 - 0%|          | 0/16 [00:00<?, ?it/s]
+2023-03-27 10:30:21.726 | Level 20 | __main__:flush:35 - 100%|##########| 16/16 [00:00<?, ?it/s]
