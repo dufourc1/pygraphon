@@ -1,6 +1,0 @@
-2022-11-29 00:04:33.482 | INFO     | __main__:main:40 - Starting experiment
-2022-11-29 00:04:33.484 | Level 20 | __main__:flush:35 - 0%|          | 0/4 [00:00<?, ?it/s]
-2022-11-29 00:04:33.485 | Level 20 | __main__:flush:35 - 100%|##########| 4/4 [00:00<00:00, 26092.09it/s]
-2022-11-29 00:08:01.223 | INFO     | __main__:main:88 - Computing done
-2022-11-29 00:08:01.226 | INFO     | __main__:main:92 - Cleaning temp/
-2022-11-29 00:08:01.228 | INFO     | __main__:main:106 - Results saved, bye
