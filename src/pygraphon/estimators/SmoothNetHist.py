@@ -1,6 +1,7 @@
 """Smoothing Network Histograms Class."""
 
 from typing import List, Optional, Tuple
+from warnings import warn
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -9,7 +10,7 @@ from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.assignment import Assignment
 from pygraphon.estimators.networkhistogram.nethist import nethist
 from pygraphon.graphons import StepGraphon
-from pygraphon.utils import edge_density
+from pygraphon.utils import bic, edge_density, log_likelihood
 
 
 class SmoothNetHist(BaseEstimator):
@@ -34,6 +35,7 @@ class SmoothNetHist(BaseEstimator):
     def __init__(self, bandwidth: Optional[float] = None) -> None:
         super().__init__()
         self.bandwidth = bandwidth
+        self._bic = np.inf
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -226,7 +228,7 @@ class SmoothNetHist(BaseEstimator):
 
     def _smoothing_operator(
         self,
-        tensor_slice_graphon: StepGraphon,
+        tensor_slice_graphon: np.ndarray,
         kmeans: KMeans,
         number_link_communities: int,
         flat_graphon: np.ndarray,
@@ -331,50 +333,26 @@ class SmoothNetHist(BaseEstimator):
                 num_par = len(np.unique(tensor_pij[i]))  # SHOULD BE TESTED
                 log_likelihood_value = log_likelihood(tensor_pij[i], adjacencyMatrix)
                 bic_score[i] = bic(log_likelihood_value, adjacencyMatrix.shape[0], num_par)
-            best_pij_matrix = tensor_pij[np.argmin(bic_score)]
+            best_index = np.argmin(bic_score)
+            best_pij_matrix = tensor_pij[best_index]
+            self._bic = bic_score[best_index]
         else:
             best_pij_matrix = tensor_pij
+            self._bic = bic(
+                log_likelihood(tensor_pij, adjacencyMatrix),
+                adjacencyMatrix.shape[0],
+                number_link_communities,
+            )
         return best_pij_matrix
 
+    def get_bic(self) -> float:
+        """Get the BIC score of the estimated graphon.
 
-def log_likelihood(probs: np.ndarray, A: np.ndarray, eps: float = 1e-10) -> float:
-    """Compute the log-likelihood of the graphon given the adjacency matrix.
-
-    Suppose probs and A are aligned.
-
-    Parameters
-    ----------
-    probs : np.ndarray
-        edge probability matrix
-    A : np.ndarray
-        adjacency matrix of the graph
-    eps : float
-        small value to avoid numerical issues with log(0)
-
-    Returns
-    -------
-    float
-        log-likelihood of the graphon given the adjacency matrix
-    """
-    probs_stable = np.clip(probs, eps, 1 - eps)
-    return np.sum(A * np.log(probs_stable) + (1 - A) * np.log(1 - probs_stable))
-
-
-def bic(log_likelihood_val: float, n: int, num_par: int) -> float:
-    """Compute the BIC score of the graphon.
-
-    Parameters
-    ----------
-    log_likelihood_val : float
-        log-likelihood of the graphon given the adjacency matrix
-    n : int
-        number of nodes of the graph
-    num_par : int
-        number of parameters of the graphon
-
-    Returns
-    -------
-    float
-        BIC score of the graphon
-    """
-    return -2 * log_likelihood_val + num_par * np.log(n * (n - 1) / 2)
+        Returns
+        -------
+        float
+            BIC score.
+        """
+        if self.fitted is False:
+            warn("The model has not been fitted yet, returning np.inf.")
+        return self._bic
