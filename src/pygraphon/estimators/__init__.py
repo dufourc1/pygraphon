@@ -6,8 +6,8 @@ from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
 from .SAS import SAS
-from .UniversalSingularValueDecomposition import USVT
 from .SmoothNetHist import SmoothNetHist
+from .UniversalSingularValueDecomposition import USVT
 
 __all__ = classes = [
     "LG",

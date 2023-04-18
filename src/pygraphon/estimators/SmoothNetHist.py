@@ -1,6 +1,6 @@
-"""Smoothing Network Histograms Class"""
+"""Smoothing Network Histograms Class."""
 
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -13,16 +13,14 @@ from pygraphon.utils import edge_density
 
 
 class SmoothNetHist(BaseEstimator):
-
     """Implementation of the smoothing network histograms algorithm.
+
     From the theory of edge clustering, approximate a graphon by smoothing blocks of similar density from a histogram.
 
     Args:
-
         bandwidth (float): bandwidth of the graphon.
 
     Functions:
-
         _approximate_graphon_from_adjacency(): Estimate the graphon function from an adjacency matrix using Smoothing.
         _first_approximate_graphon_from_adjacency(): First histogram fit of the graphon function.
         _smoothing_histLC(): Smoothing the histogram using the theory of edge clustering.
@@ -31,7 +29,6 @@ class SmoothNetHist(BaseEstimator):
         _select_best_graphon(): Select the best graphon from a tensor of Pij matrix, using BIC.
         _log_likelihood(): Compute the log likelihood of a Pij matrix.
         _bic(): Compute the BIC of a Pij matrix.
-
     """
 
     def __init__(self, bandwidth: Optional[float] = None) -> None:
@@ -52,7 +49,7 @@ class SmoothNetHist(BaseEstimator):
 
         Parameters
         ----------
-        adjacency_matrix : np.ndarray
+        adjacencyMatrix : np.ndarray
             adjacency matrix of the graph
         bandwidthHist : float
             size of the blocks (between 0 and 1), by default None
@@ -61,8 +58,12 @@ class SmoothNetHist(BaseEstimator):
         -------
         Tuple[StepGraphon, np.ndarray]
             approximated graphon, matrix of connection Pij of size n x n
-        """
 
+        Raises
+        ------
+        ValueError
+            If the number of smoothed graphon is not equal to the number of link communities.
+        """
         first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
             adjacencyMatrix,
             bandwidthHist,
@@ -78,25 +79,31 @@ class SmoothNetHist(BaseEstimator):
             raise ValueError(
                 "The number of smoothed graphon is not equal to the number of link communities"
             )
-        # Convert the tensor of graphon to a tensor of Pij matrix ordered by the assignments.
-        tensor_P = np.array(
-            [
-                tensor_graphon[i]._get_edge_probabilities(
-                    n=adjacencyMatrix.shape[0], latentVarArray=assignment.labels_to_latent_variables
-                )
-                for i in range(len(tensor_graphon))
-            ]
-        )
-        # Select the best graphon from the tensor
-        pij_matrix = self._select_best_graphon(tensor_P, adjacencyMatrix, number_link_communities)
-        return (
-            StepGraphon(
+        else:
+            # Convert the tensor of graphon to a tensor of Pij matrix ordered by the assignments.
+            tensor_P = np.array(
+                [
+                    tensor_graphon[i]._get_edge_probabilities(
+                        n=adjacencyMatrix.shape[0],
+                        latentVarArray=assignment.labels_to_latent_variables,
+                    )
+                    for i in range(len(tensor_graphon))
+                ]
+            )
+            # Select the best graphon from the tensor
+            pij_matrix = self._select_best_graphon(
+                tensor_P,
+                adjacencyMatrix,
+                number_link_communities,
+            )
+            return (
+                StepGraphon(
+                    pij_matrix,
+                    bandwidthHist=first_fit_graphon.bandwidthHist,
+                    initial_rho=first_fit_graphon.initial_rho,
+                ),
                 pij_matrix,
-                bandwidthHist=first_fit_graphon.bandwidthHist,
-                initial_rho=first_fit_graphon.initial_rho,
-            ),
-            pij_matrix,
-        )
+            )
 
     def _first_approximate_graphon_from_adjacency(
         self,
@@ -111,8 +118,8 @@ class SmoothNetHist(BaseEstimator):
 
         Parameters
         ----------
-        adjacency_matrix : np.ndarray
-            adjancency matrix of the graph
+        adjacencyMatrix : np.ndarray
+            adjacency matrix of the graph
         bandwidthHist : float
             size of the blocks (between 0 and 1), by default None
 
@@ -171,7 +178,8 @@ class SmoothNetHist(BaseEstimator):
         avr_graphon : np.ndarray
             list of kmean-smoothed graphon in increasing order of number of link communities,
             avr_graphon[i] is the smoothed graphon with i+1 link communities.
-            if number_link_communities is not None, avr_graphon is a single smoothed graphon with 'number_link_communities' link communities.
+            if number_link_communities is not None, avr_graphon is a single smoothed graphon
+            with 'number_link_communities' link communities.
 
         References
         ----------
@@ -231,7 +239,6 @@ class SmoothNetHist(BaseEstimator):
         smoothed_graphon : list of StepGraphon
             list of smoothed graphon in increasing order of number of link communities,
         """
-
         nrow_tile = hist_approx.graphon.shape[0]
         nclust_hist = avr_graphon.shape[0]
 
