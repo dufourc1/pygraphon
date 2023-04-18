@@ -2,18 +2,15 @@
 
 from typing import Optional, Tuple
 
-from pygraphon.estimators.BaseEstimator import BaseEstimator
-from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
-from pygraphon.estimators.networkhistogram.assignment import Assignment
+import numpy as np
+from sklearn.cluster import KMeans
 
+from pygraphon.estimators.BaseEstimator import BaseEstimator
+from pygraphon.estimators.networkhistogram.assignment import Assignment
+from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
+from pygraphon.estimators.networkhistogram.nethist import nethist
 from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils.utils_graph import edge_density
-from pygraphon.estimators.networkhistogram.nethist import nethist
-
-
-import numpy as np
-
-from sklearn.cluster import KMeans
 
 
 class SmoothNetHist(BaseEstimator):
@@ -42,15 +39,16 @@ class SmoothNetHist(BaseEstimator):
         super().__init__()
         self.bandwidth = bandwidth
 
-    def _approximate_graphon_from_adjacency(self,
-                                            adjacencyMatrix: np.ndarray,
-                                            bandwidthHist: Optional[float] = None,
-                                            number_link_communities: Optional[int] = None,
-                                            absTol: float = 2.5 * 1e-4,
-                                            maxNumIterations: int = 500,
-                                            past_non_improving: int = 3,
-                                            use_default_bandwidth: bool = False,
-                                            ) -> Tuple[StepGraphon, np.ndarray]:
+    def _approximate_graphon_from_adjacency(
+        self,
+        adjacencyMatrix: np.ndarray,
+        bandwidthHist: Optional[float] = None,
+        number_link_communities: Optional[int] = None,
+        absTol: float = 2.5 * 1e-4,
+        maxNumIterations: int = 500,
+        past_non_improving: int = 3,
+        use_default_bandwidth: bool = False,
+    ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
         Parameters
@@ -67,25 +65,39 @@ class SmoothNetHist(BaseEstimator):
         """
 
         first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
-            adjacencyMatrix, bandwidthHist, absTol, maxNumIterations, past_non_improving, use_default_bandwidth)
+            adjacencyMatrix,
+            bandwidthHist,
+            absTol,
+            maxNumIterations,
+            past_non_improving,
+            use_default_bandwidth,
+        )
         tensor_graphon = self._smoothing_histLC(
-            first_fit_graphon, adjacencyMatrix, number_link_communities)
-        if not len(np.unique(tensor_graphon[-1].get_graphon()))==len(tensor_graphon):
-            raise ValueError("The number of smoothed graphon is not equal to the number of link communities")
+            first_fit_graphon, adjacencyMatrix, number_link_communities
+        )
+        if not len(np.unique(tensor_graphon[-1].get_graphon())) == len(tensor_graphon):
+            raise ValueError(
+                "The number of smoothed graphon is not equal to the number of link communities"
+            )
         # Convert the tensor of graphon to a tensor of Pij matrix ordered by the assignments.
         tensor_P = np.array(
             [
-            tensor_graphon[i]._get_edge_probabilities(
-            n = adjacencyMatrix.shape[0], 
-            latentVarArray = assignment.labels_to_latent_variables
-            ) 
-            for i in range(len(tensor_graphon))
+                tensor_graphon[i]._get_edge_probabilities(
+                    n=adjacencyMatrix.shape[0], latentVarArray=assignment.labels_to_latent_variables
+                )
+                for i in range(len(tensor_graphon))
             ]
-            )
+        )
         # Select the best graphon from the tensor
-        pij_matrix = self._select_best_graphon(
-            tensor_P, adjacencyMatrix, number_link_communities)
-        return StepGraphon(pij_matrix, bandwidthHist=first_fit_graphon.bandwidthHist, initial_rho= first_fit_graphon.initial_rho) , pij_matrix
+        pij_matrix = self._select_best_graphon(tensor_P, adjacencyMatrix, number_link_communities)
+        return (
+            StepGraphon(
+                pij_matrix,
+                bandwidthHist=first_fit_graphon.bandwidthHist,
+                initial_rho=first_fit_graphon.initial_rho,
+            ),
+            pij_matrix,
+        )
 
     def _first_approximate_graphon_from_adjacency(
         self,
@@ -137,14 +149,13 @@ class SmoothNetHist(BaseEstimator):
         # ---------------------------------------------------------------------------------------------
         # Return the graphon from first fit nethist.
         graphon_nethist = StepGraphon(
-            assignment_nethist.theta, bandwidthHist=bandwidthHist, initial_rho=rho)
+            assignment_nethist.theta, bandwidthHist=bandwidthHist, initial_rho=rho
+        )
         return graphon_nethist, assignment_nethist
 
-    def _smoothing_histLC(self,
-                          hist_approx: StepGraphon,
-                          A: np.ndarray,
-                          number_link_communities: Optional[int] = None
-                          )-> list[StepGraphon]:
+    def _smoothing_histLC(
+        self, hist_approx: StepGraphon, A: np.ndarray, number_link_communities: Optional[int] = None
+    ) -> list[StepGraphon]:
         """Smoothing of the histogram estimator using k-means++ [1].
 
         Parameters
@@ -171,40 +182,40 @@ class SmoothNetHist(BaseEstimator):
         nrow_tile = hist_approx.graphon.shape[0]
         flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
-        
+
         # Clustering according to kmeans
         nclust_hist = len(np.unique(flat_graphon))
-        if number_link_communities is None:  # if None, test all possible number of link communities smoothing
-            avr_graphon = np.asarray([flat_graphon.copy()
-                                     for _ in range(nclust_hist)])
+        if (
+            number_link_communities is None
+        ):  # if None, test all possible number of link communities smoothing
+            avr_graphon = np.asarray([flat_graphon.copy() for _ in range(nclust_hist)])
             for i in range(nclust_hist - 1):
                 if i == 0:
-                    avr_graphon[i] = edge_density(
-                        A) * np.ones_like(flat_graphon)
+                    avr_graphon[i] = edge_density(A) * np.ones_like(flat_graphon)
                 else:
-                    kmeans = KMeans(n_clusters=i + 1, random_state=0, init="k-means++", n_init=10).fit(
-                        flat_graphon.reshape(-1, 1)
-                    )
+                    kmeans = KMeans(
+                        n_clusters=i + 1, random_state=0, init="k-means++", n_init=10
+                    ).fit(flat_graphon.reshape(-1, 1))
                     for j in range(i + 1):  # average tiles of same community
-                        avr_graphon[i][kmeans.labels_ ==
-                                       j] = np.sum(flat_graphon[kmeans.labels_ == j]*flat_areas[kmeans.labels_ == j])/np.sum(flat_areas[kmeans.labels_ == j])
+                        avr_graphon[i][kmeans.labels_ == j] = np.sum(
+                            flat_graphon[kmeans.labels_ == j] * flat_areas[kmeans.labels_ == j]
+                        ) / np.sum(flat_areas[kmeans.labels_ == j])
 
         else:  # else, test only the number of link communities smoothing given by the user
             avr_graphon = np.asarray(flat_graphon.copy())
-            kmeans = KMeans(n_clusters=number_link_communities, random_state=0, init="k-means++", n_init=10).fit(
-                flat_graphon.reshape(-1, 1)
-            )
+            kmeans = KMeans(
+                n_clusters=number_link_communities, random_state=0, init="k-means++", n_init=10
+            ).fit(flat_graphon.reshape(-1, 1))
             for j in range(number_link_communities):
-                avr_graphon[kmeans.labels_ ==
-                            j] = np.sum(flat_graphon[kmeans.labels_ == j]*flat_areas[kmeans.labels_ == j])/np.sum(flat_areas[kmeans.labels_ == j])
-                
+                avr_graphon[kmeans.labels_ == j] = np.sum(
+                    flat_graphon[kmeans.labels_ == j] * flat_areas[kmeans.labels_ == j]
+                ) / np.sum(flat_areas[kmeans.labels_ == j])
+
         return self._flat_to_tensor(avr_graphon, hist_approx, A.shape[0])
 
-    def _flat_to_tensor(self,
-                        avr_graphon: np.ndarray,
-                        hist_approx: StepGraphon,
-                        n: int
-                        ) -> list[StepGraphon]:
+    def _flat_to_tensor(
+        self, avr_graphon: np.ndarray, hist_approx: StepGraphon, n: int
+    ) -> list[StepGraphon]:
         """Convert the flattened smoothed histograms to a tensor containing all possible smoothing.
 
         Parameters
@@ -235,8 +246,7 @@ class SmoothNetHist(BaseEstimator):
         diag_km = np.zeros((nclust_hist, nrow_tile, nrow_tile))
         diag_km[:, i, j] = diag_km_vec
         # X+X^T-diag(X) on axis (1,2) of tensor
-        sym_KM_smooth_g = KM_smooth_g + \
-            np.transpose(KM_smooth_g, (0, 2, 1)) - diag_km
+        sym_KM_smooth_g = KM_smooth_g + np.transpose(KM_smooth_g, (0, 2, 1)) - diag_km
         smoothed_graphons = [
             StepGraphon(
                 graphon=sym_KM_smooth_g[i],
@@ -248,11 +258,11 @@ class SmoothNetHist(BaseEstimator):
         return smoothed_graphons
 
     def _select_best_graphon(
-            self,
-            tensor_pij: list(np.ndarray),
-            adjacencyMatrix: np.ndarray,
-            number_link_communities: Optional[int] = None,
-            ) -> np.ndarray:
+        self,
+        tensor_pij: list(np.ndarray),
+        adjacencyMatrix: np.ndarray,
+        number_link_communities: Optional[int] = None,
+    ) -> np.ndarray:
         """Select the best graphon from the tensor of graphons by BIC.
 
         Parameters
@@ -263,7 +273,7 @@ class SmoothNetHist(BaseEstimator):
             adjacency matrix of the graph
         number_link_communities : Optional[int], optional
             number of link communities, by default None
-        
+
         Returns
         -------
         best_pij_matrix : np.ndarray
@@ -273,16 +283,16 @@ class SmoothNetHist(BaseEstimator):
             k = tensor_pij.shape[0]
             bic_score = np.zeros(k)
             for i in range(k):
-                num_par = len(np.unique(tensor_pij[i])) #SHOULD BE TESTED
+                num_par = len(np.unique(tensor_pij[i]))  # SHOULD BE TESTED
                 log_likelihood_value = log_likelihood(tensor_pij[i], adjacencyMatrix)
                 bic_score[i] = bic(log_likelihood_value, adjacencyMatrix.shape[0], num_par)
             best_pij_matrix = tensor_pij[np.argmin(bic_score)]
         else:
             best_pij_matrix = tensor_pij
         return best_pij_matrix
-    
 
-def log_likelihood(probs: np.ndarray, A: np.ndarray, eps:float = 1e-10) -> float:
+
+def log_likelihood(probs: np.ndarray, A: np.ndarray, eps: float = 1e-10) -> float:
     """Compute the log-likelihood of the graphon given the adjacency matrix.
 
     Suppose probs and A are aligned.
@@ -304,6 +314,7 @@ def log_likelihood(probs: np.ndarray, A: np.ndarray, eps:float = 1e-10) -> float
     probs_stable = np.clip(probs, eps, 1 - eps)
     return np.sum(A * np.log(probs_stable) + (1 - A) * np.log(1 - probs_stable))
 
+
 def bic(log_likelihood_val: float, n: int, num_par: int) -> float:
     """Compute the BIC score of the graphon.
 
@@ -321,4 +332,4 @@ def bic(log_likelihood_val: float, n: int, num_par: int) -> float:
     float
         BIC score of the graphon
     """
-    return -2 * log_likelihood_val + num_par * np.log(n*(n-1)/2)
+    return -2 * log_likelihood_val + num_par * np.log(n * (n - 1) / 2)
