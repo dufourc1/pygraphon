@@ -1,16 +1,15 @@
 """Smoothing Network Histograms Class"""
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import numpy as np
 from sklearn.cluster import KMeans
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.assignment import Assignment
-from pygraphon.estimators.networkhistogram.HistogramEstimator import HistogramEstimator
 from pygraphon.estimators.networkhistogram.nethist import nethist
-from pygraphon.graphons.StepGraphon import StepGraphon
-from pygraphon.utils.utils_graph import edge_density
+from pygraphon.graphons import StepGraphon
+from pygraphon.utils import edge_density
 
 
 class SmoothNetHist(BaseEstimator):
@@ -155,7 +154,7 @@ class SmoothNetHist(BaseEstimator):
 
     def _smoothing_histLC(
         self, hist_approx: StepGraphon, A: np.ndarray, number_link_communities: Optional[int] = None
-    ) -> list[StepGraphon]:
+    ) -> List[StepGraphon]:
         """Smoothing of the histogram estimator using k-means++ [1].
 
         Parameters
@@ -215,7 +214,7 @@ class SmoothNetHist(BaseEstimator):
 
     def _flat_to_tensor(
         self, avr_graphon: np.ndarray, hist_approx: StepGraphon, n: int
-    ) -> list[StepGraphon]:
+    ) -> List[StepGraphon]:
         """Convert the flattened smoothed histograms to a tensor containing all possible smoothing.
 
         Parameters
@@ -259,7 +258,7 @@ class SmoothNetHist(BaseEstimator):
 
     def _select_best_graphon(
         self,
-        tensor_pij: list(np.ndarray),
+        tensor_pij: List[np.ndarray],
         adjacencyMatrix: np.ndarray,
         number_link_communities: Optional[int] = None,
     ) -> np.ndarray:
