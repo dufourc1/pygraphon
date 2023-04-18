@@ -7,6 +7,7 @@ from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
 from .SAS import SAS
 from .UniversalSingularValueDecomposition import USVT
+from .SmoothNetHist import SmoothNetHist
 
 __all__ = classes = [
     "LG",
@@ -17,4 +18,5 @@ __all__ = classes = [
     "USVT",
     "SAS",
     "Completion",
+    "SmoothNetHist",
 ]
