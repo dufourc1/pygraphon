@@ -195,12 +195,10 @@ class SmoothNetHist(BaseEstimator):
         if (
             number_link_communities is None
         ):  # if None, test all possible number of link communities smoothing
-            avr_graphon = np.asarray([flat_graphon.copy()
-                                     for _ in range(nclust_hist)])
+            avr_graphon = np.asarray([flat_graphon.copy() for _ in range(nclust_hist)])
             for i in range(nclust_hist - 1):
                 if i == 0:
-                    avr_graphon[i] = edge_density(
-                        A) * np.ones_like(flat_graphon)
+                    avr_graphon[i] = edge_density(A) * np.ones_like(flat_graphon)
                 else:
                     kmeans = KMeans(
                         n_clusters=i + 1, random_state=0, init="k-means++", n_init=10
@@ -256,8 +254,7 @@ class SmoothNetHist(BaseEstimator):
         """
         for j in range(number_link_communities):
             tensor_slice_graphon[kmeans.labels_ == j] = np.sum(
-                flat_graphon[kmeans.labels_ == j] *
-                flat_areas[kmeans.labels_ == j]
+                flat_graphon[kmeans.labels_ == j] * flat_areas[kmeans.labels_ == j]
             ) / np.sum(flat_areas[kmeans.labels_ == j])
 
         return tensor_slice_graphon
@@ -294,8 +291,7 @@ class SmoothNetHist(BaseEstimator):
         diag_km = np.zeros((nclust_hist, nrow_tile, nrow_tile))
         diag_km[:, i, j] = diag_km_vec
         # X+X^T-diag(X) on axis (1,2) of tensor
-        sym_KM_smooth_g = KM_smooth_g + \
-            np.transpose(KM_smooth_g, (0, 2, 1)) - diag_km
+        sym_KM_smooth_g = KM_smooth_g + np.transpose(KM_smooth_g, (0, 2, 1)) - diag_km
         smoothed_graphons = [
             StepGraphon(
                 graphon=sym_KM_smooth_g[i],
@@ -333,10 +329,8 @@ class SmoothNetHist(BaseEstimator):
             bic_score = np.zeros(k)
             for i in range(k):
                 num_par = len(np.unique(tensor_pij[i]))  # SHOULD BE TESTED
-                log_likelihood_value = log_likelihood(
-                    tensor_pij[i], adjacencyMatrix)
-                bic_score[i] = bic(log_likelihood_value,
-                                   adjacencyMatrix.shape[0], num_par)
+                log_likelihood_value = log_likelihood(tensor_pij[i], adjacencyMatrix)
+                bic_score[i] = bic(log_likelihood_value, adjacencyMatrix.shape[0], num_par)
             best_pij_matrix = tensor_pij[np.argmin(bic_score)]
         else:
             best_pij_matrix = tensor_pij
