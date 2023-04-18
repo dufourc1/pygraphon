@@ -5,7 +5,7 @@ from typing import Tuple
 import numba as nb
 import numpy as np
 
-EPS = np.spacing(1)
+from pygraphon.utils import EPS
 
 
 class Assignment:
