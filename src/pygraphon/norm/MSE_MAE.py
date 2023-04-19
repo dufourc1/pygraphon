@@ -10,7 +10,7 @@ class MseProbaEdge(BaseMetric):
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, estimated: Graphon):
-        indices = np.triu_indices(self.n_nodes,1)
+        indices = np.triu_indices(self.n_nodes, 1)
         p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False)
         p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean((p_0[indices] - p_hat[indices]) ** 2)
@@ -25,7 +25,7 @@ class MaeProbaEdge(BaseMetric):
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, estimated: Graphon):
-        indices = np.triu_indices(self.n_nodes,1)
+        indices = np.triu_indices(self.n_nodes, 1)
         p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False)
         p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
         return np.mean(np.abs(p_0[indices] - p_hat[indices]))
