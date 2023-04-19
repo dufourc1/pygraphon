@@ -1,6 +1,7 @@
 import numpy as np
-from pygraphon.estimators import SmoothNetHist
 import pytest
+
+from pygraphon.estimators import SmoothNetHist
 
 
 def test_bic_non_fitted() -> None:
