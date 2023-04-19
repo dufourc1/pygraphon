@@ -36,6 +36,8 @@ class SmoothNetHist(BaseEstimator):
         super().__init__()
         self.bandwidth = bandwidth
         self._bic = np.inf
+        self._num_par_nethist = 0
+        self._num_par_smooth = np.inf
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -194,6 +196,7 @@ class SmoothNetHist(BaseEstimator):
 
         # Clustering according to kmeans
         nclust_hist = len(np.unique(flat_graphon))
+        self._num_par_nethist = nclust_hist
         if (
             number_link_communities is None
         ):  # if None, test all possible number of link communities smoothing
@@ -336,6 +339,7 @@ class SmoothNetHist(BaseEstimator):
             best_index = np.argmin(bic_score)
             best_pij_matrix = tensor_pij[best_index]
             self._bic = bic_score[best_index]
+            self._num_par_smooth = len(np.unique(best_pij_matrix))
         else:
             best_pij_matrix = tensor_pij
             self._bic = bic(
@@ -356,3 +360,16 @@ class SmoothNetHist(BaseEstimator):
         if self.fitted is False:
             warn("The model has not been fitted yet, returning np.inf.")
         return self._bic
+
+    def get_ratio_par(self) -> float:
+        """Get the ratio of the number of parameters of the smoothed graphon over the original network histogram.
+
+        Returns
+        -------
+        float
+            ratio of the number of parameters of smoothed vs. original
+        """
+        if self.fitted is False:
+            warn("The model has not been fitted yet, returning np.inf.")
+        
+        return self._num_par_smooth/self._num_par_nethist
