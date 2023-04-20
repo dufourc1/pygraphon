@@ -8,7 +8,13 @@ from pygraphon.graphons import StepGraphon
 class DeterministicSmoother(SmoothNetHist):
 
     def _cluster(self, number_link_communities, flat_graphon) -> np.ndarray:
-        return np.array([0, 0, 0, 0, 1, 1, 1, 1])
+        k_init = len(np.unique(flat_graphon))
+        return np.concatenate(
+            [
+                np.repeat(np.arange(number_link_communities), k_init // number_link_communities),
+                np.repeat([number_link_communities-1], k_init % number_link_communities)
+            ]
+        )
 
 
 def test_bic_non_fitted() -> None:

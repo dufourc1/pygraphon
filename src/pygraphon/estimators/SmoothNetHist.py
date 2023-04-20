@@ -213,9 +213,10 @@ class SmoothNetHist(BaseEstimator):
                         flat_graphon=flat_graphon,
                         flat_areas=flat_areas,
                     )
-        elif number_link_communities > nclust_hist and number_link_communities is not None:
+        elif number_link_communities > nclust_hist:
             raise ValueError(
-                "The number of link communities is greater than the number of clusters in the histogram estimator"
+                f"The number of link communities {number_link_communities} is greater " +
+                f"than the number of clusters {nclust_hist} in the histogram estimator"
             )
         elif number_link_communities == nclust_hist:
             return self._flat_to_tensor(flat_graphon, hist_approx, A.shape[0])
