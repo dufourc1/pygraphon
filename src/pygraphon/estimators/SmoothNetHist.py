@@ -79,6 +79,7 @@ class SmoothNetHist(BaseEstimator):
         tensor_graphon = self._smoothing_histLC(
             first_fit_graphon, adjacencyMatrix, number_link_communities
         )
+        #CHECK IF THIS IS CORRECT IF NUMBER_LINK_COMMUNITIES IS SPECIFIED
         if not len(np.unique(tensor_graphon[-1].get_graphon())) == len(tensor_graphon):
             raise ValueError(
                 "The number of smoothed graphon is not equal to the number of link communities"
@@ -215,22 +216,23 @@ class SmoothNetHist(BaseEstimator):
                     )
         elif number_link_communities > nclust_hist:
             raise ValueError(
-                f"The number of link communities {number_link_communities} is greater " +
-                f"than the number of clusters {nclust_hist} in the histogram estimator"
+                f"The number of link communities {number_link_communities} is greater "
+                + f"than the number of clusters {nclust_hist} in the histogram estimator"
             )
         elif number_link_communities == nclust_hist:
             return self._flat_to_tensor(flat_graphon, hist_approx, A.shape[0])
         else:  # else, test only the number of link communities smoothing given by the user
-            avr_graphon = np.asarray(flat_graphon.copy())
+            # so that it has shape (1, len(flat_graphon))), for _flat_tensor to work properly
+            avr_graphon = np.asarray(flat_graphon.copy()).reshape(1, -1)
             kmeans = self._cluster(number_link_communities, flat_graphon)
             avr_graphon = self._smoothing_operator(
-                tensor_slice_graphon=avr_graphon,
+                tensor_slice_graphon=avr_graphon[0],
                 kmeans=kmeans,
                 number_link_communities=number_link_communities,
                 flat_graphon=flat_graphon,
                 flat_areas=flat_areas,
             )
-        return self._flat_to_tensor(avr_graphon, hist_approx, A.shape[0])
+        return self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx)
 
     def _cluster(
         self, number_link_communities: int, flat_graphon: np.ndarray, method: str = "k-means++"
@@ -310,7 +312,7 @@ class SmoothNetHist(BaseEstimator):
             list of smoothed graphon in increasing order of number of link communities,
         """
         nrow_tile = hist_approx.graphon.shape[0]
-        nclust_hist = avr_graphon.shape[0]
+        nclust_hist = avr_graphon.shape[0]  # number of slices in the tensor
 
         # deflatte the smoothed histograms and put them in a tensor
         KM_smooth_g = np.zeros((nclust_hist, nrow_tile, nrow_tile))

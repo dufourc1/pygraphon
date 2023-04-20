@@ -6,13 +6,12 @@ from pygraphon.graphons import StepGraphon
 
 
 class DeterministicSmoother(SmoothNetHist):
-
     def _cluster(self, number_link_communities, flat_graphon) -> np.ndarray:
         k_init = len(np.unique(flat_graphon))
         return np.concatenate(
             [
                 np.repeat(np.arange(number_link_communities), k_init // number_link_communities),
-                np.repeat([number_link_communities-1], k_init % number_link_communities)
+                np.repeat([number_link_communities - 1], k_init % number_link_communities),
             ]
         )
 
@@ -35,18 +34,29 @@ def test_cluster() -> None:
     test_array_1 = np.array([0, 0, 0, 0, 1, 1, 1, 1])
     labels_array_1 = estimator._cluster(2, test_array_1)
     assert len(np.unique(labels_array_1)) == 2
-    assert ((labels_array_1[test_array_1==0] == labels_array_1[0]) & (labels_array_1[test_array_1==1] == labels_array_1[4])).all()
+    assert (
+        (labels_array_1[test_array_1 == 0] == labels_array_1[0])
+        & (labels_array_1[test_array_1 == 1] == labels_array_1[4])
+    ).all()
 
     test_array_2 = np.array([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
     labels_array_2 = estimator._cluster(3, test_array_2)
     assert len(np.unique(labels_array_2)) == 3
-    assert ((labels_array_2[test_array_2==0] == labels_array_2[0]) & (labels_array_2[test_array_2==1] == labels_array_2[4]) & (labels_array_2[test_array_2==2] == labels_array_2[8])).all()
+    assert (
+        (labels_array_2[test_array_2 == 0] == labels_array_2[0])
+        & (labels_array_2[test_array_2 == 1] == labels_array_2[4])
+        & (labels_array_2[test_array_2 == 2] == labels_array_2[8])
+    ).all()
 
-    test_array_3 = np.array(
-        [0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52])
+    test_array_3 = np.array([0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52])
     labels_array_3 = estimator._cluster(3, test_array_3)
     assert len(np.unique(labels_array_3)) == 3
-    assert ((labels_array_3[test_array_3<0.16] == labels_array_3[0]) & (labels_array_3[(test_array_3>0.2) & (test_array_3 < 0.35)] == labels_array_3[4]) & (labels_array_3[test_array_3>0.45] == labels_array_3[8])).all()
+    assert (
+        (labels_array_3[test_array_3 < 0.16] == labels_array_3[0])
+        & (labels_array_3[(test_array_3 > 0.2) & (test_array_3 < 0.35)] == labels_array_3[4])
+        & (labels_array_3[test_array_3 > 0.45] == labels_array_3[8])
+    ).all()
+
 
 def test_flat_to_tensor() -> None:
     estimator = SmoothNetHist()
@@ -67,13 +77,26 @@ def test_smoothing_operator() -> None:
 
     flat_graphon = hist.graphon[np.triu_indices(3)]
     flat_areas = hist.areas[np.triu_indices(3)]
-    computed_smoothed_est = estimator._smoothing_operator(tensor_slice_graphon=flat_graphon,
-                                                          kmeans=labels,
-                                                          number_link_communities=2,
-                                                          flat_graphon=flat_graphon,
-                                                          flat_areas=flat_areas)
-    assert np.allclose(computed_smoothed_est, np.array(
-        [[1.8, 0.6, 0.6, 1.8, 0.6, 1.8]]))
+    computed_smoothed_est = estimator._smoothing_operator(
+        tensor_slice_graphon=flat_graphon,
+        kmeans=labels,
+        number_link_communities=2,
+        flat_graphon=flat_graphon,
+        flat_areas=flat_areas,
+    )
+    assert np.allclose(computed_smoothed_est, np.array([[1.8, 0.6, 0.6, 1.8, 0.6, 1.8]]))
+
+
+def test_smoothing_histLC() -> None:
+    n = 99
+    estimator = SmoothNetHist()
+    theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.25], [0.1, 0.25, 0.6]])
+    hist = StepGraphon(theta, bandwidthHist=1 / 3)
+    adj = hist.draw(rho=1, n=n, exchangeable=False)
+    smooth_test = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=3)
+    assert np.allclose(
+        smooth_test[-1].graphon, np.array([[1.7, 0.825, 0.3], [0.825, 1.7, 0.825], [0.3, 0.825, 1.7]])
+    )
 
 
 def test_select_best_graphon() -> None:
