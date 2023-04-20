@@ -371,5 +371,5 @@ class SmoothNetHist(BaseEstimator):
         """
         if self.fitted is False:
             warn("The model has not been fitted yet, returning np.inf.")
-        
-        return self._num_par_smooth/self._num_par_nethist
+
+        return self._num_par_smooth / self._num_par_nethist
