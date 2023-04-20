@@ -31,34 +31,41 @@ def test_ratio_par_non_fitted() -> None:
 
 def test_cluster() -> None:
     estimator = SmoothNetHist()
-    assert estimator._cluster(2, np.array([0, 0, 0, 0, 1, 1, 1, 1])) == np.array(
-        [0, 0, 0, 0, 1, 1, 1, 1])
-    assert estimator._cluster(3, np.array([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])) == np.array(
-        [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
-    est_decimals = estimator._cluster(3, np.array(
-        [0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52]))
-    assert est_decimals == np.array(
-        [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
 
+    test_array_1 = np.array([0, 0, 0, 0, 1, 1, 1, 1])
+    labels_array_1 = estimator._cluster(2, test_array_1)
+    assert len(np.unique(labels_array_1)) == 2
+    assert ((labels_array_1[test_array_1==0] == labels_array_1[0]) & (labels_array_1[test_array_1==1] == labels_array_1[4])).all()
+
+    test_array_2 = np.array([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
+    labels_array_2 = estimator._cluster(3, test_array_2)
+    assert len(np.unique(labels_array_2)) == 3
+    assert ((labels_array_2[test_array_2==0] == labels_array_2[0]) & (labels_array_2[test_array_2==1] == labels_array_2[4]) & (labels_array_2[test_array_2==2] == labels_array_2[8])).all()
+
+    test_array_3 = np.array(
+        [0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52])
+    labels_array_3 = estimator._cluster(3, test_array_3)
+    assert len(np.unique(labels_array_3)) == 3
+    assert ((labels_array_3[test_array_3<0.16] == labels_array_3[0]) & (labels_array_3[(test_array_3>0.2) & (test_array_3 < 0.35)] == labels_array_3[4]) & (labels_array_3[test_array_3>0.45] == labels_array_3[8])).all()
 
 def test_flat_to_tensor() -> None:
     estimator = SmoothNetHist()
-    theta = np.array([0.5, 0.3, 0.1], [0.3, 0.6, 0.2], [0.1, 0.2, 0.7])
+    theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.2], [0.1, 0.2, 0.7]])
     flat_theta = np.array([[0.5, 0.3, 0.1, 0.6, 0.2, 0.7]])
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
     deflatten_theta = estimator._flat_to_tensor(flat_theta, hist)[0]
-    assert deflatten_theta.graphon == hist.graphon
+    assert (deflatten_theta.graphon == hist.graphon).all()
 
 
 def test_smoothing_operator() -> None:
     estimator = SmoothNetHist()
-    theta = np.array([1.5, 0.9, 0.3], [0.9, 1.8, 0.6], [0.3, 0.6, 2.1])
+    theta = np.array([[1.5, 0.9, 0.3], [0.9, 1.8, 0.6], [0.3, 0.6, 2.1]])
     labels = np.array([0, 1, 1, 0, 1, 0])
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
 
-    assert theta == hist.graphon
+    assert (theta == hist.graphon).all()
 
-    flat_graphon = hist.areas[np.triu_indices(3)]
+    flat_graphon = hist.graphon[np.triu_indices(3)]
     flat_areas = hist.areas[np.triu_indices(3)]
     computed_smoothed_est = estimator._smoothing_operator(tensor_slice_graphon=flat_graphon,
                                                           kmeans=labels,
