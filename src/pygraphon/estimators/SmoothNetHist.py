@@ -205,9 +205,7 @@ class SmoothNetHist(BaseEstimator):
                 if i == 0:
                     avr_graphon[i] = edge_density(A) * np.ones_like(flat_graphon)
                 else:
-                    kmeans = KMeans(
-                        n_clusters=i + 1, random_state=0, init="k-means++", n_init=10
-                    ).fit(flat_graphon.reshape(-1, 1))
+                    kmeans = self._cluster(i + 1, flat_graphon)
                     avr_graphon[i] = self._smoothing_operator(
                         tensor_slice_graphon=avr_graphon[i],
                         kmeans=kmeans,
@@ -215,11 +213,15 @@ class SmoothNetHist(BaseEstimator):
                         flat_graphon=flat_graphon,
                         flat_areas=flat_areas,
                     )
+        elif number_link_communities > nclust_hist and number_link_communities is not None:
+            raise ValueError(
+                "The number of link communities is greater than the number of clusters in the histogram estimator"
+            )
+        elif number_link_communities == nclust_hist:
+            return self._flat_to_tensor(flat_graphon, hist_approx, A.shape[0])
         else:  # else, test only the number of link communities smoothing given by the user
             avr_graphon = np.asarray(flat_graphon.copy())
-            kmeans = KMeans(
-                n_clusters=number_link_communities, random_state=0, init="k-means++", n_init=10
-            ).fit(flat_graphon.reshape(-1, 1))
+            kmeans = self._cluster(number_link_communities, flat_graphon)
             avr_graphon = self._smoothing_operator(
                 tensor_slice_graphon=avr_graphon,
                 kmeans=kmeans,
@@ -229,10 +231,35 @@ class SmoothNetHist(BaseEstimator):
             )
         return self._flat_to_tensor(avr_graphon, hist_approx, A.shape[0])
 
+    def _cluster(
+        self, number_link_communities: int, flat_graphon: np.ndarray, method: str = "k-means++"
+    ) -> np.ndarray:
+        """Clustering of the flattened graphon.
+
+        Parameters
+        ----------
+        number_link_communities : int
+            number of link communities
+        flat_graphon : np.ndarray
+            flattened graphon
+        method : str, optional
+            method used for the clustering, by default "k-means++"
+
+        Returns
+        -------
+        np.ndarray
+            labels of the clustering
+        """
+        kmeans = KMeans(
+            n_clusters=number_link_communities, random_state=0, init=method, n_init=10
+        ).fit(flat_graphon.reshape(-1, 1))
+
+        return kmeans.labels_
+
     def _smoothing_operator(
         self,
         tensor_slice_graphon: np.ndarray,
-        kmeans: KMeans,
+        kmeans: np.ndarray,
         number_link_communities: int,
         flat_graphon: np.ndarray,
         flat_areas: np.ndarray,
@@ -242,9 +269,9 @@ class SmoothNetHist(BaseEstimator):
         Parameters
         ----------
         tensor_slice_graphon : np.ndarray
-            tensor slice containing a copy of the first graphon estimation
-        kmeans : KMeans
-            kmeans object
+            tensor slice containing a copy of the first graphon estimation, flattened.
+        kmeans : np.ndarray
+            labels of the clustering
         number_link_communities : int
             number of link communities
         flat_graphon : np.ndarray
@@ -258,14 +285,14 @@ class SmoothNetHist(BaseEstimator):
             tensor slice containing the smoothed graphon, smoothed with number_link_communities
         """
         for j in range(number_link_communities):
-            tensor_slice_graphon[kmeans.labels_ == j] = np.sum(
-                flat_graphon[kmeans.labels_ == j] * flat_areas[kmeans.labels_ == j]
-            ) / np.sum(flat_areas[kmeans.labels_ == j])
+            tensor_slice_graphon[kmeans == j] = np.sum(
+                flat_graphon[kmeans == j] * flat_areas[kmeans == j]
+            ) / np.sum(flat_areas[kmeans == j])
 
         return tensor_slice_graphon
 
     def _flat_to_tensor(
-        self, avr_graphon: np.ndarray, hist_approx: StepGraphon, n: int
+        self, avr_graphon: np.ndarray, hist_approx: StepGraphon
     ) -> List[StepGraphon]:
         """Convert the flattened smoothed histograms to a tensor containing all possible smoothing.
 
@@ -275,8 +302,6 @@ class SmoothNetHist(BaseEstimator):
             list of smoothed graphon in increasing order of number of link communities,
         hist_approx : StepGraphon
             approximated graphon from the histogram estimator
-        n : int
-            number of nodes of the graph
 
         Returns
         -------
