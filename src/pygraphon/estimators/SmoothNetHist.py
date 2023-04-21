@@ -232,6 +232,7 @@ class SmoothNetHist(BaseEstimator):
                 flat_graphon=flat_graphon,
                 flat_areas=flat_areas,
             )
+            print("avr_graphon", avr_graphon)
         return self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx)
 
     def _cluster(
@@ -288,6 +289,9 @@ class SmoothNetHist(BaseEstimator):
             tensor slice containing the smoothed graphon, smoothed with number_link_communities
         """
         for j in range(number_link_communities):
+            print("j", j)
+            print("numerator", np.sum(flat_graphon[kmeans == j] * flat_areas[kmeans == j]))
+            print("denominator", np.sum(flat_areas[kmeans == j]))
             tensor_slice_graphon[kmeans == j] = np.sum(
                 flat_graphon[kmeans == j] * flat_areas[kmeans == j]
             ) / np.sum(flat_areas[kmeans == j])

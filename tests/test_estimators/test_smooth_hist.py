@@ -64,7 +64,7 @@ def test_flat_to_tensor() -> None:
     flat_theta = np.array([[0.5, 0.3, 0.1, 0.6, 0.2, 0.7]])
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
     deflatten_theta = estimator._flat_to_tensor(flat_theta, hist)[0]
-    assert (deflatten_theta.graphon == hist.graphon).all()
+    assert (deflatten_theta.graphon == hist.graphon).all()  
 
 
 def test_smoothing_operator() -> None:
@@ -87,18 +87,45 @@ def test_smoothing_operator() -> None:
     assert np.allclose(computed_smoothed_est, np.array([[1.8, 0.6, 0.6, 1.8, 0.6, 1.8]]))
 
 
-def test_smoothing_histLC() -> None:
+def test_smoothing_histLC_givenLC_reg_block() -> None:
     n = 99
     estimator = SmoothNetHist()
     theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.25], [0.1, 0.25, 0.6]])
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
-    adj = hist.draw(rho=1, n=n, exchangeable=False)
-    smooth_test = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=3)
+    adj = hist.draw(rho=None, n=n, exchangeable=False)
+    
+    smooth_test1 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=3)
     assert np.allclose(
-        smooth_test[-1].graphon, np.array([[1.7, 0.825, 0.3], [0.825, 1.7, 0.825], [0.3, 0.825, 1.7]])
+        smooth_test1[-1].graphon, np.array([[1.7, 0.825, 0.3], [0.825, 1.7, 0.825], [0.3, 0.825, 1.7]])
     )
+
+    smooth_test2 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=2)
+    assert np.allclose(
+        smooth_test2[-1].graphon, np.array([[1.7, 0.65, 0.65], [0.65, 1.7, 0.65], [0.65, 0.65, 1.7]])
+    )
+
+    smooth_test3 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=1)
+    assert np.allclose(
+        smooth_test3[-1].graphon, np.ones((3, 3))
+    )
+
+
+def test_smoothing_histLC_givenLC_nonreg_block() -> None:
+    n = 99
+    estimator = SmoothNetHist()
+    theta = np.array([[0.5, 0.3, 0.1, 0.7], [0.3, 0.6, 0.25, 0.1], [0.1, 0.25, 0.6, 0.3], [0.7, 0.1, 0.3, 0.01]])
+    hist = StepGraphon(theta, bandwidthHist= 0.3)
+    adj = hist.draw(rho=None, n=n, exchangeable=False)
+
+    theoretical_theta = np.array([[1.48765248, 0.8288349542857144, 0.27976417, 1.84637743],
+                                  [0.8288349542857142, 1.7256768805999998, 0.8288349542857144, 0.2975305],
+                                  [0.2975305, 0.8288349542857142, 1.7256768805999998, 0.8288349542857144],
+                                  [1.7256768805999998, 0.2975305, 0.8288349542857142, 0.02975305]])
+    smooth_test1 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=4)
+    #flat_test = estimator._flat_to_tensor(avr_graphon = hist.graphon[np.triu_indices(4)].reshape(1,-1), hist_approx = hist)
+    assert np.allclose(smooth_test1[-1].graphon, theoretical_theta)
 
 
 def test_select_best_graphon() -> None:
     estimator = SmoothNetHist()
-    assert estimator.select_best_graphon() == np.inf
+    assert estimator._select_best_graphon() == np.inf
