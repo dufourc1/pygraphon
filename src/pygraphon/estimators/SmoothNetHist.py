@@ -79,7 +79,7 @@ class SmoothNetHist(BaseEstimator):
         tensor_graphon = self._smoothing_histLC(
             first_fit_graphon, adjacencyMatrix, number_link_communities
         )
-        #CHECK IF THIS IS CORRECT IF NUMBER_LINK_COMMUNITIES IS SPECIFIED
+        # CHECK IF THIS IS CORRECT IF NUMBER_LINK_COMMUNITIES IS SPECIFIED
         if not len(np.unique(tensor_graphon[-1].get_graphon())) == len(tensor_graphon):
             raise ValueError(
                 "The number of smoothed graphon is not equal to the number of link communities"
@@ -231,8 +231,7 @@ class SmoothNetHist(BaseEstimator):
                 number_link_communities=number_link_communities,
                 flat_graphon=flat_graphon,
                 flat_areas=flat_areas,
-            )
-            print("avr_graphon", avr_graphon)
+            ).reshape(1, -1)
         return self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx)
 
     def _cluster(
@@ -289,9 +288,6 @@ class SmoothNetHist(BaseEstimator):
             tensor slice containing the smoothed graphon, smoothed with number_link_communities
         """
         for j in range(number_link_communities):
-            print("j", j)
-            print("numerator", np.sum(flat_graphon[kmeans == j] * flat_areas[kmeans == j]))
-            print("denominator", np.sum(flat_areas[kmeans == j]))
             tensor_slice_graphon[kmeans == j] = np.sum(
                 flat_graphon[kmeans == j] * flat_areas[kmeans == j]
             ) / np.sum(flat_areas[kmeans == j])
