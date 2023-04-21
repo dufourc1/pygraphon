@@ -25,7 +25,7 @@ graphon_exp_max_power = Graphon(function=lambda x, y: np.exp(-max(x, y) ** (3 / 
 graphon_exp_polynomial = Graphon(
     function=lambda x, y: np.exp(-0.5 * (min(x, y) + np.sqrt(x) + np.sqrt(y)))
 )
-graphon_log = Graphon(function=lambda x, y: np.log1p(0.5 * max(x, y)))
+graphon_log_1_p = Graphon(function=lambda x, y: np.log1p(0.5 * max(x, y)))
 
 common_graphons = {
     "product": graphon_product,
@@ -37,5 +37,5 @@ common_graphons = {
     "logit_max_power": graphon_logit_max_power,
     "exp_max_power": graphon_exp_max_power,
     "exp_polynomial": graphon_exp_polynomial,
-    "log_1_p": graphon_log,
+    "log_1_p": graphon_log_1_p,
 }
