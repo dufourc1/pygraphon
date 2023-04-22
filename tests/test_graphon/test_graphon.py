@@ -7,6 +7,7 @@ import math
 import numpy as np
 import pytest
 
+from pygraphon.graphons import common_graphons as cgf
 from pygraphon.graphons.Graphon import Graphon
 from pygraphon.utils import edge_density
 
@@ -88,3 +89,14 @@ def test_draw_rho():
     assert math.isclose(edge_density(A), 0.2, abs_tol=0.01)
     A = graphon.draw(n=n)
     assert edge_density(A) == 1
+
+
+def test_integral():
+    """Test that the integral methods are correct."""
+    for _, graphon in cgf.items():
+        first_integral = graphon.integral()
+        graphon.integration_method = "simpson"
+        second_integral = graphon.integral()
+        assert math.isclose(first_integral, second_integral, abs_tol=1e-3)
+        assert math.isclose(first_integral, 1, abs_tol=1e-3)
+        assert math.isclose(second_integral, 1, abs_tol=1e-3)

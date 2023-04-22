@@ -5,9 +5,11 @@ from copy import deepcopy
 from typing import Callable, Optional
 
 import numpy as np
-from scipy.integrate import dblquad
+from scipy.integrate import dblquad, simpson
 
 from pygraphon.utils.utils_func import copy_func
+
+EPS = np.spacing(1)
 
 
 class Graphon:
@@ -28,6 +30,9 @@ class Graphon:
     initial_rho : Optional[float]
         initial edge density, by default None. Should be in ]0,1[ if given. The function is
         expected to integrate to 1 if scaled is True and initial_rho is not None.
+    integration_method : str
+        method used to compute the integral of the graphon, by default "dblquad".
+        Can be "dblquad" or "simpson". "simpson" is faster but less accurate.
 
 
     ..  note::
@@ -49,9 +54,13 @@ class Graphon:
         initial_rho: Optional[float] = None,
         scaled=True,
         check=True,
+        integration_method: str = "dblquad",
     ) -> None:
         self.graphon_function = function
         self.scaled = scaled
+        if integration_method not in ["dblquad", "simpson"]:
+            raise ValueError("integration_method must be dblquad or simpson")
+        self.integration_method = integration_method
         self.integral_value = deepcopy(self.integral())
 
         # remember the original edge density of the graphon
@@ -128,7 +137,12 @@ class Graphon:
         float
             integral value of the graphon
         """
-        integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
+        if self.integration_method == "simpson":
+            x = np.linspace(EPS, 1 - EPS, 500)
+            z = np.vectorize(self.graphon_function)(x[:, None], x)
+            integral = simpson(simpson(z, x), x)
+        elif self.integration_method == "dblquad":
+            integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
         return integral
 
     def draw(self, n: int, exchangeable: bool = True, rho: Optional[float] = None) -> np.ndarray:
