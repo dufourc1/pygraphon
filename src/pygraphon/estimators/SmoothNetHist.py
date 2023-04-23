@@ -142,7 +142,7 @@ class SmoothNetHist(BaseEstimator):
         # This section is the same HistogramEstimator.py _approximate
         # network histogram approximation
         if bandwidthHist is None and use_default_bandwidth:
-            bandwidthHist = self.bandwidthHist
+            bandwidthHist = self.bandwidth
 
         if bandwidthHist is None:
             h = None
@@ -200,50 +200,45 @@ class SmoothNetHist(BaseEstimator):
         flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
 
-        # Clustering according to kmeans
-        nclust_hist = len(np.unique(flat_graphon))
-        self._num_par_nethist = nclust_hist
-        if (
-            number_link_communities is None
-        ):  # if None, test all possible number of link communities smoothing
-            avr_graphon = np.asarray([flat_graphon.copy() for _ in range(nclust_hist)])
-            for i in range(nclust_hist - 1):
-                if i == 0:
-                    avr_graphon[i] = edge_density(A) * np.ones_like(flat_graphon)
-                else:
-                    kmeans = self._cluster(i + 1, flat_graphon)
-                    avr_graphon[i] = self._smoothing_operator(
-                        tensor_slice_graphon=avr_graphon[i],
-                        kmeans=kmeans,
-                        number_link_communities=i + 1,
-                        flat_graphon=flat_graphon,
-                        flat_areas=flat_areas,
-                    )
-        elif number_link_communities > nclust_hist:
+        # Number of link communities and input check
+        self._num_par_nethist = len(np.unique(flat_graphon))
+        if number_link_communities is not None and number_link_communities > self._num_par_nethist:
             raise ValueError(
                 f"The number of link communities {number_link_communities} is greater "
-                + f"than the number of clusters {nclust_hist} in the histogram estimator"
+                + f"than the number of clusters {self._num_par_nethist} in the histogram estimator"
             )
-        elif number_link_communities == nclust_hist:
-            return self._flat_to_tensor(flat_graphon, hist_approx, A.shape[0])
-        else:  # else, test only the number of link communities smoothing given by the user
-            # so that it has shape (1, len(flat_graphon))), for _flat_tensor to work properly
-            avr_graphon = np.asarray(flat_graphon.copy()).reshape(1, -1)
-            kmeans = self._cluster(number_link_communities, flat_graphon)
-            avr_graphon = self._smoothing_operator(
-                tensor_slice_graphon=avr_graphon[0],
-                kmeans=kmeans,
-                number_link_communities=number_link_communities,
-                flat_graphon=flat_graphon,
-                flat_areas=flat_areas,
-            ).reshape(1, -1)
+
+        clusters = (
+            list(range(1, self._num_par_nethist + 1))
+            if number_link_communities is None
+            else [number_link_communities]
+        )
+        avr_graphon = np.asarray([flat_graphon.copy() for _ in clusters])
+
+        # smoothing based on kmeans if needed
+        for index, number_groups in enumerate(clusters):
+            # erdos renyi approximation
+            if number_groups == 1:
+                avr_graphon[index] = edge_density(A) * np.ones_like(flat_graphon)
+            # original histogram estimator
+            elif number_groups == self._num_par_nethist:
+                pass
+            else:
+                avr_graphon[index] = self._smoothing_operator(
+                    tensor_slice_graphon=avr_graphon[index],
+                    labels=self._cluster(number_groups, flat_graphon),
+                    number_link_communities=number_groups,
+                    flat_graphon=flat_graphon,
+                    flat_areas=flat_areas,
+                )
+
         return self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx)
 
     def _cluster(
         self,
         number_link_communities: int,
         flat_graphon: np.ndarray,
-        method: Optional[str] = "k-means++",
+        method: str = "k-means++",
     ) -> np.ndarray:
         """Clustering of the flattened graphon.
 
@@ -253,7 +248,7 @@ class SmoothNetHist(BaseEstimator):
             number of link communities
         flat_graphon : np.ndarray
             flattened graphon
-        method : str, optional
+        method : str.
             method used for the clustering, by default "k-means++"
 
         Returns
@@ -270,12 +265,15 @@ class SmoothNetHist(BaseEstimator):
     def _smoothing_operator(
         self,
         tensor_slice_graphon: np.ndarray,
-        kmeans: np.ndarray,
+        labels: np.ndarray,
         number_link_communities: int,
         flat_graphon: np.ndarray,
         flat_areas: np.ndarray,
     ) -> np.ndarray:
-        """Smoothing operator.
+        """Merge the graphon values based on the edge communities clustering.
+
+        Update the value inside a cluster by taking the average of the graphon values
+        weighted by the areas.
 
         Parameters
         ----------
@@ -296,9 +294,10 @@ class SmoothNetHist(BaseEstimator):
             tensor slice containing the smoothed graphon, smoothed with number_link_communities
         """
         for j in range(number_link_communities):
-            tensor_slice_graphon[kmeans == j] = np.sum(
-                flat_graphon[kmeans == j] * flat_areas[kmeans == j]
-            ) / np.sum(flat_areas[kmeans == j])
+            labels_j = labels == j
+            tensor_slice_graphon[labels_j] = np.sum(
+                flat_graphon[labels_j] * flat_areas[labels_j]
+            ) / np.sum(flat_areas[labels_j])
 
         return tensor_slice_graphon
 
