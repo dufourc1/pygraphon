@@ -17,26 +17,29 @@ class DeterministicSmoother(SmoothNetHist):
 
 
 def test_bic_non_fitted() -> None:
+    """Test the bic method of the SmoothNetHist class."""
     estimator = SmoothNetHist()
     with pytest.warns():
         assert estimator.get_bic() == np.inf
 
 
 def test_ratio_par_non_fitted() -> None:
+    """Test the ratio_par method of the SmoothNetHist class."""
     estimator = SmoothNetHist()
     with pytest.warns():
         assert estimator.get_ratio_par() == np.inf
 
 
 def test_cluster() -> None:
+    """Test the cluster method of the SmoothNetHist class."""
     estimator = SmoothNetHist()
 
     test_array_1 = np.array([0, 0, 0, 0, 1, 1, 1, 1])
     labels_array_1 = estimator._cluster(2, test_array_1)
     assert len(np.unique(labels_array_1)) == 2
     assert (
-        (labels_array_1[test_array_1 == 0] == labels_array_1[0])
-        & (labels_array_1[test_array_1 == 1] == labels_array_1[4])
+        (labels_array_1[test_array_1 == 0] == labels_array_1[0]) &
+        (labels_array_1[test_array_1 == 1] == labels_array_1[4])
     ).all()
 
     test_array_2 = np.array([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
@@ -59,6 +62,7 @@ def test_cluster() -> None:
 
 
 def test_flat_to_tensor() -> None:
+    """Test flat_to_tensor with regular block graphon."""
     estimator = SmoothNetHist()
     theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.2], [0.1, 0.2, 0.7]])
     flat_theta = np.array([[0.5, 0.3, 0.1, 0.6, 0.2, 0.7]])
@@ -68,6 +72,7 @@ def test_flat_to_tensor() -> None:
 
 
 def test_smoothing_operator() -> None:
+    """Test smoothing_operator with regular block graphon."""
     estimator = SmoothNetHist()
     theta = np.array([[1.5, 0.9, 0.3], [0.9, 1.8, 0.6], [0.3, 0.6, 2.1]])
     labels = np.array([0, 1, 1, 0, 1, 0])
@@ -88,6 +93,7 @@ def test_smoothing_operator() -> None:
 
 
 def test_smoothing_histLC_givenLC_reg_block() -> None:
+    """Test smoothing_histLC_givenLC with regular block graphon."""
     n = 99
     estimator = SmoothNetHist()
     theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.25], [0.1, 0.25, 0.6]])
@@ -95,25 +101,23 @@ def test_smoothing_histLC_givenLC_reg_block() -> None:
     adj = hist.draw(rho=None, n=n, exchangeable=False)
 
     smooth_test1 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=3)
-    print("rho 1", smooth_test1[-1].initial_rho)
     assert np.allclose(
         smooth_test1[-1].graphon,
         np.array([[1.7, 0.825, 0.3], [0.825, 1.7, 0.825], [0.3, 0.825, 1.7]]),
     )
 
     smooth_test2 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=2)
-    print("rho 2", smooth_test2[-1].initial_rho)
     assert np.allclose(
         smooth_test2[-1].graphon,
         np.array([[1.7, 0.65, 0.65], [0.65, 1.7, 0.65], [0.65, 0.65, 1.7]]),
     )
 
     smooth_test3 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=1)
-    print("rho 3", smooth_test3[-1].initial_rho)
     assert np.allclose(smooth_test3[-1].graphon, np.ones((3, 3)))
 
 
 def test_smoothing_histLC_givenLC_nonreg_block() -> None:
+    """Test smoothing_histLC_givenLC with non-regular block graphon."""
     n = 99
     estimator = SmoothNetHist()
     theta = np.array(
@@ -132,3 +136,20 @@ def test_smoothing_histLC_givenLC_nonreg_block() -> None:
     )
     smooth_test1 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=4)
     assert np.allclose(smooth_test1[-1].graphon * smooth_test1[-1].initial_rho, theoretical_theta)
+
+
+def test_smoothing_histLC_tensor() -> None:
+    """Test smoothing_histLC with regular block graphon, selected by BIC."""
+    n = 99
+    estimator = SmoothNetHist()
+    theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.25], [0.1, 0.25, 0.6]])
+    hist = StepGraphon(theta, bandwidthHist=1 / 3)
+    adj = hist.draw(rho=None, n=n, exchangeable=False)
+
+    olhede_fit, _ = estimator._first_approximate_graphon_from_adjacency(adjacencyMatrix= adj)
+
+    smooth_test_tensor = estimator._smoothing_histLC(hist_approx=olhede_fit, A=adj, number_link_communities=None)
+
+    assert estimator._num_par_nethist == len(smooth_test_tensor)
+    assert np.allclose(smooth_test_tensor[-1].graphon, olhede_fit.graphon)
+    assert np.allclose(smooth_test_tensor[0].graphon, np.ones(smooth_test_tensor[0].graphon.shape))

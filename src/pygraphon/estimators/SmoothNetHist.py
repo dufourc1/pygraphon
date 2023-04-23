@@ -186,6 +186,11 @@ class SmoothNetHist(BaseEstimator):
             if number_link_communities is not None, avr_graphon is a single smoothed graphon
             with 'number_link_communities' link communities.
 
+        Raises
+        ------
+        ValueError
+            If the number of link communities prompted is greater than the max number of link communities.
+
         References
         ----------
         [1] Arthur, D. and Vassilvitskii, S. (2007). k-means++: The Advantages of Careful Seeding.
@@ -235,7 +240,10 @@ class SmoothNetHist(BaseEstimator):
         return self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx)
 
     def _cluster(
-        self, number_link_communities: int, flat_graphon: np.ndarray, method: str = "k-means++"
+        self,
+        number_link_communities: int,
+        flat_graphon: np.ndarray,
+        method: Optional[str] = "k-means++",
     ) -> np.ndarray:
         """Clustering of the flattened graphon.
 
@@ -329,7 +337,7 @@ class SmoothNetHist(BaseEstimator):
             StepGraphon(
                 graphon=sym_KM_smooth_g[i],
                 bandwidthHist=hist_approx.bandwidthHist,
-                initial_rho=hist_approx.initial_rho,
+                initial_rho=None,
             )
             for i in range(nclust_hist)
         ]
