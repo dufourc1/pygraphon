@@ -136,6 +136,11 @@ class Graphon:
         -------
         float
             integral value of the graphon
+
+        Raises
+        ------
+        ValueError
+            if integration_method is not dblquad or simpson
         """
         if self.integration_method == "simpson":
             x = np.linspace(EPS, 1 - EPS, 500)
@@ -143,6 +148,8 @@ class Graphon:
             integral = simpson(simpson(z, x), x)
         elif self.integration_method == "dblquad":
             integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
+        else:
+            raise ValueError("integration_method must be dblquad or simpson")
         return integral
 
     def draw(self, n: int, exchangeable: bool = True, rho: Optional[float] = None) -> np.ndarray:

@@ -100,3 +100,14 @@ def test_integral():
         assert math.isclose(first_integral, second_integral, abs_tol=1e-3)
         assert math.isclose(first_integral, 1, abs_tol=1e-3)
         assert math.isclose(second_integral, 1, abs_tol=1e-3)
+
+
+def test_error_on_not_implemented_integration():
+    """Test that an error is raised if the integration method is not implemented."""
+    with pytest.raises(ValueError):
+        Graphon(lambda x, y: 1, integration_method="not_implemented")
+
+    graphon = Graphon(lambda x, y: 1)
+    graphon.integration_method = "not_implemented"
+    with pytest.raises(ValueError):
+        graphon.integral()
