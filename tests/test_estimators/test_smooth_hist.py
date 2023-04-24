@@ -134,6 +134,7 @@ def test_smoothing_histLC_givenLC_nonreg_block() -> None:
             [1.82768734, 0.27693223, 0.82883496, 0.27693223],
         ]
     )
+    estimator._num_par_nethist = len(np.unique(hist.graphon))
     smooth_test1 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=4)
     assert np.allclose(smooth_test1[-1].graphon * smooth_test1[-1].initial_rho, theoretical_theta)
 

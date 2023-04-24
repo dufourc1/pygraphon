@@ -26,3 +26,4 @@ Implemented estimators
    NBDsmooth
    USVT
    SAS
+   SmoothNetHist

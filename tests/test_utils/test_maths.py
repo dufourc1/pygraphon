@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """Test of maths utils."""
+from math import log
+
 import numpy as np
 
 from pygraphon.utils.utils_maths import EPS, log_likelihood
@@ -10,7 +12,7 @@ def test_log_likelihood_simple_graph():
     """Check log-likelihood is correct."""
     probs = np.array([[0.1, 0.2, 0.3], [0.2, 0.5, 0.45], [0.3, 0.45, 0.9]])
     A = np.array([[0, 1, 1], [1, 0, 0], [1, 0, 0]])
-    theoretical_ll = np.log(0.2 * 0.3 * (1 - 0.45))
+    theoretical_ll = log(0.2 * 0.3 * (1 - 0.45))
     assert np.isclose(log_likelihood(probs, A), theoretical_ll)
 
 
