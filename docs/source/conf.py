@@ -73,13 +73,13 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_inline_tabs",
-    "sphinx_togglebutton"
+    "sphinx_togglebutton",
 ]
 
 # citation style
-bibtex_bibfiles = ['refs.bib']
-bibtex_reference_style = 'author_year'
-bibtex_default_style = 'alpha'
+bibtex_bibfiles = ["refs.bib"]
+bibtex_reference_style = "author_year"
+bibtex_default_style = "alpha"
 
 # generate autosummary pages
 autosummary_generate = False
@@ -138,14 +138,14 @@ html_theme_options = {
             "html": "",
             "class": "fa-brands fa-solid fa-github fa-2x",
         }
-     ],
+    ],
 }
 
 
 html_css_files = [
-      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
-      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
-      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
 ]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -258,9 +258,7 @@ texinfo_documents = [
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    "https://docs.python.org/3/": None,
-}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 autodoc_typehints = "description"
 typehints_document_rtype = False
