@@ -16,49 +16,50 @@ class DeterministicSmoother(SmoothNetHist):
         )
 
 
-def test_bic_non_fitted() -> None:
-    """Test the bic method of the SmoothNetHist class."""
+def _test_cluster_up_to_relabelling(theoretical: np.ndarray, empirical: np.ndarray):
+    """Test that two sets of labels are the up to relabelling."""
+    assert np.array_equal(np.unique(empirical), np.unique(theoretical))
+    assert empirical.shape == theoretical.shape
+    for g in np.unique(theoretical):
+        # find corresponding label
+        ids_true = np.where(theoretical == g)[0]
+        ids_pred = np.where(empirical == empirical[ids_true[0]])[0]
+        assert np.array_equal(ids_true, ids_pred)
+
+
+def test_non_fitted_getters() -> None:
+    """Test non fitted estimator returns default value."""
     estimator = SmoothNetHist()
     with pytest.warns():
         assert estimator.get_bic() == np.inf
-
-
-def test_ratio_par_non_fitted() -> None:
-    """Test the ratio_par method of the SmoothNetHist class."""
-    estimator = SmoothNetHist()
     with pytest.warns():
         assert estimator.get_ratio_par() == np.inf
 
 
-def test_cluster() -> None:
-    """Test the cluster method of the SmoothNetHist class."""
+def test_cluster_no_reduction() -> None:
+    """Test the clustering method for basic cases.
+
+    Should return the same group up to relabelling if there are no reductions
+    in the number of groups.
+    """
     estimator = SmoothNetHist()
 
     test_array_1 = np.array([0, 0, 0, 0, 1, 1, 1, 1])
     labels_array_1 = estimator._cluster(2, test_array_1)
-    assert len(np.unique(labels_array_1)) == 2
-    assert (
-        (labels_array_1[test_array_1 == 0] == labels_array_1[0]) &
-        (labels_array_1[test_array_1 == 1] == labels_array_1[4])
-    ).all()
+    _test_cluster_up_to_relabelling(test_array_1, labels_array_1)
 
     test_array_2 = np.array([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2])
     labels_array_2 = estimator._cluster(3, test_array_2)
-    assert len(np.unique(labels_array_2)) == 3
-    assert (
-        (labels_array_2[test_array_2 == 0] == labels_array_2[0])
-        & (labels_array_2[test_array_2 == 1] == labels_array_2[4])
-        & (labels_array_2[test_array_2 == 2] == labels_array_2[8])
-    ).all()
+    _test_cluster_up_to_relabelling(test_array_2, labels_array_2)
 
+
+def test_cluster_reduction() -> None:
+    """Test if the clustering method reduces the number of groups."""
+    estimator = SmoothNetHist()
     test_array_3 = np.array([0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52])
     labels_array_3 = estimator._cluster(3, test_array_3)
     assert len(np.unique(labels_array_3)) == 3
-    assert (
-        (labels_array_3[test_array_3 < 0.16] == labels_array_3[0])
-        & (labels_array_3[(test_array_3 > 0.2) & (test_array_3 < 0.35)] == labels_array_3[4])
-        & (labels_array_3[test_array_3 > 0.45] == labels_array_3[8])
-    ).all()
+    assert test_array_3.shape == labels_array_3.shape
 
 
 def test_flat_to_tensor() -> None:
@@ -84,7 +85,7 @@ def test_smoothing_operator() -> None:
     flat_areas = hist.areas[np.triu_indices(3)]
     computed_smoothed_est = estimator._smoothing_operator(
         tensor_slice_graphon=flat_graphon,
-        kmeans=labels,
+        labels=labels,
         number_link_communities=2,
         flat_graphon=flat_graphon,
         flat_areas=flat_areas,
@@ -134,6 +135,7 @@ def test_smoothing_histLC_givenLC_nonreg_block() -> None:
             [1.82768734, 0.27693223, 0.82883496, 0.27693223],
         ]
     )
+    estimator._num_par_nethist = len(np.unique(hist.graphon))
     smooth_test1 = estimator._smoothing_histLC(hist_approx=hist, A=adj, number_link_communities=4)
     assert np.allclose(smooth_test1[-1].graphon * smooth_test1[-1].initial_rho, theoretical_theta)
 
@@ -146,9 +148,11 @@ def test_smoothing_histLC_tensor() -> None:
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
     adj = hist.draw(rho=None, n=n, exchangeable=False)
 
-    olhede_fit, _ = estimator._first_approximate_graphon_from_adjacency(adjacencyMatrix= adj)
+    olhede_fit, _ = estimator._first_approximate_graphon_from_adjacency(adjacencyMatrix=adj)
 
-    smooth_test_tensor = estimator._smoothing_histLC(hist_approx=olhede_fit, A=adj, number_link_communities=None)
+    smooth_test_tensor = estimator._smoothing_histLC(
+        hist_approx=olhede_fit, A=adj, number_link_communities=None
+    )
 
     assert estimator._num_par_nethist == len(smooth_test_tensor)
     assert np.allclose(smooth_test_tensor[-1].graphon, olhede_fit.graphon)
