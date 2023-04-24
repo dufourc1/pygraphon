@@ -65,11 +65,6 @@ class SmoothNetHist(BaseEstimator):
         -------
         Tuple[StepGraphon, np.ndarray]
             approximated graphon, matrix of connection Pij of size n x n
-
-        Raises
-        ------
-        ValueError
-            If the number of smoothed graphon is not equal to the number of link communities.
         """
         first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
             adjacencyMatrix,
@@ -79,6 +74,7 @@ class SmoothNetHist(BaseEstimator):
             past_non_improving,
             use_default_bandwidth,
         )
+
         tensor_graphon = self._smoothing_histLC(
             first_fit_graphon, adjacencyMatrix, number_link_communities
         )
@@ -218,7 +214,7 @@ class SmoothNetHist(BaseEstimator):
         self,
         number_link_communities: int,
         flat_graphon: np.ndarray,
-        method: str = "k-means++",
+        method: Optional[str] = "k-means++",
     ) -> np.ndarray:
         """Clustering of the flattened graphon.
 
@@ -259,7 +255,7 @@ class SmoothNetHist(BaseEstimator):
         ----------
         tensor_slice_graphon : np.ndarray
             tensor slice containing a copy of the first graphon estimation, flattened.
-        kmeans : np.ndarray
+        labels : np.ndarray
             labels of the clustering
         number_link_communities : int
             number of link communities

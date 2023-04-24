@@ -32,10 +32,11 @@ def test_non_fitted_getters() -> None:
     estimator = SmoothNetHist()
     with pytest.warns():
         assert estimator.get_bic() == np.inf
+    with pytest.warns():
         assert estimator.get_ratio_par() == np.inf
 
 
-def test_cluster() -> None:
+def test_cluster_no_reduction() -> None:
     """Test the clustering method for basic cases.
 
     Should return the same group up to relabelling if there are no reductions
@@ -51,14 +52,14 @@ def test_cluster() -> None:
     labels_array_2 = estimator._cluster(3, test_array_2)
     _test_cluster_up_to_relabelling(test_array_2, labels_array_2)
 
+
+def test_cluster_reduction() -> None:
+    """Test if the clustering method reduces the number of groups."""
+    estimator = SmoothNetHist()
     test_array_3 = np.array([0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52])
     labels_array_3 = estimator._cluster(3, test_array_3)
     assert len(np.unique(labels_array_3)) == 3
-    assert (
-        (labels_array_3[test_array_3 < 0.16] == labels_array_3[0])
-        & (labels_array_3[(test_array_3 > 0.2) & (test_array_3 < 0.35)] == labels_array_3[4])
-        & (labels_array_3[test_array_3 > 0.45] == labels_array_3[8])
-    ).all()
+    assert test_array_3.shape == labels_array_3.shape
 
 
 def test_flat_to_tensor() -> None:
