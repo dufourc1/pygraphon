@@ -118,7 +118,7 @@ class TestApiSmoothing(TestApiHistogramEstimator):
 
     @pytest.fixture
     def estimator(self):
-        return SmoothNetHist(bandwidth=1 / 3)
+        return SmoothNetHist()
 
     @pytest.fixture
     def fitted_estimator(self, estimator, sbm_3):
