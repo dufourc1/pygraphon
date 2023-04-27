@@ -24,7 +24,11 @@ def _add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
 
 
 def plot_graphon_function(
-    graphon: Graphon, fig: Figure = None, ax: Axes = None, figsize: Tuple[int, int] = (6, 5)
+    graphon: Graphon,
+    fig: Figure = None,
+    ax: Axes = None,
+    figsize: Tuple[int, int] = (6, 5),
+    res=0.01,
 ) -> Tuple[Figure, Axes]:
     """Plot a graphon function.
 
@@ -44,11 +48,13 @@ def plot_graphon_function(
     Tuple[Figure, Axes]
         plot
     """
-    x1, x2 = np.meshgrid(np.arange(0, 1, 0.1), np.arange(0, 1, 0.1))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    x1, x2 = np.meshgrid(np.arange(0, 1, res), np.arange(0, 1, res))
     y = graphon.graphon_function(x1, x2)
-    ax.imshow(y, extent=[0, 1, 0, 1], cmap=plt.cm.get_cmap("jet"), origin="lower")
-    fig.colorbar()
-    plt.show()
+    im = ax.imshow(y, extent=[0, 1, 0, 1], cmap=plt.cm.get_cmap("turbo"), origin="lower")
+    fig.colorbar(im, ax=ax)
+    return fig, ax
 
 
 def plot_sample(
