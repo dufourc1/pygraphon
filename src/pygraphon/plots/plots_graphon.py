@@ -66,6 +66,8 @@ def plot_probabilities(
     cmap: str = "turbo",
     origin: str = "lower",
     show_colorbar: bool = False,
+    vmin: float = 0,
+    vmax: float = 1,
 ) -> Tuple[Figure, Axes]:
     """Plot the probabilities from a graphon.
 
@@ -87,6 +89,10 @@ def plot_probabilities(
         origin of the plot, by default "lower"
     show_colorbar : bool
         whether to show the colorbar, by default False
+    vmin : float
+        minimum value of the colorbar, by default 0
+    vmax : float
+        maximum value of the colorbar, by default 1
 
     Returns
     -------
@@ -103,7 +109,14 @@ def plot_probabilities(
     fig, ax = _default_fig_ax(fig, ax, figsize)
     y = _evaluate_graphon(graphon, res=res) * graphon.initial_rho
     fig, ax = _show_evaluated_graphon(
-        y, fig, ax, cmap=cmap, origin=origin, show_colorbar=show_colorbar
+        y,
+        fig,
+        ax,
+        cmap=cmap,
+        origin=origin,
+        show_colorbar=show_colorbar,
+        vmin=vmin,
+        vmax=vmax,
     )
     return fig, ax
 
@@ -138,6 +151,8 @@ def _show_evaluated_graphon(
     cmap: str = "turbo",
     origin: str = "lower",
     show_colorbar: bool = False,
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
 ):
     extent = [0, 1, 0, 1] if origin == "lower" else [0, 1, 1, 0]
     im = ax.imshow(
@@ -145,6 +160,8 @@ def _show_evaluated_graphon(
         extent=extent,
         cmap=mpl.colormaps[cmap],
         origin=origin,
+        vmin=vmin,
+        vmax=vmax,
     )
     if show_colorbar:
         _add_colorbar(im, ax=ax)
