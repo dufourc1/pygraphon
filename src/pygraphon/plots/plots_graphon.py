@@ -139,13 +139,13 @@ def _show_evaluated_graphon(
     origin: str = "lower",
     show_colorbar: bool = False,
 ):
+    extent = [0, 1, 0, 1] if origin == "lower" else [0, 1, 1, 0]
     im = ax.imshow(
         f,
-        extent=[0, 1, 0, 1],
+        extent=extent,
         cmap=mpl.colormaps[cmap],
+        origin=origin,
     )
-    if origin == "lower":
-        ax.invert_yaxis()
     if show_colorbar:
         _add_colorbar(im, ax=ax)
     return fig, ax
