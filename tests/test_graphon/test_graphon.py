@@ -100,6 +100,10 @@ def test_integral():
         assert math.isclose(first_integral, second_integral, abs_tol=1e-3)
         assert math.isclose(first_integral, 1, abs_tol=1e-3)
         assert math.isclose(second_integral, 1, abs_tol=1e-3)
+        assert math.isclose(
+            graphon.unormalized_graphon_function(0.2, 0.3),
+            graphon.graphon_function(0.2, 0.3) * graphon.initial_rho,
+        )
 
 
 def test_error_on_not_implemented_integration():
