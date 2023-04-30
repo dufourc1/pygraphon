@@ -22,13 +22,13 @@ graphon_mean = Graphon(function=lambda x, y: 0.5 * (x + y))
 graphon_logit_sum = Graphon(function=lambda x, y: 1 / (1 + np.exp(-10 * (x**2 + y**2))))
 graphon_latent_distance = Graphon(function=lambda x, y: np.abs(x - y))
 graphon_logit_max_power = Graphon(
-    function=lambda x, y: 1 / (1 + np.exp(-(max(x, y) ** 2 + min(x, y) ** 4)))
+    function=lambda x, y: 1 / (1 + np.exp(-(np.maximum(x, y) ** 2 + np.minimum(x, y) ** 4)))
 )
-graphon_exp_max_power = Graphon(function=lambda x, y: np.exp(-max(x, y) ** (3 / 4)))
+graphon_exp_max_power = Graphon(function=lambda x, y: np.exp(-np.maximum(x, y) ** (3 / 4)))
 graphon_exp_polynomial = Graphon(
-    function=lambda x, y: np.exp(-0.5 * (min(x, y) + np.sqrt(x) + np.sqrt(y)))
+    function=lambda x, y: np.exp(-0.5 * (np.minimum(x, y) + np.sqrt(x) + np.sqrt(y)))
 )
-graphon_log_1_p = Graphon(function=lambda x, y: np.log1p(0.5 * max(x, y)))
+graphon_log_1_p = Graphon(function=lambda x, y: np.log1p(0.5 * np.maximum(x, y)))
 
 common_graphons = {
     "product": graphon_product,

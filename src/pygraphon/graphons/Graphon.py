@@ -58,6 +58,7 @@ class Graphon:
         integration_method: str = "dblquad",
         repr: Optional[str] = None,
     ) -> None:
+        self.unormalized_graphon_function = copy_func(function)
         self.graphon_function = function
         self.repr = self._make_repr(repr)
         self.scaled = scaled
