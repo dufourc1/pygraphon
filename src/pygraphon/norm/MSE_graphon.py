@@ -7,7 +7,10 @@ from pygraphon.utils.utils_matrix import permute_matrix
 
 
 def permutation_distance(
-    graphon1: StepGraphon, graphon2: StepGraphon, norm: str = "MSE", exchangeable: bool = True
+    graphon1: StepGraphon,
+    graphon2: StepGraphon,
+    norm: str = "MSE",
+    exchangeable: bool = True,
 ) -> float:
     """Exact permutation distance between two graphons.
 

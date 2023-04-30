@@ -66,7 +66,10 @@ class SmoothNetHist(BaseEstimator):
         Tuple[StepGraphon, np.ndarray]
             approximated graphon, matrix of connection Pij of size n x n
         """
-        first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
+        (
+            first_fit_graphon,
+            assignment,
+        ) = self._first_approximate_graphon_from_adjacency(
             adjacencyMatrix,
             bandwidthHist,
             absTol,
@@ -80,7 +83,10 @@ class SmoothNetHist(BaseEstimator):
         )
 
         return self._select_best_graphon(
-            tensor_graphon, adjacencyMatrix, assignment=assignment, n_link_com=n_link_com
+            tensor_graphon,
+            adjacencyMatrix,
+            assignment=assignment,
+            n_link_com=n_link_com,
         )
 
     def _first_approximate_graphon_from_adjacency(
@@ -138,12 +144,17 @@ class SmoothNetHist(BaseEstimator):
         # ---------------------------------------------------------------------------------------------
         # Return the graphon from first fit nethist.
         graphon_nethist = StepGraphon(
-            assignment_nethist.theta, bandwidthHist=bandwidthHist, initial_rho=rho
+            assignment_nethist.theta,
+            bandwidthHist=bandwidthHist,
+            initial_rho=rho,
         )
         return graphon_nethist, assignment_nethist
 
     def _smoothing_histLC(
-        self, hist_approx: StepGraphon, A: np.ndarray, number_link_communities: Optional[int] = None
+        self,
+        hist_approx: StepGraphon,
+        A: np.ndarray,
+        number_link_communities: Optional[int] = None,
     ) -> Tuple[List[StepGraphon], List[int]]:
         """Smoothing of the histogram estimator using k-means++ [1].
 
@@ -212,7 +223,10 @@ class SmoothNetHist(BaseEstimator):
                     flat_areas=flat_areas,
                 )
 
-        return self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx), clusters
+        return (
+            self._flat_to_tensor(avr_graphon=avr_graphon, hist_approx=hist_approx),
+            clusters,
+        )
 
     def _cluster(
         self,
@@ -237,7 +251,10 @@ class SmoothNetHist(BaseEstimator):
             labels of the clustering
         """
         kmeans = KMeans(
-            n_clusters=number_link_communities, random_state=0, init=method, n_init=10
+            n_clusters=number_link_communities,
+            random_state=0,
+            init=method,
+            n_init=10,
         ).fit(flat_graphon.reshape(-1, 1))
 
         return kmeans.labels_

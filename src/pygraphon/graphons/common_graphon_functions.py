@@ -10,8 +10,11 @@ import numpy as np
 
 from .Graphon import Graphon
 
-graphon_product = Graphon(function=lambda x, y: x * y)
-graphon_exp_07 = Graphon(function=lambda x, y: np.exp(-(x**0.7 + y**0.7)))
+graphon_product = Graphon(function=lambda x, y: x * y, repr="f(x,y) = x*y")
+graphon_exp_07 = Graphon(
+    function=lambda x, y: np.exp(-(x**0.7 + y**0.7)),
+    repr="exp(-x^0.7 - y^0.7)",
+)
 graphon_polynomial = Graphon(
     function=lambda x, y: 0.25 * (x**2 + y**2 + np.sqrt(x) + np.sqrt(y))
 )

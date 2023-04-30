@@ -37,7 +37,11 @@ class CycleCount:
         return self.network_profile(adjacency_matrix, kmax=self.L)
 
     def approximate_network_profile(
-        self, adjacency_matrix: np.ndarray, kmax: int, subsample: float = 0.4, repetitions: int = 3
+        self,
+        adjacency_matrix: np.ndarray,
+        kmax: int,
+        subsample: float = 0.4,
+        repetitions: int = 3,
     ) -> np.ndarray:
         """Compute the network profile of a graph G by subsampling it multiple times and averaging the results.
 

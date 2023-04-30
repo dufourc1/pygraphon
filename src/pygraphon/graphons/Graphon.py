@@ -1,4 +1,5 @@
 """Graphon based on a continuous function."""
+import inspect
 import math
 import warnings
 from copy import deepcopy
@@ -55,8 +56,10 @@ class Graphon:
         scaled=True,
         check=True,
         integration_method: str = "dblquad",
+        repr: Optional[str] = None,
     ) -> None:
         self.graphon_function = function
+        self.repr = self._make_repr(repr)
         self.scaled = scaled
         if integration_method not in ["dblquad", "simpson"]:
             raise ValueError("integration_method must be dblquad or simpson")
@@ -91,6 +94,31 @@ class Graphon:
                     raise ValueError(
                         "Graphon does not integrate to 1 and cannot be automatically corrected"
                     )
+
+    def __str__(self) -> str:
+        """Return a string representation of the graphon.
+
+        Returns
+        -------
+        str
+            string representation of the graphon.
+        """
+        return self.repr
+
+    def _make_repr(self, repr: Optional[str]) -> str:
+        """Return a string representation of the graphon.
+
+        Returns
+        -------
+        str
+            string representation of the graphon.
+        """
+        if repr is None:
+            try:
+                repr = inspect.getsource(self.graphon_function).strip()
+            except Exception:
+                repr = "Graphon with no repr"
+        return repr
 
     def check_graphon(self):
         """Check graphon properties depending on the subclass that iplements it.

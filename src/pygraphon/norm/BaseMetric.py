@@ -18,11 +18,18 @@ class BaseMetric:
         if not estimator.fitted:
             raise ValueError("Estimator is not fitted and no adjacency matrix was provided")
         return self._compute(
-            graphon=graphon, estimated=estimator.graphon, adjacency_matrix=adj_matrix
+            graphon=graphon,
+            estimated=estimator.graphon,
+            adjacency_matrix=adj_matrix,
         )
 
     @abstractclassmethod
-    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
+    def _compute(
+        self,
+        graphon: Graphon,
+        estimated: Graphon,
+        adjacency_matrix: np.ndarray,
+    ):
         pass
 
     @abstractclassmethod

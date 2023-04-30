@@ -10,7 +10,12 @@ class AUCEdge(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
+    def _compute(
+        self,
+        graphon: Graphon,
+        estimated: Graphon,
+        adjacency_matrix: np.ndarray,
+    ):
         p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
         if not adjacency_matrix.shape == p_hat.shape:
             raise ValueError("Adjacency matrix and probabilities matrix have different shapes")
@@ -25,7 +30,12 @@ class AUPRCEdge(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def _compute(self, graphon: Graphon, estimated: Graphon, adjacency_matrix: np.ndarray):
+    def _compute(
+        self,
+        graphon: Graphon,
+        estimated: Graphon,
+        adjacency_matrix: np.ndarray,
+    ):
         p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
         if not adjacency_matrix.shape == p_hat.shape:
             raise ValueError("Adjacency matrix and probabilities matrix have different shapes")

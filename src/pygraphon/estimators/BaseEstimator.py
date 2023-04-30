@@ -70,9 +70,10 @@ class BaseEstimator:
                 f"type of graph is not supported, got {type(graph)}, but expected nx.Graph or np.ndarray"
             )
         check_simple_adjacency_matrix(adjacency_matrix)
-        self.graphon, self.edge_connectivity = self._approximate_graphon_from_adjacency(
-            adjacency_matrix, *args, **kwargs
-        )
+        (
+            self.graphon,
+            self.edge_connectivity,
+        ) = self._approximate_graphon_from_adjacency(adjacency_matrix, *args, **kwargs)
         self.fitted = True
 
     @abstractclassmethod

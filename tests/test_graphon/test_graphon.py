@@ -111,3 +111,17 @@ def test_error_on_not_implemented_integration():
     graphon.integration_method = "not_implemented"
     with pytest.raises(ValueError):
         graphon.integral()
+
+
+def test_print_method(capfd):
+    """Test that the print method is correct."""
+    g = Graphon(lambda x, y: 1)
+    assert str(g) == "g = Graphon(lambda x, y: 1)"
+    print(g)  # noqa: T201
+    out, _ = capfd.readouterr()
+    assert out == "g = Graphon(lambda x, y: 1)\n"
+    g2 = Graphon(lambda x, y: 1, repr="Erdos-Renyi")
+    assert str(g2) == "Erdos-Renyi"
+    print(g2)  # noqa: T201
+    out, _ = capfd.readouterr()
+    assert out == "Erdos-Renyi\n"
