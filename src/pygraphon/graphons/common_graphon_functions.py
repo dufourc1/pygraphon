@@ -19,7 +19,7 @@ graphon_polynomial = Graphon(
     function=lambda x, y: 0.25 * (x**2 + y**2 + np.sqrt(x) + np.sqrt(y))
 )
 graphon_mean = Graphon(function=lambda x, y: 0.5 * (x + y))
-graphon_logit_sum = Graphon(function=lambda x, y: 1 / (1 + np.exp(-10 * (x**2 + y**2))))
+graphon_logit_sum = Graphon(function=lambda x, y: (np.exp(-10 * (x**2 + y**2))))
 graphon_latent_distance = Graphon(function=lambda x, y: np.abs(x - y))
 graphon_logit_max_power = Graphon(
     function=lambda x, y: 1 / (1 + np.exp(-(np.maximum(x, y) ** 2 + np.minimum(x, y) ** 4)))
