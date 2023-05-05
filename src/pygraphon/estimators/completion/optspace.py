@@ -118,7 +118,7 @@ class OptSpace(object):
         obs[np.isnan(obs)] = 0
         # generate a mask that tracks where missing
         # values exist in the obs dataset
-        mask = (np.abs(obs) > 0).astype(np.int)
+        mask = (np.abs(obs) > 0).astype(int)
         # save the shape of the matrix
         n, m = obs.shape
         # get a measure of sparsity level
