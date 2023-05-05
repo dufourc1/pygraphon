@@ -108,7 +108,7 @@ class CycleCount:
                 dA3 = np.diag(Ak)
                 tA3 = np.sum(dA3)
                 sA3 = np.sum(Ak)
-                t[k - 1] = tA3 ** (1 / k)
+                t[k - 1] = tA3  # ** (1 / k)
                 A3 = Ak
             elif k == 4:
                 dA4 = np.diag(Ak)
@@ -117,13 +117,13 @@ class CycleCount:
                     tA4
                     + 2 * number_edges
                     - 2 * (degrees[non_zero_degrees] @ degrees[non_zero_degrees])
-                ) ** (1 / k)
+                )  # ** (1 / k)
                 A4 = Ak
 
             elif k == 5:
                 dA5 = np.diag(Ak)
                 tA5 = np.sum(dA5)
-                t[k - 1] = (tA5 - 5 * np.sum((degrees[non_zero_degrees] - 1) * dA3)) ** (1 / k)
+                t[k - 1] = tA5 - 5 * np.sum((degrees[non_zero_degrees] - 1) * dA3)  # ** (1 / k)
                 A5 = Ak
             elif k == 6:
                 dA6 = np.diag(Ak)
@@ -135,7 +135,7 @@ class CycleCount:
                 inter += 3 * sA3
                 inter -= 12 * np.sum(degrees[non_zero_degrees] ** 2)
                 inter += 4 * np.sum(degrees[non_zero_degrees])
-                t[k - 1] = (inter) ** (1 / k)
+                t[k - 1] = inter  # ** (1 / k)
             elif k == 7:
                 dA7 = np.diag(Ak)
                 tA7 = np.sum(dA7)
@@ -151,7 +151,7 @@ class CycleCount:
                 inter += 7 * np.sum(dA3 * np.sum(A2, axis=1))
                 inter -= 77 * np.sum(dA3 * degrees[non_zero_degrees])
                 inter += 56 * tA3
-                t[k - 1] = (inter) ** (1 / k)
+                t[k - 1] = inter  # ** (1 / k)
             elif k == 8:
                 inter = (
                     np.sum(np.diag(Ak))
@@ -196,7 +196,7 @@ class CycleCount:
                 for i in range(A1.shape[0]):
                     xk4 += A1[i, :] @ (A1 * (A1 @ np.diag(A1[i, :]) @ A1)) @ (A1[i, :].T)
                 inter += 22 * xk4
-                t[k - 1] = (inter) ** (1 / k)
+                t[k - 1] = inter  # ** (1 / k)
             elif k == 9:
                 inter = (
                     np.sum(np.diag(Ak))
@@ -272,11 +272,11 @@ class CycleCount:
                         A1[i1, :] @ (A1 * (A1 @ np.diag(A1[i1, :]) @ (A1 * A2))) @ (A1[i1, :].T)
                     )
                 inter = inter - 156 * xk4
-                t[k - 1] = (inter) ** (1 / k)
+                t[k - 1] = inter  # ** (1 / k)
             else:
                 raise ValueError("kmax should be <= 9 and >= 3")
 
         # normalize densities
-        self.counts = np.copy((t ** (np.arange(0, len(t)) + 1))[2:])
-        t /= np.shape(adjacency_matrix)[0]
-        return (t ** (np.arange(0, len(t)) + 1))[2:]
+        self.counts = np.copy(t[2:])
+        t /= np.shape(adjacency_matrix)[0] ** (np.arange(0, len(t)) + 1)
+        return t[2:]
