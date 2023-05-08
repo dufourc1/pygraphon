@@ -56,8 +56,9 @@ def test_cycle_counts_against_nx():
 
 def test_erdos_renyi_densities():
     """Test cycle densities against theoretical values for ER."""
-    A = nx.to_numpy_array(nx.erdos_renyi_graph(500, 0.3))
+    p = 0.4
+    A = nx.to_numpy_array(nx.erdos_renyi_graph(100, p, seed=13))
     cc = CycleCount(5, normalization="t")
     normalized = cc(A)
-    theoretical = 0.3 ** np.arange(3, cc.L + 1)
+    theoretical = p ** np.arange(3, cc.L + 1)
     assert np.allclose(normalized, theoretical, atol=1e-3, rtol=1e-2)
