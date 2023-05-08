@@ -83,6 +83,8 @@ class CycleCount:
                     for i in range(len(counts))
                 ]
             )
+        else:
+            raise ValueError("normalization should be either s or t")
 
     @staticmethod
     def network_profile(adjacency_matrix, kmax=3) -> np.ndarray:
