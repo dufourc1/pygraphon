@@ -34,9 +34,7 @@ class CycleCount:
         """
         check_simple_adjacency_matrix(adjacency_matrix)
         self.adjacency_matrix = adjacency_matrix
-        self.counts = np.copy(CycleCount.network_profile(adjacency_matrix, kmax=self.L)) / (
-            np.arange(3, self.L + 1) * 2
-        )
+        self.counts = np.copy(CycleCount.network_profile(adjacency_matrix, kmax=self.L))
         return CycleCount.normalize_counts(
             self.counts, np.shape(adjacency_matrix)[0], self.normalization
         )
@@ -72,17 +70,11 @@ class CycleCount:
 
     @staticmethod
     def normalize_counts(counts: np.ndarray, n_nodes: int, normalization: str = "s") -> np.ndarray:
-        density = counts / (n_nodes ** (np.arange(3, len(counts) + 3)))
-        print(density)
+        unormalized_counts = counts * np.arange(3, len(counts) + 3) * 2
         if normalization == "s":
-            return density
+            return unormalized_counts / n_nodes
         elif normalization == "t":
-            return np.array(
-                [
-                    density[i] ** (1 / (i + 3)) if density[i] != 0 else density[i]
-                    for i in range(len(counts))
-                ]
-            )
+            return unormalized_counts / (n_nodes ** (1 / (np.arange(3, len(counts) + 3))))
         else:
             raise ValueError("normalization should be either s or t")
 
@@ -299,5 +291,5 @@ class CycleCount:
             else:
                 raise ValueError("kmax should be <= 9 and >= 3")
 
-        # normalize counts
-        return t[2:]
+        # normalize counts (avoid double counting)
+        return t[2:] / (np.arange(3, kmax + 1) * 2)

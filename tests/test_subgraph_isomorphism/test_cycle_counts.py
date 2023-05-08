@@ -1,7 +1,6 @@
 import networkx as nx
 import numpy as np
 import pytest
-from scipy.special import comb
 
 from pygraphon.subgraph_isomorphism import CycleCount
 
@@ -21,9 +20,9 @@ def test_cycle_counts(length, normalization, number_cycles):
     """Test cycle counts for multiple cycle of length L."""
     n_nodes = 300
     A = make_cycle(length, n_nodes, number_cycles)
-    theoretical_density = number_cycles / comb(n_nodes, length)
+    theoretical_density = number_cycles * length * 2 / n_nodes
     if normalization == "t":
-        theoretical_density = theoretical_density ** (1 / length)
+        theoretical_density = number_cycles * length * 2 / (n_nodes ** (1 / length))
     cc = CycleCount(length, normalization=normalization)
     normalized = cc(A)
     assert cc.counts[-1] == number_cycles
