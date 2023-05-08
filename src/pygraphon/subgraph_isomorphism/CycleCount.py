@@ -5,19 +5,19 @@ from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
 
 class CycleCount:
-    """Implement the cycle count algorithm for finding the number of cycles in a graph.
+    """Implement the cycle count algorithm for finding the number of cycles in a graph."""
 
-    The algorithm is based on the paper:
-    """
-
-    def __init__(self, L: float = 9) -> None:
+    def __init__(self, L: int = 3, normalization: str = "s") -> None:
         if L < 3:
             raise ValueError("input L should be an integer >= 3")
         if L >= 10:
-            raise ValueError("cycleCount algorithm cannot handle L > 10")
+            raise NotImplementedError("cycleCount algorithm cannot handle L > 10")
 
-        self.L = float(L)
-        self.counts = None
+        self.L = int(L)
+        self.counts = np.array([])
+        if normalization not in ["s", "t"]:
+            raise ValueError("normalization should be either s or t")
+        self.normalization = normalization
 
     def __call__(self, adjacency_matrix: np.ndarray) -> np.ndarray:
         """Count the densities of subgraph C_l in a graph G: t(C_L,G).
@@ -34,7 +34,12 @@ class CycleCount:
         """
         check_simple_adjacency_matrix(adjacency_matrix)
         self.adjacency_matrix = adjacency_matrix
-        return self.network_profile(adjacency_matrix, kmax=self.L)
+        self.counts = np.copy(CycleCount.network_profile(adjacency_matrix, kmax=self.L)) / (
+            np.arange(3, self.L + 1) * 2
+        )
+        return CycleCount.normalize_counts(
+            self.counts, np.shape(adjacency_matrix)[0], self.normalization
+        )
 
     def approximate_network_profile(
         self,
@@ -65,7 +70,22 @@ class CycleCount:
         """
         raise NotImplementedError("approximate_network_profile is not implemented")
 
-    def network_profile(self, adjacency_matrix, kmax=None) -> np.ndarray:
+    @staticmethod
+    def normalize_counts(counts: np.ndarray, n_nodes: int, normalization: str = "s") -> np.ndarray:
+        density = counts / (n_nodes ** (np.arange(3, len(counts) + 3)))
+        print(density)
+        if normalization == "s":
+            return density
+        elif normalization == "t":
+            return np.array(
+                [
+                    density[i] ** (1 / (i + 3)) if density[i] != 0 else density[i]
+                    for i in range(len(counts))
+                ]
+            )
+
+    @staticmethod
+    def network_profile(adjacency_matrix, kmax=3) -> np.ndarray:
         """Compute the network profile of a graph: normalized counts of cycles of length 3 to L.
 
         Parameters
@@ -73,7 +93,7 @@ class CycleCount:
         adjacency_matrix : np.ndarray
              Adjacency matrix representing the simple graph G
         kmax : int
-            maximum length of cycles to consider (default: None). If None, use the value of L.
+            maximum length of cycles to consider (default: 3)
 
         Returns
         -------
@@ -87,12 +107,13 @@ class CycleCount:
         ValueError
             if L is smaller than 3
         """
-        if kmax is None:
-            kmax = self.L
         if kmax >= 10:
             raise NotImplementedError(
                 "Cannot count cycles with length >= 10:  not implemented. Please change the value of kmax."
             )
+        if kmax < 3:
+            raise ValueError("kmax should be an integer >= 3")
+
         kmax = int(kmax)
         number_edges = np.sum(adjacency_matrix) / 2
         degrees = np.sum(adjacency_matrix, axis=0)
@@ -276,7 +297,5 @@ class CycleCount:
             else:
                 raise ValueError("kmax should be <= 9 and >= 3")
 
-        # normalize densities
-        self.counts = np.copy(t[2:])
-        t /= np.shape(adjacency_matrix)[0] ** (np.arange(0, len(t)) + 1)
+        # normalize counts
         return t[2:]
