@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pytest
+from scipy.special import comb
 
 from pygraphon.subgraph_isomorphism import CycleCount
 
@@ -20,9 +21,10 @@ def test_cycle_counts(length, normalization, number_cycles):
     """Test cycle counts for multiple cycle of length L."""
     n_nodes = 300
     A = make_cycle(length, n_nodes, number_cycles)
-    theoretical_density = number_cycles * length * 2 / n_nodes
+    if normalization == "s":
+        theoretical_density = number_cycles / comb(n_nodes, length)
     if normalization == "t":
-        theoretical_density = number_cycles * length * 2 / (n_nodes ** (1 / length))
+        theoretical_density = number_cycles * length * 2 / (n_nodes**length)
     cc = CycleCount(length, normalization=normalization)
     normalized = cc(A)
     assert cc.counts[-1] == number_cycles
@@ -37,3 +39,25 @@ def test_cycle_counts_outside_boundary():
 
     with pytest.raises(NotImplementedError):
         CycleCount(10)
+
+
+def test_cycle_counts_against_nx():
+    """Test cycle counts against networkx cycle counts."""
+    G = nx.erdos_renyi_graph(40, 0.3)
+    A = nx.to_numpy_array(G)
+    cycles_nx = nx.simple_cycles(G, 5)
+    n_cycles = np.zeros(6)
+    for c in cycles_nx:
+        n_cycles[len(c)] += 1
+    cc = CycleCount(5, normalization="s")
+    _ = cc(A)
+    assert np.array_equal(n_cycles[3:], cc.counts)
+
+
+def test_erdos_renyi_densities():
+    """Test cycle densities against theoretical values for ER."""
+    A = nx.to_numpy_array(nx.erdos_renyi_graph(500, 0.3))
+    cc = CycleCount(5, normalization="t")
+    normalized = cc(A)
+    theoretical = 0.3 ** np.arange(3, cc.L + 1)
+    assert np.allclose(normalized, theoretical, atol=1e-3, rtol=1e-2)

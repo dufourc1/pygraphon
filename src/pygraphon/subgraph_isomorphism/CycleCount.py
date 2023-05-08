@@ -1,5 +1,6 @@
 """Class to compute cycle homomorphism."""
 import numpy as np
+from scipy.special import comb
 
 from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
@@ -70,17 +71,46 @@ class CycleCount:
 
     @staticmethod
     def normalize_counts(counts: np.ndarray, n_nodes: int, normalization: str = "s") -> np.ndarray:
-        unormalized_counts = counts * np.arange(3, len(counts) + 3) * 2
+        """Normalize the counts of cycles.
+
+        For a cycle of size k, the normalization is either
+        s: 1 / (n_nodes choose k)
+        t: k * 2 * k / n_nodes ** k (t(C_k,G))
+
+        Parameters
+        ----------
+        counts : np.ndarray
+            Counts of cycles of length 3 to L
+        n_nodes : int
+            number of nodes in the graph
+        normalization : str
+            type of normalization, in :obj:`["s","t"]` by default "s".
+
+        Returns
+        -------
+        np.ndarray
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         if normalization == "s":
-            return unormalized_counts / n_nodes
+            return counts / comb(n_nodes, np.arange(3, len(counts) + 3))
         elif normalization == "t":
-            return unormalized_counts / (n_nodes ** (1 / (np.arange(3, len(counts) + 3))))
+            return (
+                counts
+                * np.arange(3, len(counts) + 3)
+                * 2
+                / (n_nodes ** (np.arange(3, len(counts) + 3)))
+            )
         else:
             raise ValueError("normalization should be either s or t")
 
     @staticmethod
     def network_profile(adjacency_matrix, kmax=3) -> np.ndarray:
-        """Compute the network profile of a graph: normalized counts of cycles of length 3 to L.
+        """Compute the counts of cycles of length 3 to L.
 
         Parameters
         ----------
@@ -92,7 +122,7 @@ class CycleCount:
         Returns
         -------
         np.ndarray
-            network profile of the graph
+            counts of cycle of length 3 to  L
 
         Raises
         ------
