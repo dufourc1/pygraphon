@@ -66,10 +66,7 @@ class SmoothNetHist(BaseEstimator):
         Tuple[StepGraphon, np.ndarray]
             approximated graphon, matrix of connection Pij of size n x n
         """
-        (
-            first_fit_graphon,
-            assignment,
-        ) = self._first_approximate_graphon_from_adjacency(
+        first_fit_graphon, assignment = self._first_approximate_graphon_from_adjacency(
             adjacencyMatrix,
             bandwidthHist,
             absTol,
