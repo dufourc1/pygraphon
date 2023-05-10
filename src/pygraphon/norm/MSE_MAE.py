@@ -9,11 +9,12 @@ class MseProbaEdge(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def _compute(self, graphon: Graphon, estimated: Graphon):
-        indices = np.triu_indices(self.n_nodes, 1)
-        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False)
-        p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
-        return np.mean((p_0[indices] - p_hat[indices]) ** 2)
+    def _compute(self, graphon: Graphon, estimated: Graphon, **kwargs):
+        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False, wholeMatrix=False)
+        p_hat = estimated.get_edge_probabilities(
+            self.n_nodes, exchangeable=False, wholeMatrix=False
+        )
+        return np.mean((p_0 - p_hat) ** 2)
 
     def __str__(self):
         return "MSE on probabily matrix"
@@ -24,11 +25,12 @@ class MaeProbaEdge(BaseMetric):
         super().__init__()
         self.n_nodes = n_nodes
 
-    def _compute(self, graphon: Graphon, estimated: Graphon,**kwargs):
-        indices = np.triu_indices(self.n_nodes, 1)
-        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False)
-        p_hat = estimated.get_edge_probabilities(self.n_nodes, exchangeable=False)
-        return np.mean(np.abs(p_0[indices] - p_hat[indices]))
+    def _compute(self, graphon: Graphon, estimated: Graphon, **kwargs):
+        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False, wholeMatrix=False)
+        p_hat = estimated.get_edge_probabilities(
+            self.n_nodes, exchangeable=False, wholeMatrix=False
+        )
+        return np.mean(np.abs(p_0 - p_hat))
 
     def __str__(self):
         return "MAE on probabily matrix"
