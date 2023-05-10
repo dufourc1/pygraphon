@@ -1,13 +1,16 @@
 """Graphon based on a continuous function."""
+import inspect
 import math
 import warnings
 from copy import deepcopy
 from typing import Callable, Optional
 
 import numpy as np
-from scipy.integrate import dblquad
+from scipy.integrate import dblquad, simpson
 
 from pygraphon.utils.utils_func import copy_func
+
+EPS = np.spacing(1)
 
 
 class Graphon:
@@ -28,6 +31,9 @@ class Graphon:
     initial_rho : Optional[float]
         initial edge density, by default None. Should be in ]0,1[ if given. The function is
         expected to integrate to 1 if scaled is True and initial_rho is not None.
+    integration_method : str
+        method used to compute the integral of the graphon, by default "dblquad".
+        Can be "dblquad" or "simpson". "simpson" is faster but less accurate.
 
 
     ..  note::
@@ -49,9 +55,16 @@ class Graphon:
         initial_rho: Optional[float] = None,
         scaled=True,
         check=True,
+        integration_method: str = "dblquad",
+        repr: Optional[str] = None,
     ) -> None:
+        self.unormalized_graphon_function = copy_func(function)
         self.graphon_function = function
+        self.repr = self._make_repr(repr)
         self.scaled = scaled
+        if integration_method not in ["dblquad", "simpson"]:
+            raise ValueError("integration_method must be dblquad or simpson")
+        self.integration_method = integration_method
         self.integral_value = deepcopy(self.integral())
 
         # remember the original edge density of the graphon
@@ -82,6 +95,31 @@ class Graphon:
                     raise ValueError(
                         "Graphon does not integrate to 1 and cannot be automatically corrected"
                     )
+
+    def __str__(self) -> str:
+        """Return a string representation of the graphon.
+
+        Returns
+        -------
+        str
+            string representation of the graphon.
+        """
+        return self.repr
+
+    def _make_repr(self, repr: Optional[str]) -> str:
+        """Return a string representation of the graphon.
+
+        Returns
+        -------
+        str
+            string representation of the graphon.
+        """
+        if repr is None:
+            try:
+                repr = inspect.getsource(self.graphon_function).strip()
+            except Exception:
+                repr = "Graphon with no repr"
+        return repr
 
     def check_graphon(self):
         """Check graphon properties depending on the subclass that iplements it.
@@ -127,8 +165,20 @@ class Graphon:
         -------
         float
             integral value of the graphon
+
+        Raises
+        ------
+        ValueError
+            if integration_method is not dblquad or simpson
         """
-        integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
+        if self.integration_method == "simpson":
+            x = np.linspace(EPS, 1 - EPS, 500)
+            z = np.vectorize(self.graphon_function)(x[:, None], x)
+            integral = simpson(simpson(z, x), x)
+        elif self.integration_method == "dblquad":
+            integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
+        else:
+            raise ValueError("integration_method must be dblquad or simpson")
         return integral
 
     def draw(self, n: int, exchangeable: bool = True, rho: Optional[float] = None) -> np.ndarray:

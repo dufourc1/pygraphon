@@ -1,144 +1,168 @@
 """Utilities to plot graphons."""
-from typing import Tuple
+from typing import Optional, Tuple
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.pyplot import Axes, Figure
-from mpl_toolkits import axes_grid1
+from matplotlib.figure import Figure
+from matplotlib.pyplot import Axes
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.graphons.StepGraphon import StepGraphon
 
-from .utils import make_0_1
-
-
-# noqa: DAR101
-def _add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
-    divider = axes_grid1.make_axes_locatable(im.axes)
-    width = axes_grid1.axes_size.AxesY(im.axes, aspect=1.0 / aspect)
-    pad = axes_grid1.axes_size.Fraction(pad_fraction, width)
-    current_ax = plt.gca()
-    cax = divider.append_axes("right", size=width, pad=pad)
-    plt.sca(current_ax)
-    return im.axes.figure.colorbar(im, cax=cax, **kwargs)
+from .utils import _add_colorbar
 
 
 def plot_graphon_function(
-    graphon: Graphon, fig: Figure = None, ax: Axes = None, figsize: Tuple[int, int] = (6, 5)
+    graphon: Graphon,
+    res=0.01,
+    fig: Optional[Figure] = None,
+    ax: Optional[Axes] = None,
+    figsize: Tuple[int, int] = (6, 5),
+    cmap: str = "turbo",
+    origin: str = "lower",
+    show_colorbar: bool = False,
 ) -> Tuple[Figure, Axes]:
     """Plot a graphon function.
 
     Parameters
     ----------
     graphon : Graphon
-        graphon defined with a function.
+        graphon to plot
+    res : float
+        resolution of the plot, by default 0.01
     fig : Figure
         matplotlib figure, by default None
     ax : Axes
         maplotlib ax, by default None
-    figsize : Tuple[int, int], optional
+    figsize : Tuple[int, int]
         figure size, by default (6, 5)
+    cmap : str
+        matplotlib colormap, by default "turbo"
+    origin : str
+        origin of the plot, by default "lower"
+    show_colorbar : bool
+        whether to show the colorbar, by default False
 
     Returns
     -------
     Tuple[Figure, Axes]
-        plot
+        graphon function evaluated on a grid.
     """
-    x1, x2 = np.meshgrid(np.arange(0, 1, 0.1), np.arange(0, 1, 0.1))
-    y = graphon.graphon_function(x1, x2)
-    ax.imshow(y, extent=[0, 1, 0, 1], cmap=plt.cm.get_cmap("jet"), origin="lower")
-    fig.colorbar()
-    plt.show()
+    res = _validate_res(res)
+    fig, ax = _default_fig_ax(fig, ax, figsize)
+    y = _evaluate_graphon(graphon, res=res)
+    fig, ax = _show_evaluated_graphon(
+        y, fig, ax, cmap=cmap, origin=origin, show_colorbar=show_colorbar
+    )
+    return fig, ax
 
 
-def plot_sample(
+def plot_probabilities(
     graphon: Graphon,
-    resolution=100,
-    fig: Figure = None,
-    ax: Axes = None,
-    colorbar=False,
-    integrate_to_1: bool = False,
-    colormap: str = "binary",
+    res=100,
+    fig: Optional[Figure] = None,
+    ax: Optional[Axes] = None,
+    figsize: Tuple[int, int] = (6, 5),
+    cmap: str = "turbo",
+    origin: str = "lower",
+    show_colorbar: bool = False,
+    vmin: float = 0,
+    vmax: float = 1,
 ) -> Tuple[Figure, Axes]:
-    """Plot a sample of the graphon.
+    """Plot the probabilities from a graphon.
 
     Parameters
     ----------
     graphon : Graphon
-        graphon
-    resolution : int
-        number of samples to take, by default 100
+        graphon to plot
+    res : float
+        number of points to evaluate the graphon, by default 100.
     fig : Figure
-        figure, by default None
+        matplotlib figure, by default None
     ax : Axes
-        ax, by default None
-    colorbar : bool
-        if yes add a colorbar, by default False
-    integrate_to_1 : bool
-        if False plot with original edge density, by default False
+        maplotlib ax, by default None
+    figsize : Tuple[int, int]
+        figure size, by default (6, 5)
+    cmap : str
+        matplotlib colormap, by default "turbo"
+    origin : str
+        origin of the plot, by default "lower"
+    show_colorbar : bool
+        whether to show the colorbar, by default False
+    vmin : float
+        minimum value of the colorbar, by default 0
+    vmax : float
+        maximum value of the colorbar, by default 1
 
     Returns
     -------
     Tuple[Figure, Axes]
-        plotted sample
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(6, 5))
-    x1, x2 = np.linspace(0, 1, resolution, endpoint=False), np.linspace(
-        0, 1, resolution, endpoint=False
-    )
-    result = np.zeros((x1.shape[0], x2.shape[0]))
-    for i, x in enumerate(x1):
-        for j, y in enumerate(x2):
-            result[i, j] = graphon.graphon_function(x, y)
-    if integrate_to_1:
-        vmin = 0
-        vmax = 1
-    else:
-        result *= graphon.initial_rho
-        vmin = None
-        vmax = None
+        graphon function evaluated on a grid and normalized.
 
-    im = ax.imshow(result, cmap=colormap, vmin=vmin, vmax=vmax)
-    if colorbar:
-        _add_colorbar(im, ax=ax)
+
+    .. note::
+        The difference between this function and :func:`plot_graphon_function`
+        is that this function normalizes the graphon function by its initial
+        density so that the plotted values are between 0 and 1.
+    """
+    res = _validate_res(res)
+    fig, ax = _default_fig_ax(fig, ax, figsize)
+    y = _evaluate_graphon(graphon, res=res) * graphon.initial_rho
+    fig, ax = _show_evaluated_graphon(
+        y,
+        fig,
+        ax,
+        cmap=cmap,
+        origin=origin,
+        show_colorbar=show_colorbar,
+        vmin=vmin,
+        vmax=vmax,
+    )
     return fig, ax
 
 
-def plot(
-    graphon: StepGraphon,
-    fig: Figure = None,
-    ax: Axes = None,
+def _validate_res(res: float) -> float:
+    if res <= 0:
+        raise ValueError("resolution must be positive")
+    elif res > 1:
+        return 1 / res
+    return res
+
+
+def _evaluate_graphon(graphon: Graphon, res=0.01) -> np.ndarray:
+    x1, x2 = np.meshgrid(np.arange(0, 1, res), np.arange(0, 1, res))
+    return graphon.graphon_function(x1, x2)
+
+
+def _default_fig_ax(
+    fig: Optional[Figure] = None,
+    ax: Optional[Axes] = None,
     figsize: Tuple[int, int] = (6, 5),
-    colormap: str = "binary",
-    integrate_to_1: bool = False,
+):
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    return fig, ax
+
+
+def _show_evaluated_graphon(
+    f: np.ndarray,
+    fig: Figure,
+    ax: Axes,
+    cmap: str = "turbo",
+    origin: str = "lower",
     show_colorbar: bool = False,
-) -> Tuple[Figure, Axes]:
-    """Plot the graphon.
-
-    Parameters
-    ----------
-    graphon : StepGraphon
-         graphon to plot.
-    fig : Figure
-        figure, by default None
-    ax : Axes
-        ax, by default None
-    figsize : Tuple[int, int]
-        figsize, by default (6, 5)
-
-    Returns
-    -------
-    Tuple[Figure, Axes]
-        plot
-    """
-    fig, ax = plot_sample(
-        graphon,
-        fig=fig,
-        ax=ax,
-        colorbar=show_colorbar,
-        integrate_to_1=integrate_to_1,
-        colormap=colormap,
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
+):
+    extent = [0, 1, 0, 1] if origin == "lower" else [0, 1, 1, 0]
+    im = ax.imshow(
+        f,
+        extent=extent,
+        cmap=mpl.colormaps[cmap],
+        origin=origin,
+        vmin=vmin,
+        vmax=vmax,
     )
-    make_0_1(ax)
+    if show_colorbar:
+        _add_colorbar(im, ax=ax)
     return fig, ax

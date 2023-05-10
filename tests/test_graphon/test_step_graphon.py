@@ -115,3 +115,32 @@ class TestIrregularGraphon(TestRegularGraphon):
         P_ij = irregular_step_graphon.get_edge_probabilities(n=20, wholeMatrix=False)
         assert np.all(P_ij <= 1)
         assert np.all(P_ij >= 0)
+
+
+def test_print_method(capfd):
+    """Test the print method."""
+    g = StepGraphon(graphon=np.array([[0.8, 0.2], [0.2, 0.8]]), bandwidthHist=0.5)
+    print(g)  # noqa: T201
+    out, _ = capfd.readouterr()
+    theoretical_out = "StepGraphon \n[[0.8 0.2]\n [0.2 0.8]]\n\n [0.25 0.25] (size of the blocks)\n"
+
+    assert out == theoretical_out
+
+    g_irregular = StepGraphon(
+        graphon=np.array(
+            [
+                [0.8, 0.2, 0.1, 0.01],
+                [0.2, 0.7, 0.2, 0.03],
+                [0.1, 0.2, 0.8, 0.3],
+                [0.01, 0.03, 0.3, 0.9],
+            ]
+        ),
+        bandwidthHist=0.3,
+    )
+    print(g_irregular)  # noqa: T201
+    out, _ = capfd.readouterr()
+    theoretical_out = (
+        "StepGraphon \n[[0.80 0.20 0.10 0.01]\n [0.20 0.70 0.20 0.03]\n [0.10 0.20 0.80 0.30]\n "
+    )
+    theoretical_out += "[0.01 0.03 0.30 0.90]]\n\n [0.09 0.09 0.09 0.03] (size of the blocks)\n"
+    assert out == theoretical_out

@@ -35,7 +35,13 @@ class OptSpace(object):
     """
 
     def __init__(
-        self, n_components, max_iterations, tol, step_size=10000, resolution_limit=20, sign=-1
+        self,
+        n_components,
+        max_iterations,
+        tol,
+        step_size=10000,
+        resolution_limit=20,
+        sign=-1,
     ):
         """
 
@@ -124,7 +130,10 @@ class OptSpace(object):
             self.n_components = rank_estimate(obs, eps)
             # check estimate again
             if self.n_components >= min(n, m) - 1:
-                warnings.warn("Your matrix is estimated " "to be high-rank.", RuntimeWarning)
+                warnings.warn(
+                    "Your matrix is estimated " "to be high-rank.",
+                    RuntimeWarning,
+                )
 
         # raise future warning if hard set
         elif isinstance(self.n_components, int):
@@ -296,7 +305,17 @@ def gradient_decent(U, V, S, obs, mask, step_size, rho):
 
 
 def line_search(
-    U, U_update, V, V_update, S, obs, mask, step_size, rho, resolution_limit=20, line=-1e-1
+    U,
+    U_update,
+    V,
+    V_update,
+    S,
+    obs,
+    mask,
+    step_size,
+    rho,
+    resolution_limit=20,
+    line=-1e-1,
 ):
     """
     An exact line search
@@ -313,7 +332,13 @@ def line_search(
     cost[0] = cost_function(U, V, S, obs, mask, step_size, rho)
     for i in range(resolution_limit):
         cost[i + 1] = cost_function(
-            U + line * U_update, V + line * V_update, S, obs, mask, step_size, rho
+            U + line * U_update,
+            V + line * V_update,
+            S,
+            obs,
+            mask,
+            step_size,
+            rho,
         )
         if (cost[i + 1] - cost[0]) <= 0.5 * line * norm_update:
             return line

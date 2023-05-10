@@ -12,6 +12,7 @@ from pygraphon.estimators import (
     HistogramEstimator,
     NBDsmooth,
     SimpleMomentEstimator,
+    SmoothNetHist,
 )
 from pygraphon.graphons import StepGraphon
 from pygraphon.utils.utils_matrix import check_symmetric
@@ -110,3 +111,16 @@ class TestApiCompletion(TestApiHistogramEstimator):
     @pytest.fixture
     def estimator(self):
         return Completion()
+
+
+class TestApiSmoothing(TestApiHistogramEstimator):
+    """Test api for Smoothing estimator."""
+
+    @pytest.fixture
+    def estimator(self):
+        return SmoothNetHist()
+
+    @pytest.fixture
+    def fitted_estimator(self, estimator, sbm_3):
+        estimator.fit(sbm_3)
+        return estimator

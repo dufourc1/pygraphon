@@ -95,7 +95,10 @@ class SimpleMomentEstimator(BaseEstimator):
         # structure the parameters into a graphon
         graphon = self._add_constraints_on_SBM(root, self.numberBlocks)
         graphon = self.correct_fitted_values(graphon, kind="abs")
-        return StepGraphon(graphon, 1 / self.numberBlocks, initial_rho=rho), None
+        return (
+            StepGraphon(graphon, 1 / self.numberBlocks, initial_rho=rho),
+            None,
+        )
 
     @staticmethod
     def correct_fitted_values(graphon, kind="abs") -> np.ndarray:

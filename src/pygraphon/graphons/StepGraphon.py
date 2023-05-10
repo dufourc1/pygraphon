@@ -5,8 +5,7 @@ from typing import Callable, Optional
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils.utils_graphon import compute_areas_histogram
-from pygraphon.utils.utils_matrix import check_symmetric
+from pygraphon.utils import check_symmetric, compute_areas_histogram
 
 
 class StepGraphon(Graphon):
@@ -23,7 +22,10 @@ class StepGraphon(Graphon):
     """
 
     def __init__(
-        self, graphon: np.ndarray, bandwidthHist: float, initial_rho: Optional[float] = None
+        self,
+        graphon: np.ndarray,
+        bandwidthHist: float,
+        initial_rho: Optional[float] = None,
     ) -> None:
         # save args
         self.graphon = graphon
@@ -37,6 +39,16 @@ class StepGraphon(Graphon):
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
 
         super().__init__(function=self.graphon_function_builder(), initial_rho=initial_rho)
+
+        self.repr = "StepGraphon \n"
+        self.repr += np.array2string(
+            self.graphon * self.initial_rho,
+            precision=3,
+            floatmode="maxprec_equal",
+        )
+        self.repr += "\n\n "
+        self.repr += np.array2string(self.areas[0, :], precision=3, floatmode="maxprec_equal")
+        self.repr += " (size of the blocks)"
 
     def graphon_function_builder(self) -> Callable:
         """Build the graphon function f(x,y).

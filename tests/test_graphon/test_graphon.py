@@ -7,6 +7,7 @@ import math
 import numpy as np
 import pytest
 
+from pygraphon.graphons import common_graphons as cgf
 from pygraphon.graphons.Graphon import Graphon
 from pygraphon.utils import edge_density
 
@@ -88,3 +89,43 @@ def test_draw_rho():
     assert math.isclose(edge_density(A), 0.2, abs_tol=0.01)
     A = graphon.draw(n=n)
     assert edge_density(A) == 1
+
+
+def test_integral():
+    """Test that the integral methods are correct."""
+    for _, graphon in cgf.items():
+        first_integral = graphon.integral()
+        graphon.integration_method = "simpson"
+        second_integral = graphon.integral()
+        assert math.isclose(first_integral, second_integral, abs_tol=1e-3)
+        assert math.isclose(first_integral, 1, abs_tol=1e-3)
+        assert math.isclose(second_integral, 1, abs_tol=1e-3)
+        assert math.isclose(
+            graphon.unormalized_graphon_function(0.2, 0.3),
+            graphon.graphon_function(0.2, 0.3) * graphon.initial_rho,
+        )
+
+
+def test_error_on_not_implemented_integration():
+    """Test that an error is raised if the integration method is not implemented."""
+    with pytest.raises(ValueError):
+        Graphon(lambda x, y: 1, integration_method="not_implemented")
+
+    graphon = Graphon(lambda x, y: 1)
+    graphon.integration_method = "not_implemented"
+    with pytest.raises(ValueError):
+        graphon.integral()
+
+
+def test_print_method(capfd):
+    """Test that the print method is correct."""
+    g = Graphon(lambda x, y: 1)
+    assert str(g) == "g = Graphon(lambda x, y: 1)"
+    print(g)  # noqa: T201
+    out, _ = capfd.readouterr()
+    assert out == "g = Graphon(lambda x, y: 1)\n"
+    g2 = Graphon(lambda x, y: 1, repr="Erdos-Renyi")
+    assert str(g2) == "Erdos-Renyi"
+    print(g2)  # noqa: T201
+    out, _ = capfd.readouterr()
+    assert out == "Erdos-Renyi\n"
