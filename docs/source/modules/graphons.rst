@@ -40,7 +40,20 @@ We also provide a list of pre-implemented common graphons which are instances of
    * - :py:class:`graphon_log_1_p`
      - :math:`f(x,y) = \log(1 + 0.5*\max(x,y))`
    
-   
+.. plot::
+    :include-source: False
+    :show-source-link: False
+    :context: reset
+
+    from pygraphon.graphons import common_graphons
+    from pygraphon.plots import plot_probabilities, make_0_1
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(2, 5, figsize=(15, 6))
+    for i, graphon_name in enumerate(common_graphons):
+        plot_probabilities(common_graphons[graphon_name], ax=ax[i//5, i%5], show_colorbar=True)
+        ax[i//5, i%5].set_title(graphon_name)
+    plt.tight_layout()
 
 .. automodule:: pygraphon.graphons
 	:members:

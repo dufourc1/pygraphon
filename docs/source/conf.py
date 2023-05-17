@@ -74,6 +74,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_inline_tabs",
     "sphinx_togglebutton",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
 # citation style
