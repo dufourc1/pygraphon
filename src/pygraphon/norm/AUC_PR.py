@@ -3,10 +3,10 @@ import warnings
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 
-from pygraphon.norm.BaseMetric import BaseMetric
+from .BaseMetric import ValueMetric
 
 
-class AUCEdge(BaseMetric):
+class AUCEdge(ValueMetric):
     def __init__(self, **kwargs) -> None:
         super().__init__()
         if "n_nodes" in kwargs:
@@ -25,7 +25,7 @@ class AUCEdge(BaseMetric):
         return "AUC on probability matrix"
 
 
-class AUPRCEdge(BaseMetric):
+class AUPRCEdge(ValueMetric):
     def __init__(self, **kwargs) -> None:
         super().__init__()
         if "n_nodes" in kwargs:

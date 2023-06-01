@@ -1,11 +1,12 @@
 """norm for graphons."""
 
-from pygraphon.norm import BaseMetric
-from pygraphon.norm.AUC_PR import AUCEdge, AUPRCEdge
-from pygraphon.norm.MSE_MAE import MaeProbaEdge, MseProbaEdge
+from .AUC_PR import AUCEdge, AUPRCEdge
+from .BaseMetric import FunctionMetric, ValueMetric
+from .MSE_MAE import MaeProbaEdge, MseProbaEdge
 
 __all__ = classes = [
-    "BaseMetric",
+    "ValueMetric",
+    "FunctionMetric",
     "MseProbaEdge",
     "MaeProbaEdge",
     "AUCEdge",
