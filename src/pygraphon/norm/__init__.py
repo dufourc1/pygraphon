@@ -1,12 +1,12 @@
 """norm for graphons."""
 
 from .AUC_PR import AUCEdge, AUPRCEdge
-from .BaseMetric import FunctionMetric, ValueMetric
+from .BaseMetric import ClassificationMetric, ValueMetric
 from .MSE_MAE import MaeProbaEdge, MseProbaEdge
 
 __all__ = classes = [
+    "ClassificationMetric",
     "ValueMetric",
-    "FunctionMetric",
     "MseProbaEdge",
     "MaeProbaEdge",
     "AUCEdge",

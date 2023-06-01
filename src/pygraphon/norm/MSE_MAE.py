@@ -1,20 +1,23 @@
 import numpy as np
 
 from pygraphon.graphons import Graphon
-from .BaseMetric import FunctionMetric
+
+from .BaseMetric import ValueMetric
 
 
-class MseProbaEdge(FunctionMetric):
+class MseProbaEdge(ValueMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, graphon_2: Graphon, **kwargs) -> float:
-        """
-        Compute the MSE between the probability matrix of the actual graphon and the graphon_2 following
-        the formula :math: `MSE = \frac{1}{n^2} \sum_{i,j} (p_{ij} - \hat{p}_{ij})^2` where :math: `p_{ij}` is the
+        r"""
+        Compute the MSE between the probability matrix of 2 different graphons following the formula
+        :math: `MSE = \frac{1}{n^2} \sum_{i,j} (p_{ij} - \hat{p}_{ij})^2` where :math: `p_{ij}` is the
         probability of an edge between nodes :math: `i` and :math: `j` in the actual graphon and :math: `\hat{p}_{ij}`
         is the probability of an edge between nodes :math: `i` and :math: `j` in the graphon_2 graphon.
+
+        Can be used to compare a theoretical graphon and an estimated graphon.
 
         Parameters
         ----------
@@ -44,17 +47,19 @@ class MseProbaEdge(FunctionMetric):
         return "MSE on probabily matrix"
 
 
-class MaeProbaEdge(FunctionMetric):
+class MaeProbaEdge(ValueMetric):
     def __init__(self, n_nodes: int = 100) -> None:
         super().__init__()
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, graphon_2: Graphon, **kwargs) -> float:
-        """
-        Compute the MAE between the probability matrix of the actual graphon and the graphon_2 graphon following
-        the formula :math: `MAE = \frac{1}{n^2} \sum_{i,j} |p_{ij} - \hat{p}_{ij}|` where :math: `p_{ij}` is the
+        r"""
+        Compute the MAE between the probability matrix of 2 different graphons following the formula
+        :math: `MAE = \frac{1}{n^2} \sum_{i,j} |p_{ij} - \hat{p}_{ij}|` where :math: `p_{ij}` is the
         probability of an edge between nodes :math: `i` and :math: `j` in the actual graphon and :math: `\hat{p}_{ij}`
         is the probability of an edge between nodes :math: `i` and :math: `j` in the graphon_2 graphon.
+
+        Can be used to compare a theoretical graphon and an estimated graphon.
 
         Parameters
         ----------
