@@ -305,7 +305,7 @@ class Graphon:
             if True the graph will be vertex exchangeable. Defaults to True.
         wholeMatrix : bool
              if True return the square symmetric matrix, otherwise return the upper
-            diagonal. Defaults to True.
+            triangle of the matrix as an array of shape ((n*(n-1)/2),). Defaults to True.
 
         Returns
         -------
