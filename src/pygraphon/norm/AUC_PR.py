@@ -8,13 +8,22 @@ class SklearnBinaryMetric(ClassificationMetric):
     """Use a binary classification metric from sklearn.metrics to measure edge predictions."""
 
     def __init__(self, method: str = "roc_auc_score", **kwargs) -> None:
-        """
+        """Initialize the metric.
 
-        Parameters:
+        Parameters
         ----------
-            method: str
-                name of the method to use from sklearn.metrics. Should take these first two
-                arguments: y_true and y_pred (or y_score).
+        method: str
+            name of the method to use from sklearn.metrics. Should take these first two
+            arguments: y_true and y_pred (or y_score).
+        kwargs: dict
+            additional arguments to pass to `self.method`.
+
+        Raises
+        ------
+        Exception:
+            if the method is not found in sklearn.metrics.
+        ValueError:
+            if the method is not found in sklearn.metrics.
         """
         super().__init__()
         try:
@@ -28,21 +37,22 @@ class SklearnBinaryMetric(ClassificationMetric):
         pij: np.ndarray,
         **kwargs,
     ) -> float:
-        r"""
+        """
         Compute the AUC between the probability matrix estimated from an adjacency matrix.
 
         Parameters:
         ----------
-            adjacency_matrix: np.ndarray
-                adjacency matrix of the graph
-            pij: np.ndarray
-                probability matrix
-            kwargs: dict
-                additional arguments to pass to `self.method`
+        adjacency_matrix: np.ndarray
+            adjacency matrix of the graph
+        pij: np.ndarray
+            probability matrix
+        kwargs: dict
+            additional arguments to pass to `self.method`
 
         Returns:
         -------
-            float: AUC on the probability matrix
+        float:
+            Binary classification metric on probability matrix.
         """
         indices = np.triu_indices(adjacency_matrix.shape[0], k=1)
         return self.method(adjacency_matrix[indices], pij[indices], **kwargs)

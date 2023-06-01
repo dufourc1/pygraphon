@@ -36,10 +36,6 @@ def test_compute_Mae_with_self():
     assert loss(estimator.get_graphon(), estimator.get_graphon()) == 0
 
 
-def test_compute_Mse():
-    pass
-
-
 def test_compute_AUC():
     """Should compute the AUC."""
     metric = AUCEdge()
