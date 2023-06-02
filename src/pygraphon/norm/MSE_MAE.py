@@ -11,12 +11,13 @@ class MseProbaEdge(ValueMetric):
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, graphon_2: Graphon, **kwargs) -> float:
-        r""" Compute the MSE between the probability matrix of 2 different graphons following the formula
-        :math: `MSE = \frac{1}{n^2} \sum_{i,j} (p_{ij} - \hat{p}_{ij})^2` where :math: `p_{ij}` is the
-        probability of an edge between nodes :math: `i` and :math: `j` in the actual graphon and :math: `\hat{p}_{ij}`
-        is the probability of an edge between nodes :math: `i` and :math: `j` in the graphon_2 graphon.
+        r"""Compute the MSE between the probability matrix of 2 different graphons.
 
-        Can be used to compare a theoretical graphon and an estimated graphon.
+        This follows the formula :math: `MSE = \frac{1}{n^2} \sum_{i,j} (p_{ij} - \hat{p}_{ij})^2` where
+        :math: `p_{ij}` is the probability of an edge between nodes :math: `i` and :math: `j` in the actual
+        graphon and :math: `\hat{p}_{ij}` is the probability of an edge between nodes :math: `i` and
+        :math: `j` in the graphon_2 graphon. Can be used to compare a theoretical graphon and an estimated
+        graphon.
 
         Parameters
         ----------
@@ -57,12 +58,13 @@ class MaeProbaEdge(ValueMetric):
         self.n_nodes = n_nodes
 
     def _compute(self, graphon: Graphon, graphon_2: Graphon, **kwargs) -> float:
-        r""" Compute the MAE between the probability matrix of 2 different graphons following the formula
-        :math: `MAE = \frac{1}{n^2} \sum_{i,j} |p_{ij} - \hat{p}_{ij}|` where :math: `p_{ij}` is the
-        probability of an edge between nodes :math: `i` and :math: `j` in the actual graphon and :math: `\hat{p}_{ij}`
-        is the probability of an edge between nodes :math: `i` and :math: `j` in the graphon_2 graphon.
+        r"""Compute the MAE between the probability matrix of 2 different graphons.
 
-        Can be used to compare a theoretical graphon and an estimated graphon.
+        This follows the formula :math: `MAE = \frac{1}{n^2} \sum_{i,j} |p_{ij} - \hat{p}_{ij}|` where
+        :math: `p_{ij}` is the probability of an edge between nodes :math: `i` and :math: `j` in the
+        actual graphon and :math: `\hat{p}_{ij}` is the probability of an edge between nodes :math: `i`
+        and :math: `j` in the graphon_2 graphon. Can be used to compare a theoretical graphon and an
+        estimated graphon.
 
         Parameters
         ----------
