@@ -38,7 +38,7 @@ class SklearnBinaryMetric(ClassificationMetric):
         **kwargs,
     ) -> float:
         """
-        Compute the AUC between the probability matrix estimated from an adjacency matrix.
+        Compute a metric between the probability matrix estimated from an adjacency matrix.
 
         Parameters
         ----------
@@ -63,10 +63,14 @@ class SklearnBinaryMetric(ClassificationMetric):
 
 
 class AUCEdge(SklearnBinaryMetric):
+    """AUC for edge prediction."""
+
     def __init__(self, **kwargs) -> None:
         super().__init__(method="roc_auc_score", **kwargs)
 
 
 class AUPRCEdge(SklearnBinaryMetric):
+    """AUPRC for edge prediction."""
+
     def __init__(self, **kwargs) -> None:
         super().__init__(method="average_precision_score", **kwargs)

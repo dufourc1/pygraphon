@@ -46,12 +46,12 @@ It's important to note that the choice between value estimation and function est
 
 For further exploration of this topic, you may refer to the paper "An iterative step-function estimator for graphons" by Diana Cai. The paper can be accessed at `this link <https://arxiv.org/abs/1412.2129>`_.
 
+
+API
+---
+
 .. currentmodule:: pygraphon.norm
 
-.. autosummary::
-   :nosignatures:
-   :toctree: ../generated
-
-   {% for name in pygraphon.norm.classes %}
-     {{ name }}
-   {% endfor %}
+.. automodule::  pygraphon.norm
+    :private-members:
+    :members:
