@@ -5,7 +5,14 @@ from .BaseMetric import ClassificationMetric
 
 
 class SklearnBinaryMetric(ClassificationMetric):
-    """Use a binary classification metric from sklearn.metrics to measure edge predictions."""
+    """Use a binary classification metric from sklearn.metrics to measure edge predictions.
+
+    Parameters
+    ----------
+    method : str
+        name of the method from `sklearn.metrics`, by default "roc_auc_score".
+        Should take these first two arguments: y_true and y_pred (or y_score).
+    """
 
     def __init__(
         self,
