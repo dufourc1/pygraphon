@@ -2,6 +2,10 @@ import argparse
 from loguru import logger
 import csv
 from typing import Optional
+import os
+
+
+THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
 
 def parser_argument(folder_name: str) -> None:
@@ -20,7 +24,8 @@ def parser_argument(folder_name: str) -> None:
 
 
 def csv_gen_graphon(
-        folder_name: str,
+        path: str,
+        file_name: str,
         n_graphons: int,
         smoothnethist_par: Optional[bool] = False,
         ) -> None:
@@ -28,29 +33,46 @@ def csv_gen_graphon(
 
     Parameters
     ----------
-    folder_name : str
-        folder to save the results
+    file_name : str
+        file to save the results
     n_graphons : int
         number of graphons tested
     smoothnethist_par : bool, optional
         if True, use the smoothnethist parameter, by default False
     """
-
-    filename = f'{folder_name}.csv'
+    if not file_name.endswith(".csv"):
+        file_name = file_name + ".csv"
+    path_to_file = os.path.join(path, file_name) 
     if smoothnethist_par:
         column_names = ["Type of Graphon", "n", "MSE", "MAE", "AUC", "AUPRC", "BIC", "RatioPar"]
     else:
         column_names = ["Type of Graphon", "n", "MSE", "MAE", "AUC", "AUPRC"]
 
     # Write the column names to the CSV file
-    with open(filename, 'w', newline='') as csvfile:
+    with open(path_to_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(column_names)
 
     # Append k empty lines to the CSV file
-    with open(filename, 'a', newline='') as csvfile:
+    with open(path_to_file, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         for _ in range(n_graphons):
             writer.writerow([])
 
-    print(f"Empty CSV file '{filename}' with {n_graphons} lines created.")
+    print(f"Empty CSV file '{path_to_file}' with {n_graphons} lines created.")
+
+
+def update_row(file_name : str,
+               folder_name : str,
+               row_index : int,
+               new_row: list
+               ) -> None:
+
+    csv_file = os.path.join(THIS_FOLDER, 'results', folder_name, file_name + '.csv')
+    with open(csv_file, 'r') as file:
+        rows = list(csv.reader(file))
+        rows[row_index] = new_row
+
+    with open(csv_file, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
