@@ -23,4 +23,4 @@ exclude dev
 include docs/requirements.txt
 recursive-include docs *.bib
 exclude codecov.yml
-recursive exclude experiments *.py
+recursive-include experiments *.py
