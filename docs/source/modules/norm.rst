@@ -2,9 +2,44 @@
  Norm
 ######
 
-=================================================================================
-Difference Between Value Estimation and Function Estimation in Graphon Estimation
-=================================================================================
+=================================
+Metrics for Simple Graph Analysis
+=================================
+
+AUC and AUPRC
+-------------
+
+The Area Under the Receiver Operating Characteristic Curve (AUC) and the Area Under the Precision-Recall Curve (AUPRC) are commonly used metrics for evaluating the performance of binary classifiers in network analysis. AUC measures the classifier's ability to distinguish between positive and negative samples, while AUPRC provides a summary of precision and recall trade-offs.
+
+AUC is advantageous as it is insensitive to class imbalance and provides a single scalar summary of the classifier's performance. However, it can be less informative when the dataset has a significant class imbalance. AUPRC, on the other hand, is more informative in such cases but may lack interpretability when precision and recall are not of equal importance.
+
+Notably, AUC and AUPRC can only be computed when an estimated probability matrix and an adjacency matrix are available. They cannot be directly computed using two probability matrices. If one wishes to compare two probability matrices, they need to sample an adjacency matrix from the theoretical probability matrix for evaluation.
+
+MSE and MAE
+-----------
+
+Mean Squared Error (MSE) and Mean Absolute Error (MAE) are commonly used metrics for comparing the similarity between two probability matrices in network analysis. MSE calculates the average squared difference between corresponding elements of two matrices, while MAE computes the average absolute difference.
+
+MSE is sensitive to outliers due to the squaring operation, but it gives more weight to larger errors, making it suitable for cases where larger errors are of greater concern. On the other hand, MAE is less sensitive to outliers and treats all errors equally. It is more appropriate when all errors should be weighted equally.
+
+Both MSE and MAE can only be used to compare two probability matrices and cannot be directly computed using estimated or theoretical probability matrices.
+
+Difference between Value and Function Estimation for a Graphon
+------------------------------------------------------------
+
+In graphon estimation, value estimation aims to estimate specific values of the graphon at given points or pairs of points, while function estimation seeks to estimate the entire graphon function across the entire unit square. Value estimation focuses on individual values, while function estimation captures the overall structure of the graphon. The choice between these approaches depends on the research question and analysis goals.
+
+Python Function: ``permutation_distance``
+------------------------------------------
+
+To facilitate the comparison of step-function graphons with the same size, the provided Python function called "permutation_distance" implements MSE and MAE metrics. This function computes the MSE and MAE between two step-function graphons with the same number of blocks and the same areas of blocks.
+
+By utilizing this function, users can assess the dissimilarity between step-function graphons by comparing their MSE and MAE scores.
+
+
+=============================================================================================================
+A Further Discussion of the Difference Between Value Estimation and Function Estimation in Graphon Estimation
+=============================================================================================================
 
 Introduction
 ------------
