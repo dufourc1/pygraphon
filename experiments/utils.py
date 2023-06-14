@@ -130,3 +130,17 @@ def update_row(file_name : str,
     with open(csv_file, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(rows)
+
+def clean_temp_folder(folder_name: str) -> None:
+    # clean temp folder
+    folder = 'experiments/results/'+f'{folder_name}'
+    for filename in os.listdir(folder):
+        if folder_name in filename:  # only delete files from corresponding regime
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))

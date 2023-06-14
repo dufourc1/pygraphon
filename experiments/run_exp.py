@@ -7,8 +7,9 @@ from loguru import logger
 from tqdm import tqdm
 import os
 import shutil
+from pygraphon.graphons import Graphon
 
-from .utils import parser_argument
+from .utils import parser_argument, clean_temp_folder
 
 
 class TqdmToLogger(io.StringIO):
@@ -33,7 +34,10 @@ class TqdmToLogger(io.StringIO):
         self.logger.log(self.level, self.buf)
 
 
-def main(folder_name):
+def main(adjacency_matrix: np.ndarray,
+         graphon: Graphon,
+         folder_name: str,
+         ):
 
     logger.info("Starting experiment")
     # Initialise experiments
@@ -42,24 +46,17 @@ def main(folder_name):
 
     # Run experiments
     # ----------------------
+    ## Running different estimators for comparison
 
+    ## Running SmoothNetHist
+    
+    # ----------------------
     logger.info("Computing done")
     with open("results"+f"{folder_name}.pkl", "wb") as f:
         pickle.dump(metric_list, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     logger.info(f"Cleaning {folder_name}/")
-    # clean temp folder
-    folder = 'experiments/results/'+f'{folder_name}'
-    for filename in os.listdir(folder):
-        if folder_name in filename:  # only delete files from corresponding regime
-            file_path = os.path.join(folder, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+    clean_temp_folder(folder_name)
 
     logger.info("Results saved, bye")
 
