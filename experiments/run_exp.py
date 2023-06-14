@@ -8,7 +8,7 @@ from tqdm import tqdm
 import os
 import shutil
 from pygraphon.graphons import Graphon
-
+from gen_sbm import AssociativeFullyRandom
 from .utils import parser_argument, clean_temp_folder
 
 
@@ -49,7 +49,7 @@ def main(adjacency_matrix: np.ndarray,
     ## Running different estimators for comparison
 
     ## Running SmoothNetHist
-    
+
     # ----------------------
     logger.info("Computing done")
     with open("results"+f"{folder_name}.pkl", "wb") as f:
@@ -75,6 +75,7 @@ if __name__ == "__main__":
     folder_name = "sbm_ssm"
     parser_argument(folder_name)
 
+    # If generate with SBM-SSM
     # k init
     k_max = 5
     k_list = list(range(2, k_max + 1))
