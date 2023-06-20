@@ -1,5 +1,6 @@
-from pygraphon.estimators.BaseEstimator import BaseEstimator
 import numpy as np
+
+from pygraphon.estimators.BaseEstimator import BaseEstimator
 
 
 class ISFE(BaseEstimator):

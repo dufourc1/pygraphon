@@ -2,13 +2,13 @@
 
 from .completion import Completion
 from .EmpiricalDegrees import LG
+from .ISFE import ISFE
 from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
 from .SAS import SAS
 from .SmoothNetHist import SmoothNetHist
 from .UniversalSingularValueDecomposition import USVT
-from .ISFE import ISFE
 
 __all__ = classes = [
     "LG",
