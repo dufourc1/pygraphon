@@ -4,16 +4,6 @@
 
 .. currentmodule:: pygraphon.estimators
 
-
-Estimator general interface
-----------------------------
-
-
-.. autoclass:: pygraphon.estimators.BaseEstimator.BaseEstimator
-   :members:
-   :undoc-members:
-   :noindex:
-
 Implemented estimators
 ----------------------
 
@@ -26,4 +16,16 @@ Implemented estimators
    NBDsmooth
    USVT
    SAS
+   Completion
    SmoothNetHist
+
+
+Estimator general interface
+----------------------------
+
+
+.. autoclass:: pygraphon.estimators.BaseEstimator.BaseEstimator
+   :members:
+   :undoc-members:
+   :noindex:
+
