@@ -1,11 +1,9 @@
 import numpy as np
 from typing import Optional, Tuple, List
 from pygraphon.graphons import StepGraphon
-from pygraphon.estimators.BaseEstimator import (
-    BaseEstimator,
-    HistogramEstimator,
-)
-import itertools
+from pygraphon.estimators.BaseEstimator import BaseEstimator
+
+from pygraphon.estimators import HistogramEstimator
 
 
 class ISFE(BaseEstimator):
@@ -94,15 +92,20 @@ class ISFE(BaseEstimator):
         self, adjacency_matrix: np.ndarray, partition: List[List[int]]
     ) -> List[List[int]]:
         """Update the partition according to the ISFE algorithm."""
-        raise NotImplementedError("algorithm unclear from paper and no implementation available")
+        raise NotImplementedError(
+            "algorithm unclear from paper and no implementation available"
+        )
         size_partition = [len(c) for c in partition]
-        new_partition = [[0], ]
+        new_partition = [
+            [0],
+        ]
         n_nodes = adjacency_matrix.shape[0]
         weighted_density = np.zeros(len(partition))
         for i in range(1, n_nodes):
             for j in range(len(partition)):
                 weighted_density[j] = (
-                    adjacency_matrix[i, partition[j]].sum() / size_partition[j]
+                    adjacency_matrix[i, partition[j]].sum()
+                    / size_partition[j]
                 )
 
         return new_partition
