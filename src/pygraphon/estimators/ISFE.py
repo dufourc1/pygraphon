@@ -1,9 +1,9 @@
-import numpy as np
-from typing import Optional, Tuple, List
-from pygraphon.graphons import StepGraphon
-from pygraphon.estimators.BaseEstimator import BaseEstimator
+from typing import List, Optional, Tuple
 
-from pygraphon.estimators import HistogramEstimator
+import numpy as np
+
+from pygraphon.estimators.BaseEstimator import BaseEstimator
+from pygraphon.graphons import StepGraphon
 
 
 class ISFE(BaseEstimator):
@@ -44,9 +44,7 @@ class ISFE(BaseEstimator):
             approximated graphon and matrix of connection Pij of size n x n
         """
         # get the initial partition
-        partition = self.get_initial_partition(
-            adjacency_matrix, initial_partition
-        )
+        partition = self.get_initial_partition(adjacency_matrix, initial_partition)
         # update the partition iteratively
         for _ in range(self.number_iterations):
             partition = self.update_partition(adjacency_matrix, partition)
@@ -54,16 +52,21 @@ class ISFE(BaseEstimator):
         # convert partition to node labels
         node_labels = self._partition_to_node_membership(partition)
         # given the partition, we can estimate the graphon
-        graphon_matrix = (
-            HistogramEstimator._approximate_graphon_from_adjacency(
-                adjacency_matrix, node_labels
-            )
-        )
+        graphon_matrix = np.zeros((len(node_labels), len(node_labels)))
+        for i in range(graphon_matrix.shape[0]):
+            for j in np.arange(i + 1, graphon_matrix.shape[0]):
+                graphon_matrix[i, j] = np.mean(
+                    adjacency_matrix[
+                        np.ix_(
+                            np.where(node_labels == node_labels[i])[0],
+                            np.where(node_labels == node_labels[j])[0],
+                        )
+                    ]
+                )
+                graphon_matrix[j, i] = graphon_matrix[i, j]
 
         # build the edge probability matrix
-        edge_probability_matrix = np.zeros(
-            (len(node_labels), len(node_labels))
-        )
+        edge_probability_matrix = np.zeros((len(node_labels), len(node_labels)))
         for i in range(edge_probability_matrix.shape[0]):
             for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
                 edge_probability_matrix[i, j] = graphon_matrix[
@@ -83,18 +86,14 @@ class ISFE(BaseEstimator):
             initial_labels = np.random.randint(
                 0, self.min_number_classes, size=adjacency_matrix.shape[0]
             )
-            initial_partition = self._node_membership_to_partition(
-                initial_labels
-            )
+            initial_partition = self._node_membership_to_partition(initial_labels)
         return initial_partition
 
     def update_partition(
         self, adjacency_matrix: np.ndarray, partition: List[List[int]]
     ) -> List[List[int]]:
         """Update the partition according to the ISFE algorithm."""
-        raise NotImplementedError(
-            "algorithm unclear from paper and no implementation available"
-        )
+        raise NotImplementedError("algorithm unclear from paper and no implementation available")
         size_partition = [len(c) for c in partition]
         new_partition = [
             [0],
@@ -103,25 +102,18 @@ class ISFE(BaseEstimator):
         weighted_density = np.zeros(len(partition))
         for i in range(1, n_nodes):
             for j in range(len(partition)):
-                weighted_density[j] = (
-                    adjacency_matrix[i, partition[j]].sum()
-                    / size_partition[j]
-                )
+                weighted_density[j] = adjacency_matrix[i, partition[j]].sum() / size_partition[j]
 
         return new_partition
 
-    def _partition_to_node_membership(
-        self, partition: List[List[int]]
-    ) -> np.ndarray:
+    def _partition_to_node_membership(self, partition: List[List[int]]) -> np.ndarray:
         n_nodes = sum(len(c) for c in partition)
         node_membership = np.zeros(n_nodes, dtype=int)
         for i, c in enumerate(partition):
             node_membership[c] = i
         return node_membership
 
-    def _node_membership_to_partition(
-        self, node_membership: np.ndarray
-    ) -> List[List[int]]:
+    def _node_membership_to_partition(self, node_membership: np.ndarray) -> List[List[int]]:
         partition = []
         for i in range(node_membership.max() + 1):
             partition.append(np.where(node_membership == i)[0])

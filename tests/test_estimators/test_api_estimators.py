@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from pygraphon.estimators import (
+    ISFE,
     LG,
     SAS,
     USVT,
@@ -13,7 +14,6 @@ from pygraphon.estimators import (
     NBDsmooth,
     SimpleMomentEstimator,
     SmoothNetHist,
-    ISFE,
 )
 from pygraphon.graphons import StepGraphon
 from pygraphon.utils.utils_matrix import check_symmetric
