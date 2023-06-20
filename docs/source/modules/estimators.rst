@@ -18,6 +18,7 @@ Implemented estimators
    SAS
    Completion
    SmoothNetHist
+   ISFE
 
 
 Estimator general interface
