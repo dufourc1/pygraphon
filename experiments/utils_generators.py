@@ -1,53 +1,7 @@
-import importlib.util
 from typing import Tuple
 import numpy as np
 from pygraphon.graphons import Graphon
 
-
-def class_extract(class_name: str,
-                  file_path: str
-                  ) -> type:
-    """Extracts a class from a file.
-
-    Parameters
-    ----------
-    class_name : str
-        name of the class to extract
-    file_path : str
-        path to the file containing the class. Example: "src\pygraphon\graphons\StepGraphon.py"
-    
-    Returns
-    -------
-    type
-        class object
-    
-    Raises
-    ------
-    TypeError
-        if the retrieved object is not a class
-    NameError
-        if the class is not found in the file
-    """
-    try:
-        # Load the module from the file path
-        spec = importlib.util.spec_from_file_location("module", file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        # Check if the class exists in the module
-        if hasattr(module, class_name):
-            # Retrieve the class object using the class name
-            class_object = getattr(module, class_name)
-
-            # Check if the retrieved object is a class
-            if isinstance(class_object, type):
-                return class_object
-            else:
-                raise TypeError(f"{class_name} is not a class.")
-        else:
-            raise NameError(f"Class {class_name} not found in {file_path}.")
-    except Exception as e:
-        print(f"Error: {e}")
 
 class AssociativeFullyRandom:
     def __init__(
