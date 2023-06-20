@@ -15,10 +15,10 @@ from pygraphon.utils.utils_graph import (
 class BaseEstimator:
     """Base class for Graphon estimator.
 
-    If the method can do function estimation, `.get_graphon()` should return a Graphon object,
-    otherwise it should return None.
-    If the method can do value estimation, `.get_edge_connectivity()` should return a numpy array,
-    otherwise it should return None.
+    If the method can do function estimation, :obj:`get_graphon()` should return a Graphon object,
+    otherwise it should return :obj:`None`.
+    If the method can do value estimation, :obj:`get_edge_connectivity()` should return a numpy array,
+    otherwise it should return :obj:`None`.
 
     Notes
     -----

@@ -17,15 +17,13 @@ class HistogramEstimator(BaseEstimator):
     provided by the user.
 
     Args:
-        bandwithHist (float, optional): size of the block of the histogram. If None, automatically derived
-            from the observation. Defaults to None.
+        bandwithHist (float, optional): size of the block of the histogram. If :obj:`None`, automatically derived
+            from the observation. Defaults to :obj:`None`.
     """
 
-    def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:
+    def __init__(self, bandwithHist: Optional[float] = None) -> None:
         super().__init__()
         self.bandwidthHist = bandwithHist
-        if method != "mine":
-            DeprecationWarning("method other than 'mine' are deprecated")
 
     def _approximate_graphon_from_adjacency(
         self,
