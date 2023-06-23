@@ -77,10 +77,10 @@ class Graphon:
 
             if scaled and not math.isclose(self.integral_value, 1):
                 warnings.warn(
-                    "function provided does not integrate to 1, disregarding initial_rho, replacing with "
-                    + "integral_value of given function",
+                    f"function provided does not integrate to 1, disregarding initial_rho {initial_rho:.3f}, replacing with "
+                    + f"integral_value {self.integral_value:.3f} of given function this may be due to numerical errors in the integration.",
                     UserWarning,
-                    stacklevel=2,
+                    stacklevel=1,
                 )
                 self.initial_rho = deepcopy(self.integral_value)
             else:
