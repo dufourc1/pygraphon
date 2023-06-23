@@ -1,5 +1,4 @@
 """Network histogram class."""
-from collections import Counter
 from typing import Optional, Tuple
 
 import numpy as np
@@ -126,32 +125,3 @@ class HistogramEstimator(BaseEstimator):
                 edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
 
         return graphon_matrix, edge_probability_matrix, bandwidthHist
-
-    @staticmethod
-    def _approximate_from_node_membership(
-        adjacencyMatrix: np.ndarray, node_memberships: np.ndarray
-    ) -> np.ndarray:
-        # compute the actual values of the graphon approximation
-        groups = np.unique(node_memberships)
-        countGroups = Counter(node_memberships)
-        ngroups = len(groups)
-        # rho = edge_density(adjacencyMatrix)
-        # rho_inv = 1 / rho if rho != 0 else 0
-        graphon_matrix = np.zeros((ngroups, ngroups))
-
-        # compute the number of links between groups i and j / all possible
-        # links
-        for i in range(ngroups):
-            for j in np.arange(i, ngroups):
-                total = countGroups[groups[i]] * countGroups[groups[j]]
-                graphon_matrix[i][j] = (
-                    np.sum(
-                        adjacencyMatrix[np.where(node_memberships == groups[i])[0]][
-                            :, np.where(node_memberships == groups[j])[0]
-                        ]
-                    )
-                    / total
-                )
-                graphon_matrix[i, j] = graphon_matrix[i, j]  # * rho_inv
-                graphon_matrix[j][i] = graphon_matrix[i, j]
-        return graphon_matrix
