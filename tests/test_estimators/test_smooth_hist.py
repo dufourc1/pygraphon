@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from scipy.special import comb
 
 from pygraphon.estimators import HistogramEstimator, SmoothNetHist
 from pygraphon.graphons import StepGraphon
@@ -75,11 +76,11 @@ def test_flat_to_tensor() -> None:
 def test_smoothing_operator() -> None:
     """Test smoothing_operator with regular block graphon."""
     estimator = SmoothNetHist()
-    theta = np.array([[1.5, 0.9, 0.3], [0.9, 1.8, 0.6], [0.3, 0.6, 2.1]])
+    theta = np.array([[1.5, 0.9, 0.3], [0.9, 1.8, 0.6], [0.3, 0.6, 2.1]]) / 2.1
     labels = np.array([0, 1, 1, 0, 1, 0])
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
 
-    assert (theta == hist.graphon).all()
+    assert (theta == hist.graphon * hist.initial_rho).all()
 
     flat_graphon = hist.graphon[np.triu_indices(3)]
     flat_areas = hist.areas[np.triu_indices(3)]
@@ -161,13 +162,13 @@ def test_smoothing_histLC_tensor() -> None:
     adj = hist.draw(rho=None, n=n, exchangeable=False)
 
     olhede_fit, _ = estimator._first_approximate_graphon_from_adjacency(adjacencyMatrix=adj)
-    params_olhede_fit = (olhede_fit.graphon.shape[0] + 1) * olhede_fit.graphon.shape[0] // 2
+    params_olhede_fit = comb(olhede_fit.graphon.shape[0] + 1, 2)
     smooth_test_tensor, n_link_com = estimator._smoothing_histLC(
         hist_approx=olhede_fit, A=adj, number_link_communities=None
     )
-    assert np.array_equal(n_link_com, np.arange(1, params_olhede_fit + 1))
+    assert np.array_equal(n_link_com, np.arange(1, len(np.unique(olhede_fit.graphon)) + 1))
 
-    assert estimator._num_par_nethist == len(smooth_test_tensor)
+    assert estimator._num_par_nethist == params_olhede_fit
     assert np.allclose(smooth_test_tensor[-1].graphon, olhede_fit.graphon)
     assert np.allclose(smooth_test_tensor[0].graphon, np.ones(smooth_test_tensor[0].graphon.shape))
 
