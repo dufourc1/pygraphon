@@ -5,6 +5,8 @@ from typing import List, Optional, Tuple
 from warnings import warn
 
 import numpy as np
+from loguru import logger
+from scipy.special import comb
 from sklearn.cluster import KMeans
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
@@ -41,6 +43,8 @@ class SmoothNetHist(BaseEstimator):
         self._num_par_nethist = -1
         self._num_par_smooth = -1
         self._bic_nethist = np.inf
+        logger.warning("toleration is set to 1e-4, arbitrary value, argue")
+        self._tolerance = 1e-4
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -131,12 +135,32 @@ class SmoothNetHist(BaseEstimator):
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
         )
+
+        # to delete
+        graphon_matrix = assignment_nethist.theta
+        logger.debug(f"First fit nethist: graphon matrix = {graphon_matrix}")
+        groupmembership = assignment_nethist.labels
+
+        # fills in the edge probability matrix from the value of the graphon
+        edge_probability_matrix = np.zeros((len(groupmembership), len(groupmembership)))
+        for i in range(edge_probability_matrix.shape[0]):
+            for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
+                edge_probability_matrix[i, j] = graphon_matrix[
+                    int(groupmembership[i]), int(groupmembership[j])
+                ]
+                edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
+
+        log_likelihood_nethist = log_likelihood(edge_probability_matrix, adjacencyMatrix)
+        logger.info(f"First fit nethist: log likelihood = {log_likelihood_nethist}")
+        # to delete
+
         bandwidthHist = h / adjacencyMatrix.shape[0]
         self._bic_nethist = bic(
-            log_likelihood_val=assignment_nethist.log_likelihood,
+            log_likelihood_val=log_likelihood_nethist,
             n=adjacencyMatrix.shape[0],
-            num_par=len(np.unique(assignment_nethist.theta)),
+            num_par=comb(assignment_nethist.theta.shape[0] + 1, 2),
         )
+        logger.debug(f"First fit nethist: bandwidth = {bandwidthHist}, bic = {self._bic_nethist}")
 
         # ---------------------------------------------------------------------------------------------
         # Return the graphon from first fit nethist.
@@ -145,6 +169,7 @@ class SmoothNetHist(BaseEstimator):
             bandwidthHist=bandwidthHist,
             initial_rho=rho,
         )
+        logger.debug(f"First fit nethist: graphon normalized = {graphon_nethist.get_graphon()}")
         return graphon_nethist, assignment_nethist
 
     def _smoothing_histLC(
@@ -163,7 +188,7 @@ class SmoothNetHist(BaseEstimator):
             adjancency matrix of the graph
         number_link_communities : int, optional
             number of link communities to be obtained after smoothing, by default None.
-            will try all of them.
+            will try all of them up tp the maximum number of unique values im hist_approx.
 
         Returns
         -------
@@ -185,19 +210,20 @@ class SmoothNetHist(BaseEstimator):
         """
         # Flattening the graphon and the areas
         nrow_tile = hist_approx.graphon.shape[0]
-        flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
+        flat_graphon = hist_approx.get_theta()[np.triu_indices(nrow_tile)]
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
 
         # Number of link communities and input check
-        self._num_par_nethist = flat_graphon.size
-        if number_link_communities is not None and number_link_communities > self._num_par_nethist:
+        self._num_par_nethist = comb(nrow_tile + 1, 2)
+        num_par_diff = len(np.unique(flat_graphon))
+        if number_link_communities is not None and number_link_communities > num_par_diff:
             raise ValueError(
                 f"The number of link communities {number_link_communities} is greater "
-                + f"than the number of clusters {self._num_par_nethist} in the histogram estimator"
+                + f"than the number of clusters {num_par_diff} in the histogram estimator"
             )
 
         clusters = (
-            list(range(1, self._num_par_nethist + 1))
+            list(range(1, num_par_diff + 1))
             if number_link_communities is None
             else [number_link_communities]
         )
@@ -207,6 +233,7 @@ class SmoothNetHist(BaseEstimator):
         for index, number_groups in enumerate(clusters):
             # erdos renyi approximation
             if number_groups == 1:
+                logger.debug("Smoothing with 1 link community")
                 avr_graphon[index] = edge_density(A) * np.ones_like(flat_graphon)
             # original histogram estimator
             elif number_groups == self._num_par_nethist:
@@ -330,7 +357,7 @@ class SmoothNetHist(BaseEstimator):
             StepGraphon(
                 graphon=sym_KM_smooth_g[i],
                 bandwidthHist=hist_approx.bandwidthHist,
-                initial_rho=None,
+                initial_rho=hist_approx.initial_rho,
             )
             for i in range(nclust_hist)
         ]
@@ -378,17 +405,28 @@ class SmoothNetHist(BaseEstimator):
             best_bic = np.inf
             best_graphon = tensor_graphon[0]
             best_pij = np.ones((n_nodes, n_nodes)) / 2
+            logger.warning(f"n_nodes : {n_nodes}")
+            best_num_link = 0
             for i, graphon in enumerate(tensor_graphon):
                 pij = graphon._get_edge_probabilities(n=n_nodes, latentVarArray=latentVarArray)
                 log_likelihood_value = log_likelihood(pij, adjacencyMatrix)
                 bic_candidate = bic(log_likelihood_value, n=n_nodes, num_par=n_link_com[i])
-                if bic_candidate < best_bic:
+                improv = (best_bic - bic_candidate) / best_bic if best_bic != np.inf else 1
+                logger.debug(
+                    f"Improvement: {improv}, best BIC: {best_bic}, candidate BIC: {bic_candidate}"
+                )
+                if improv >= self._tolerance and improv > 0:
+                    logger.debug(
+                        f"New best BIC: {bic_candidate}, with {n_link_com[i]} link communities."
+                    )
                     best_bic = bic_candidate
+                    best_num_link = n_link_com[i]
                     best_graphon = graphon
                     best_pij = pij
                     self._num_par_smooth = n_link_com[i]
 
         self._bic = best_bic
+        logger.debug(f"Best BIC: {best_bic}, with {best_num_link} link communities.")
         return best_graphon, best_pij
 
     def get_bic(self) -> float:
