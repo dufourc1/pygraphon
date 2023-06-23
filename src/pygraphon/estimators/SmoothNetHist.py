@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 from warnings import warn
+from loguru import logger
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -189,7 +190,7 @@ class SmoothNetHist(BaseEstimator):
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
 
         # Number of link communities and input check
-        self._num_par_nethist = flat_graphon.size
+        self._num_par_nethist = len(np.unique(flat_graphon))
         if number_link_communities is not None and number_link_communities > self._num_par_nethist:
             raise ValueError(
                 f"The number of link communities {number_link_communities} is greater "
@@ -287,7 +288,7 @@ class SmoothNetHist(BaseEstimator):
         tensor_slice_graphon : np.ndarray
             tensor slice containing the smoothed graphon, smoothed with number_link_communities
         """
-        for j in range(number_link_communities):
+        for j in np.unique(labels):
             labels_j = np.argwhere(labels == j).reshape(-1)
             tensor_slice_graphon[labels_j] = np.sum(
                 flat_graphon[labels_j] * flat_areas[labels_j]
@@ -361,6 +362,7 @@ class SmoothNetHist(BaseEstimator):
             best graphon matrix and P_ij selected by the BIC.
         """
         latentVarArray = assignment.labels_to_latent_variables()
+        logger.debug(f"latentVarArray: {latentVarArray}")
         n_nodes = adjacencyMatrix.shape[0]
 
         if len(tensor_graphon) == 1:
@@ -381,8 +383,11 @@ class SmoothNetHist(BaseEstimator):
             for i, graphon in enumerate(tensor_graphon):
                 pij = graphon._get_edge_probabilities(n=n_nodes, latentVarArray=latentVarArray)
                 log_likelihood_value = log_likelihood(pij, adjacencyMatrix)
+                logger.debug(f"Log likelihood for {n_link_com[i]} link communities: {log_likelihood_value}")
                 bic_candidate = bic(log_likelihood_value, n=n_nodes, num_par=n_link_com[i])
+                logger.debug(f"BIC for {n_link_com[i]} link communities: {bic_candidate}")
                 if bic_candidate < best_bic:
+                    logger.debug(f"New best BIC: {bic_candidate}, with {n_link_com[i]} link communities.")
                     best_bic = bic_candidate
                     best_graphon = graphon
                     best_pij = pij

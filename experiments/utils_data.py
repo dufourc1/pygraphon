@@ -3,7 +3,7 @@ import numpy as np
 from loguru import logger
 import csv
 from typing import Optional
-
+import shutil
 import os
 
 
@@ -26,11 +26,11 @@ def parser_argument(folder_name: str) -> None:
 
 
 def csv_gen_graphon(
-        path: str,
-        file_name: str,
-        n_graphons: int,
-        smoothnethist_par: Optional[bool] = False,
-        ) -> None:
+    path: str,
+    file_name: str,
+    n_graphons: int,
+    smoothnethist_par: Optional[bool] = False,
+) -> None:
     """Generates the csv file to store results when testing estimator for different graphons.
 
     Parameters
@@ -44,30 +44,42 @@ def csv_gen_graphon(
     """
     if not file_name.endswith(".csv"):
         file_name = file_name + ".csv"
-    path_to_file = os.path.join(path, file_name) 
+    path_to_file = os.path.join(THIS_FOLDER, path, file_name)
     if smoothnethist_par:
-        column_names = ["Type of Graphon", "n", "MSE", "MAE", "AUC", "AUPRC", "BIC", "RatioPar"]
+        column_names = [
+            "Method",
+            "Type of Graphon",
+            "n",
+            "MSE",
+            "MAE",
+            "AUC",
+            "AUPRC",
+            "BIC",
+            "RatioPar",
+        ]
     else:
-        column_names = ["Type of Graphon", "n", "MSE", "MAE", "AUC", "AUPRC"]
+        column_names = ["Method", "Type of Graphon", "n", "MSE", "MAE", "AUC", "AUPRC"]
 
     # Write the column names to the CSV file
-    with open(path_to_file, 'w', newline='') as csvfile:
+    with open(path_to_file, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(column_names)
 
     # Append k empty lines to the CSV file
-    with open(path_to_file, 'a', newline='') as csvfile:
+    with open(path_to_file, "a", newline="") as csvfile:
         writer = csv.writer(csvfile)
         for _ in range(n_graphons):
             writer.writerow([])
 
-    print(f"Empty CSV file '{path_to_file}' with {n_graphons} lines created.")
+    logger.debug(f"Empty CSV file '{path_to_file}' with {n_graphons} lines created.")
 
-def csv_store_StepGraphon_parameters(path: str, 
-                                     file_name: str, 
-                                     n_it: int,
-                                     SBM_SSM: bool,
-                                     ) -> None:
+
+def csv_store_StepGraphon_parameters(
+    path: str,
+    file_name: str,
+    n_it: int,
+    SBM_SSM: bool,
+) -> None:
     """Stores the parameters of the Step Graphon in a csv file.
 
     Parameters
@@ -83,32 +95,27 @@ def csv_store_StepGraphon_parameters(path: str,
     """
     if not file_name.endswith(".csv"):
         file_name = file_name + ".csv"
-    path_to_file = os.path.join(path, file_name)
+    path_to_file = os.path.join(THIS_FOLDER, path, file_name)
     if SBM_SSM:
         column_names = ["SBM", "n", "Theta", "Areas"]
     else:
         column_names = ["SSM", "n", "Theta", "Areas"]
 
     # Write the column names to the CSV file
-    with open(path_to_file, 'w', newline='') as csvfile:
+    with open(path_to_file, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(column_names)
 
     # Append k empty lines to the CSV file
-    with open(path_to_file, 'a', newline='') as csvfile:
+    with open(path_to_file, "a", newline="") as csvfile:
         writer = csv.writer(csvfile)
         for _ in range(n_it):
             writer.writerow([])
 
-    print(f"Empty CSV file '{path_to_file}' with {n_it} lines created.")
+    logger.debug(f"Empty CSV file '{path_to_file}' with {n_it} lines created.")
 
 
-
-def update_row(file_name : str,
-               folder_name : str,
-               row_index : int,
-               new_row: list
-               ) -> None:
+def update_row(file_name: str, folder_name: str, row_index: int, new_row: list) -> None:
     """Updates a row in a csv file.
 
     Parameters
@@ -123,18 +130,19 @@ def update_row(file_name : str,
         new row
     """
 
-    csv_file = os.path.join(THIS_FOLDER, 'results', folder_name, file_name + '.csv')
-    with open(csv_file, 'r') as file:
+    csv_file = os.path.join(THIS_FOLDER, "results", folder_name, file_name + ".csv")
+    with open(csv_file, "r") as file:
         rows = list(csv.reader(file))
         rows[row_index] = new_row
 
-    with open(csv_file, 'w', newline='') as file:
+    with open(csv_file, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(rows)
 
+
 def clean_temp_folder(folder_name: str) -> None:
     # clean temp folder
-    folder = 'experiments/results/'+f'{folder_name}'
+    folder = "results/" + f"{folder_name}"
     for filename in os.listdir(folder):
         if folder_name in filename:  # only delete files from corresponding regime
             file_path = os.path.join(folder, filename)
@@ -144,4 +152,4 @@ def clean_temp_folder(folder_name: str) -> None:
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
             except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+                print("Failed to delete %s. Reason: %s" % (file_path, e))

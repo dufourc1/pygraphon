@@ -8,12 +8,20 @@ from tqdm import tqdm
 import os
 import shutil
 from pygraphon.graphons import Graphon
+from pygraphon.graphons import StepGraphon
+from pygraphon.graphons import common_graphons
 from pygraphon import estimators
-from pygraphon.estimators.SAS import SAS
-from pygraphon.estimators.UniversalSingularValueDecomposition import UVST
-from pygraphon.estimators.sba import SBA
-from .utils_data import parser_argument, clean_temp_folder, csv_gen_graphon
-from .utils_generators import AssociativeFullyRandom, AssociativeSimpleNonDiagonal, ER
+from pygraphon.estimators import USVT, Completion, SAS, SmoothNetHist
+from utils_data import (
+    parser_argument,
+    clean_temp_folder,
+    csv_gen_graphon,
+    csv_store_StepGraphon_parameters,
+    update_row,
+)
+from utils_generators import AssociativeFullyRandom, AssociativeSimpleNonDiagonal, ER
+from pygraphon.norm import MseProbaEdge, MaeProbaEdge, AUCEdge, AUPRCEdge
+from typing import List, Optional
 
 
 class TqdmToLogger(io.StringIO):
@@ -38,73 +46,152 @@ class TqdmToLogger(io.StringIO):
         self.logger.log(self.level, self.buf)
 
 
-def main(adjacency_matrix: np.ndarray,
-         graphon: Graphon,
-         method: str,
-         folder_name: str,
-         ):
-
+def main(
+    adjacency_matrix: np.ndarray,
+    graphon: Optional[Graphon],
+    method: str,
+    folder_name: str,
+):
     logger.info("Starting experiment")
     # Initialise experiments
     # ----------------------
-    csv_fill = {"Type of Graphon": None, "n": None, "MSE": None, "MAE": None, "AUC": None, "AUPRC": None}
     method_est = getattr(estimators, method)
     # Run experiments
     # ----------------------
-    ## Running different estimators for comparison
-    est1 = SAS().fit(adjacency_matrix)
-    est2 = UVST().fit(adjacency_matrix)
-    est3 = SBA().fit(adjacency_matrix)
-
-    est = method_est().fit(adjacency_matrix)
-    ## Running SmoothNetHist
-
+    est = method_est()
+    est.fit(adjacency_matrix)
+    n = adjacency_matrix.shape[0]
+    if graphon is not None:
+        norm_mse = MseProbaEdge(n_nodes=n)(graphon, est.get_graphon())
+        norm_mae = MaeProbaEdge(n_nodes=n)(graphon, est.get_graphon())
+    else:
+        norm_mse = MseProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
+        norm_mae = MaeProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
+    # Compute AUC and AUPRC
+    norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
+    norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
+    # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
+    graphon_repr = f"sbm {len(np.unique(est.get_graphon().graphon))}" if isinstance(graphon, StepGraphon) else  graphon.repr 
+    if method == "SmoothNetHist":
+        result = [
+            method,
+            graphon_repr,
+            n,
+            norm_mse,
+            norm_mae,
+            norm_auc,
+            norm_auprc,
+            est.get_bic(),
+            est.get_ratio_par(),
+        ]
+    else:
+        result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, None, None]
     # ----------------------
     logger.info("Computing done")
-    with open("results"+f"{folder_name}.pkl", "wb") as f:
-        pickle.dump(metric_list, f, protocol=pickle.HIGHEST_PROTOCOL)
+    with open("results" + f"{folder_name}.pkl", "wb") as f:
+        pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     logger.info(f"Cleaning {folder_name}/")
-    clean_temp_folder(folder_name)
+    #clean_temp_folder(folder_name)
 
     logger.info("Results saved, bye")
+
+    return result
 
 
 if __name__ == "__main__":
     # init logger because Charles corrupted me
-    logger.remove()
-    logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-    logger.add("log_exp.txt", level="INFO", mode="w")
+    #logger.remove()
+    #logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
+    #logger.add("log_exp.txt", level="INFO", mode="w")
 
     # sparse regime import and init
     folder_name = "sbm_ssm"
-    mult_rep = True
-    parser_argument(folder_name)
+    mult_rep = False
+    #parser_argument(folder_name)
 
-    n = 200
+    n = 100
 
+    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
     if folder_name == "sbm_ssm":
-        sbm_params = {}
-        theta = AssociativeFullyRandom()
-        k_max = 5
+        k_max = 2
         # theta init
-        theta_intra_min, theta_intra_max = 0.15, 0.5
-        theta_inter_min, theta_inter_max = 0.05, 0.15
+        theta_intra_min, theta_intra_max = 0.9, 0.9
+        theta_inter_min, theta_inter_max = 0, 0
+        # ----- If multiple repetitions -----
         if mult_rep:
             # n init
             n_min, n_step = 50, 50
             n_list = np.arange(n_min, n, n_step)
             # k init
             k_list = list(range(2, k_max + 1))
-            graphon = []
-            adjacency_matrix = []
-            for i,k in enumerate(k_list):
-                graphon[i] = theta.Theta(K=k, min_inside_classes=theta_intra_min, max_inside_classes=theta_intra_max, min_outside_classes=theta_inter_min, max_outside_classes=theta_inter_max)
-                adjacency_matrix[i] = graphon[i].sample(n) #not good as doesnt take into account the number of nodes in each class
+            csv_store_StepGraphon_parameters(
+                path="\sbm_ssm",
+                file_name="parameters" + f"_{folder_name}" + ".csv",
+                n_it=len(n_list) * len(k_list),
+                SBM_SSM=True,
+            )
+            for i, k in enumerate(k_list):
+                theta = AssociativeFullyRandom(
+                    K=k,
+                    min_inside_classes=theta_intra_min,
+                    max_inside_classes=theta_intra_max,
+                    min_outside_classes=theta_inter_min,
+                    max_outside_classes=theta_inter_max,
+                )
+                graphon = StepGraphon(
+                    theta.Theta, bandwidthHist=1 / k_max
+                )  # can add arg repr to specify the name as a str (default is "Step Graphon")
+                for j, n in enumerate(n_list):
+                    result = main(
+                        adjacency_matrix=graphon.draw(n=n, exchangeable=False),
+                        graphon=graphon,
+                        method="SmoothNetHist",
+                        folder_name=folder_name,
+                    )
+        # ----- If single repetition -----
         else:
-            graphon = theta.Theta(K=k_max, min_inside_classes=theta_intra_min, max_inside_classes=theta_intra_max, min_outside_classes=theta_inter_min, max_outside_classes=theta_inter_max)
-            adjacency_matrix = graphon.sample(n)
-    method = ["SmoothNetHist", "SAS", "UVST", "SBA"]
-    for m in method:
-        main(adjacency_matrix= A, graphon=graphon, method=m, folder_name=folder_name)
+            csv_gen_graphon(path = "results\sbm_ssm", file_name="comparison" + f"_{folder_name}" + ".csv", n_graphons=k_max)
+            theta = AssociativeFullyRandom(
+                K=k_max,
+                min_inside_classes=theta_intra_min,
+                max_inside_classes=theta_intra_max,
+                min_outside_classes=theta_inter_min,
+                max_outside_classes=theta_inter_max,
+            )
+            graphon = StepGraphon(theta.Theta, bandwidthHist=1 / k_max)
+            result = main(
+                adjacency_matrix=graphon.draw(n=n, exchangeable=False),
+                graphon=graphon,
+                method="SmoothNetHist",
+                folder_name=folder_name,
+            )
+            update_row(
+                folder_name="sbm_ssm",
+                file_name="comparison" + f"_{folder_name}",
+                new_row=result,
+                row_index=1,
+            )
+
+    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    graphons = []
+    if folder_name == "comparison":
+        method = ["SmoothNetHist", "SAS", "UVST", "Completion"]
+        for g in common_graphons.values():
+            graphons.append(g)
+
+        for i, m in enumerate(method):
+            for j, g in enumerate(graphons):
+                result = main(
+                    adjacency_matrix=g.draw(n=n, exchangeable=False),
+                    graphon=g,
+                    method=m,
+                    folder_name=folder_name,
+                )
+                update_row(
+                    path="\comparison",
+                    file_name="comparison" + f"_{folder_name}" + ".csv",
+                    row=result,
+                    row_index=1+i * len(graphons) + j,
+                )
