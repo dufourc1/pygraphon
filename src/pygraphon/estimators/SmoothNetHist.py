@@ -55,6 +55,7 @@ class SmoothNetHist(BaseEstimator):
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
         use_default_bandwidth: bool = True,
+        progress_bar: bool = False,
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -77,6 +78,7 @@ class SmoothNetHist(BaseEstimator):
             maxNumIterations,
             past_non_improving,
             use_default_bandwidth,
+            progress_bar,
         )
 
         tensor_graphon, n_link_com = self._smoothing_histLC(
@@ -98,6 +100,7 @@ class SmoothNetHist(BaseEstimator):
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
         use_default_bandwidth: bool = False,
+        progress_bar: bool = False,
     ) -> Tuple[StepGraphon, Assignment]:
         """Estimate the graphon function f(x,y) from an adjacency matrix from a first histogram from [1].
 
@@ -134,6 +137,7 @@ class SmoothNetHist(BaseEstimator):
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
+            progress_bar=progress_bar,
         )
 
         # to delete
@@ -280,7 +284,7 @@ class SmoothNetHist(BaseEstimator):
             init=method,
             n_init=10,
         ).fit(flat_graphon.reshape(-1, 1))
-
+        logger.info(kmeans.labels_)
         return kmeans.labels_
 
     def _smoothing_operator(

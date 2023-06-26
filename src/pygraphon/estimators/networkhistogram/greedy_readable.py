@@ -17,6 +17,7 @@ def greedy_opt(
     absTol: float = 2.5 * 1e-4,
     maxNumIterations: int = 500,
     past_non_improving: int = 3,
+    progress_bar: bool = False,
     *args,
     **kwargs,
 ) -> Assignment:
@@ -35,6 +36,10 @@ def greedy_opt(
         absolute tolerance for convergence, by default 2.5 * 1e-4
     maxNumIterations : int
         number of steps, by default 500
+    past_non_improving : int
+        number of steps without improvement before stopping, by default 3
+    progress_bar : bool
+        whether to show a progress bar, by default False
 
     Returns
     -------
@@ -54,7 +59,7 @@ def greedy_opt(
 
     past_best_likelihood = [overall_best.log_likelihood]
 
-    pbar = tqdm(range(maxNumIterations))
+    pbar = tqdm(range(maxNumIterations), disable=not progress_bar)
     for m in pbar:
         index_i = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
         index_j = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)

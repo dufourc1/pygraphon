@@ -19,6 +19,7 @@ def nethist(
     absTol: float = 2.5 * 1e-4,
     maxNumIterations: int = 500,
     past_non_improving: int = 3,
+    progress_bar: bool = False,
 ) -> Tuple[Assignment, int]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
@@ -34,6 +35,10 @@ def nethist(
         absolute tolerance for convergence
     maxNumIterations : int
         maximum number of iterations for the optimization (outer loop)
+    past_non_improving : int
+        number of steps without improvement before stopping
+    progress_bar : bool
+        whether to show a progress bar
 
 
     Returns
