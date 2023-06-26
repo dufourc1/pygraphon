@@ -7,6 +7,7 @@ from typing import Callable, Optional
 
 import numpy as np
 from scipy.integrate import dblquad, simpson
+from loguru import logger
 
 from pygraphon.utils.utils_func import copy_func
 
@@ -76,13 +77,12 @@ class Graphon:
                 raise ValueError("Initial edge density must be in  ]0,1[")
 
             if scaled and not math.isclose(self.integral_value, 1):
-                warnings.warn(
+                diff = abs(self.integral_value - initial_rho)
+                logger.trace(
                     f"function provided does not integrate to 1, disregarding initial_rho {initial_rho:.3f},"
                     + " replacing with "
                     + f"integral_value {self.integral_value:.3f} of given function this may be due to numerical"
-                    + " errors in the integration.",
-                    UserWarning,
-                    stacklevel=1,
+                    + f" errors in the integration. Error is {diff:.3f}",
                 )
                 self.initial_rho = deepcopy(self.integral_value)
             else:
