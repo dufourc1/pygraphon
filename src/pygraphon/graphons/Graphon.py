@@ -5,8 +5,8 @@ from copy import deepcopy
 from typing import Callable, Optional
 
 import numpy as np
-from scipy.integrate import dblquad, simpson
 from loguru import logger
+from scipy.integrate import dblquad, simpson
 
 from pygraphon.utils.utils_func import copy_func
 
