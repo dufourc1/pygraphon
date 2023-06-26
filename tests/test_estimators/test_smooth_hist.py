@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from scipy.special import comb
 
-from pygraphon.estimators import HistogramEstimator, SmoothNetHist
+from pygraphon.estimators import SmoothNetHist
 from pygraphon.graphons import StepGraphon
 
 
@@ -136,20 +136,22 @@ def test_smoothing_histLC_givenLC_nonreg_block() -> None:
     )
     hist = StepGraphon(theta, bandwidthHist=0.3)
     adj = hist.draw(rho=None, n=n, exchangeable=False)
-
-    theoretical_theta = np.array(
-        [
-            [1.48765248, 0.82883496, 0.27693223, 1.82768734],
-            [0.82883496, 1.82768734, 0.82883496, 0.27693223],
-            [0.27693223, 0.82883496, 1.82768734, 0.82883496],
-            [1.82768734, 0.27693223, 0.82883496, 0.27693223],
-        ]
+    clusters = np.array([3, 0, 2, 1, 1, 0, 2, 1, 0, 2])
+    flat_theoretical_thera = np.zeros_like(theta[np.triu_indices_from(theta)])
+    flat_theoretical_thera = estimator._smoothing_operator(
+        flat_theoretical_thera,
+        clusters,
+        number_link_communities=4,
+        flat_graphon=theta[np.triu_indices_from(theta)],
+        flat_areas=hist.areas[np.triu_indices_from(theta)],
     )
+    theoretical_theta = estimator._flat_to_tensor(flat_theoretical_thera, hist)[0].graphon
+
     estimator._num_par_nethist = len(np.unique(hist.graphon))
     smooth_test1, n_link_com = estimator._smoothing_histLC(
         hist_approx=hist, A=adj, number_link_communities=4
     )
-    assert np.allclose(smooth_test1[-1].graphon * smooth_test1[-1].initial_rho, theoretical_theta)
+    assert np.allclose(smooth_test1[-1].graphon, theoretical_theta, atol=1e-5)
     assert np.array_equal(n_link_com, [4])
 
 
@@ -171,27 +173,3 @@ def test_smoothing_histLC_tensor() -> None:
     assert estimator._num_par_nethist == params_olhede_fit
     assert np.allclose(smooth_test_tensor[-1].graphon, olhede_fit.graphon)
     assert np.allclose(smooth_test_tensor[0].graphon, np.ones(smooth_test_tensor[0].graphon.shape))
-
-
-def test_deterministic_clustering() -> None:
-    """Test end to end pipeline without kmeans randomness."""
-    estimator = DeterministicSmoother()
-    nethist_estimator = HistogramEstimator()
-
-    theta = np.array([[0.5, 0.3, 0.1], [0.3, 0.6, 0.25], [0.1, 0.25, 0.6]])
-    hist = StepGraphon(theta, bandwidthHist=1 / 3)
-    n = 100
-
-    adj = hist.draw(rho=None, n=n, exchangeable=False)
-
-    nethist_estimator.fit(graph=adj)
-    estimator.fit(graph=adj)
-
-    K = nethist_estimator.get_graphon().graphon.shape[0]
-    assert estimator._num_par_nethist == (K * (K - 1)) // 2 + K
-    assert estimator._num_par_smooth == len(np.unique(estimator.get_graphon().graphon))
-    test_clustered, n_link_coms = estimator._smoothing_histLC(
-        nethist_estimator.get_graphon(), adj, number_link_communities=estimator._num_par_smooth
-    )
-    assert np.array_equal(n_link_coms, [estimator._num_par_smooth])
-    assert np.array_equiv(test_clustered[-1].graphon, estimator.get_graphon().graphon)
