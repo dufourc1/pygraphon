@@ -135,7 +135,6 @@ class SmoothNetHist(BaseEstimator):
             n=adjacencyMatrix.shape[0],
             num_par=comb(assignment_nethist.theta.shape[0] + 1, 2),
         )
-        logger.debug(f"First fit nethist: bandwidth = {bandwidthHist}, bic = {self._bic_nethist}")
 
         # ---------------------------------------------------------------------------------------------
         # Return the graphon from first fit nethist.
@@ -143,7 +142,6 @@ class SmoothNetHist(BaseEstimator):
             assignment_nethist.theta,
             bandwidthHist=bandwidthHist,
         )
-        logger.debug(f"First fit nethist: graphon normalized = {graphon_nethist.get_graphon()}")
         return graphon_nethist, assignment_nethist
 
     def _smoothing_histLC(
@@ -254,7 +252,6 @@ class SmoothNetHist(BaseEstimator):
             init=method,
             n_init=10,
         ).fit(flat_graphon.reshape(-1, 1))
-        logger.info(kmeans.labels_)
         return kmeans.labels_
 
     def _smoothing_operator(
@@ -379,20 +376,13 @@ class SmoothNetHist(BaseEstimator):
             best_bic = np.inf
             best_graphon = tensor_graphon[0]
             best_pij = np.ones((n_nodes, n_nodes)) / 2
-            logger.warning(f"n_nodes : {n_nodes}")
             best_num_link = 0
             for i, graphon in enumerate(tensor_graphon):
                 pij = graphon._get_edge_probabilities(n=n_nodes, latentVarArray=latentVarArray)
                 log_likelihood_value = log_likelihood(pij, adjacencyMatrix)
                 bic_candidate = bic(log_likelihood_value, n=n_nodes, num_par=n_link_com[i])
                 improv = (best_bic - bic_candidate) / best_bic if best_bic != np.inf else 1
-                logger.debug(
-                    f"Improvement: {improv}, best BIC: {best_bic}, candidate BIC: {bic_candidate}"
-                )
                 if improv >= self._tolerance and improv > 0:
-                    logger.debug(
-                        f"New best BIC: {bic_candidate}, with {n_link_com[i]} link communities."
-                    )
                     best_bic = bic_candidate
                     best_num_link = n_link_com[i]
                     best_graphon = graphon
