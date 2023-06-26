@@ -56,7 +56,7 @@ class StepGraphon(Graphon):
         self.repr += " (size of the blocks)"
 
     def get_theta(self) -> np.ndarray:
-        """Return the theta matrix in [0,1]^KxK
+        """Return the theta matrix in [0,1]^KxK.
 
         Returns
         -------

@@ -55,8 +55,8 @@ class Assignment:
 
         Parameters
         ----------
-        scale : bool, optional
-            Whether to scale the likelihood by the sample size, by default True
+        scale : bool
+            Whether to scale the likelihood by the sample size, by default False
 
         Returns
         -------

@@ -67,11 +67,15 @@ def log_likelihood(probs: np.ndarray, A: np.ndarray) -> float:
     A : np.ndarray
         adjacency matrix of the graph
 
+    Raises
+    ------
+    ValueError
+        if the probability matrix contains values greater than 1
+
     Returns
     -------
     float
         log-likelihood of the graphon given the adjacency matrix
-
 
     .. note::
         Suppose :py:obj:`probs` and :py:obj:`A` are aligned, i.e. :py:obj:`probs[i,j]` is the probability
