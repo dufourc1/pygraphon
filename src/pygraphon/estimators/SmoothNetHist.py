@@ -24,16 +24,6 @@ class SmoothNetHist(BaseEstimator):
     Args:
         bandwidth (float): bandwidth of the original non-smoothed :py:class:`~pygraphon.estimators.HistogramEstimator`
         graphon.
-
-    Functions:
-        _approximate_graphon_from_adjacency(): Estimate the graphon function from an adjacency matrix using Smoothing.
-        _first_approximate_graphon_from_adjacency(): First histogram fit of the graphon function.
-        _smoothing_histLC(): Smoothing the histogram using the theory of edge clustering.
-        _flat_to_tensor(): Convert a list of flat vector to a tensor, each slice representing a Pij matrix.
-        _from_graphon_to_adjacency(): Convert a graphon to a Pij matrix, given node assignments.
-        _select_best_graphon(): Select the best graphon from a tensor of Pij matrix, using BIC.
-        _log_likelihood(): Compute the log likelihood of a Pij matrix.
-        _bic(): Compute the BIC of a Pij matrix.
     """
 
     def __init__(self, bandwidth: Optional[float] = None) -> None:
@@ -120,7 +110,6 @@ class SmoothNetHist(BaseEstimator):
         ----------
             [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
         """
-        rho = edge_density(adjacencyMatrix)
         # ---------------------------------------------------------------------------------------------
         # This section is the same HistogramEstimator.py _approximate
         # network histogram approximation
@@ -140,27 +129,9 @@ class SmoothNetHist(BaseEstimator):
             progress_bar=progress_bar,
         )
 
-        # to delete
-        graphon_matrix = assignment_nethist.theta
-        logger.debug(f"First fit nethist: graphon matrix = {graphon_matrix}")
-        groupmembership = assignment_nethist.labels
-
-        # fills in the edge probability matrix from the value of the graphon
-        edge_probability_matrix = np.zeros((len(groupmembership), len(groupmembership)))
-        for i in range(edge_probability_matrix.shape[0]):
-            for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
-                edge_probability_matrix[i, j] = graphon_matrix[
-                    int(groupmembership[i]), int(groupmembership[j])
-                ]
-                edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
-
-        log_likelihood_nethist = log_likelihood(edge_probability_matrix, adjacencyMatrix)
-        logger.info(f"First fit nethist: log likelihood = {log_likelihood_nethist}")
-        # to delete
-
         bandwidthHist = h / adjacencyMatrix.shape[0]
         self._bic_nethist = bic(
-            log_likelihood_val=log_likelihood_nethist,
+            log_likelihood_val=assignment_nethist.log_likelihood,
             n=adjacencyMatrix.shape[0],
             num_par=comb(assignment_nethist.theta.shape[0] + 1, 2),
         )
@@ -171,7 +142,6 @@ class SmoothNetHist(BaseEstimator):
         graphon_nethist = StepGraphon(
             assignment_nethist.theta,
             bandwidthHist=bandwidthHist,
-            initial_rho=rho,
         )
         logger.debug(f"First fit nethist: graphon normalized = {graphon_nethist.get_graphon()}")
         return graphon_nethist, assignment_nethist
