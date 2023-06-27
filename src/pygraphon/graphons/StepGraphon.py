@@ -33,7 +33,7 @@ class StepGraphon(Graphon):
             raise ValueError("The bandwidth should be between 0 and 1.")
         self.bandwidthHist = bandwidthHist
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
+            raise ValueError("The graphon matrix should have size consistent with the bandwidth.")
 
         if np.max(graphon) > 1 and initial_rho is None:
             raise ValueError(
