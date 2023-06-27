@@ -36,7 +36,7 @@ class TestRegularGraphon:
         integral = np.sum(theta * areas)
 
         # check demormalized graphon is equal to theta
-        assert np.allclose(step_graphon.graphon * step_graphon.initial_rho, theta)
+        assert np.allclose(step_graphon.get_theta(), theta)
         # check block size correctly instantiated
         assert step_graphon.bandwidthHist == block_size
         # check areas
@@ -148,14 +148,17 @@ def test_print_method(capfd):
 
 def test_init_raises() -> None:
     """Test that the step graphon is correctly instantiated."""
+    # check graphon value are between 0 and 1
     graphon = np.array([[1.8, 0.2], [0.2, 0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=0.5)
 
+    # Check bandwidth is consistent with graphon size
     graphon = np.array([[0.8, 0.2], [0.2, 0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=1 / 3)
 
+    # Check bandwidth is between 0 and 1
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=1.1)
 
@@ -164,11 +167,11 @@ def test_check_graphon_symmetric():
     """Test that the graphon is correctly checked for symmetry."""
     graphon = np.array([[0.8, 0.2], [0.7, 0.8]])
     with pytest.raises(ValueError):
-        StepGraphon(graphon=graphon, bandwidthHist=0.5).check_graphon()
+        StepGraphon(graphon=graphon, bandwidthHist=0.5)
 
 
 def test_check_graphon_positive():
     """Test that the graphon is positive."""
     graphon = np.array([[0.8, 0.2], [0.2, -0.8]])
     with pytest.raises(ValueError):
-        StepGraphon(graphon=graphon, bandwidthHist=0.5).check_graphon()
+        StepGraphon(graphon=graphon, bandwidthHist=0.5)
