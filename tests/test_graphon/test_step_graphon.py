@@ -146,12 +146,13 @@ def test_print_method(capfd):
     assert out == theoretical_out
 
 
-def test_init() -> None:
+def test_init_raises() -> None:
     """Test that the step graphon is correctly instantiated."""
     graphon = np.array([[1.8, 0.2], [0.2, 0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=0.5)
 
+    graphon = np.array([[0.8, 0.2], [0.2, 0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=1 / 3)
 
@@ -159,12 +160,15 @@ def test_init() -> None:
         StepGraphon(graphon=graphon, bandwidthHist=1.1)
 
 
-def test_check_graphon():
-    """Test that the graphon is correctly checked."""
+def test_check_graphon_symmetric():
+    """Test that the graphon is correctly checked for symmetry."""
     graphon = np.array([[0.8, 0.2], [0.7, 0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=0.5).check_graphon()
 
+
+def test_check_graphon_positive():
+    """Test that the graphon is positive."""
     graphon = np.array([[0.8, 0.2], [0.2, -0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=0.5).check_graphon()

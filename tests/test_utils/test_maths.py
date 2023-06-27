@@ -51,8 +51,8 @@ def test_diagonal_no_impact():
     assert ll == log_likelihood(probs, a + np.eye(n) * 10)
 
 
-def test_log_likelihood_raise() -> None:
-    """Check that the log-likelihood raises an error when the adjacency matrix is not symmetric."""
+def test_log_likelihood_probs_bigger_1() -> None:
+    """Check that the log-likelihood raises an error when the one of the probs are bigger than 1."""
     probs = np.array([[0.1, 0.2, 0.3], [0.2, 0.5, 1.45], [0.3, 1.45, 0]])
     A = np.array([[0, 1, 1], [1, 0, 0], [1, 0, 0]])
     with pytest.raises(ValueError):
