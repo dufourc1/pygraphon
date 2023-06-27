@@ -80,7 +80,7 @@ def test_smoothing_operator() -> None:
     labels = np.array([0, 1, 1, 0, 1, 0])
     hist = StepGraphon(theta, bandwidthHist=1 / 3)
 
-    assert (theta == hist.graphon * hist.initial_rho).all()
+    assert (theta == hist.get_theta()).all()
 
     flat_graphon = hist.graphon[np.triu_indices(3)]
     flat_areas = hist.areas[np.triu_indices(3)]
