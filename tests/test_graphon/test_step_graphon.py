@@ -144,3 +144,27 @@ def test_print_method(capfd):
     )
     theoretical_out += "[0.01 0.03 0.30 0.90]]\n\n [0.09 0.09 0.09 0.03] (size of the blocks)\n"
     assert out == theoretical_out
+
+
+def test_init() -> None:
+    """Test that the step graphon is correctly instantiated."""
+    graphon = np.array([[1.8, 0.2], [0.2, 0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=0.5)
+
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=1/3)
+
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=1.1)
+
+
+def test_check_graphon():
+    """Test that the graphon is correctly checked."""
+    graphon = np.array([[0.8, 0.2], [0.7, 0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=0.5).check_graphon()
+
+    graphon = np.array([[0.8, 0.2], [0.2, -0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=0.5).check_graphon()
