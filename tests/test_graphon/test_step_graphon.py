@@ -153,7 +153,7 @@ def test_init() -> None:
         StepGraphon(graphon=graphon, bandwidthHist=0.5)
 
     with pytest.raises(ValueError):
-        StepGraphon(graphon=graphon, bandwidthHist=1/3)
+        StepGraphon(graphon=graphon, bandwidthHist=1 / 3)
 
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=1.1)
