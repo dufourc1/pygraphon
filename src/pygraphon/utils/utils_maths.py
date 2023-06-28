@@ -67,11 +67,15 @@ def log_likelihood(probs: np.ndarray, A: np.ndarray) -> float:
     A : np.ndarray
         adjacency matrix of the graph
 
+    Raises
+    ------
+    ValueError
+        if the probability matrix contains values greater than 1
+
     Returns
     -------
     float
         log-likelihood of the graphon given the adjacency matrix
-
 
     .. note::
         Suppose :py:obj:`probs` and :py:obj:`A` are aligned, i.e. :py:obj:`probs[i,j]` is the probability
@@ -81,4 +85,6 @@ def log_likelihood(probs: np.ndarray, A: np.ndarray) -> float:
         This function assumes the graph is simple, i.e. only undirected edges and no self-loops.
         For this reason, only the upper triangular part of :py:obj:`probs` and :py:obj:`A` are considered.
     """
+    if np.any(np.triu(probs, k=1) > 1):
+        raise ValueError("The probability matrix cannot contain values greater than 1")
     return bernoulli.logpmf(np.triu(A, k=1), np.clip(np.triu(probs, k=1), EPS, 1 - EPS)).sum()

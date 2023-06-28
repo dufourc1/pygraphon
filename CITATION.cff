@@ -1,0 +1,21 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: PyGraphon
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Charles
+    family-names: Dufour
+  - given-names: Arthur
+    family-names: Verdeyme
+repository-code: 'https://github.com/dufourc1/pygraphon'
+abstract: ' PyGraphon is a Python library for estimating graphons. This library specializes in providing algorithms and tools for estimating graphons from observed data, making it easier to work with these objects in a practical setting.'
+keywords:
+  - graphon estimation
+  - graphon
+  - Exchangeable network
+license: MIT

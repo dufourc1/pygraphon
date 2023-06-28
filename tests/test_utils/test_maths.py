@@ -4,6 +4,7 @@
 from math import log
 
 import numpy as np
+import pytest
 
 from pygraphon.utils.utils_maths import EPS, log_likelihood
 
@@ -48,3 +49,11 @@ def test_diagonal_no_impact():
     ll = log_likelihood(probs, a)
     assert ll == log_likelihood(probs + np.eye(n) * 10, a)
     assert ll == log_likelihood(probs, a + np.eye(n) * 10)
+
+
+def test_log_likelihood_probs_bigger_1() -> None:
+    """Check that the log-likelihood raises an error when the one of the probs are bigger than 1."""
+    probs = np.array([[0, 0.2, 0.3], [0.2, 0, 1.45], [0.3, 1.45, 0]])
+    A = np.array([[0, 1, 1], [1, 0, 0], [1, 0, 0]])
+    with pytest.raises(ValueError):
+        log_likelihood(probs, A)

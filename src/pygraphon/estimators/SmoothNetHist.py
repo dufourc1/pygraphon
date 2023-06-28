@@ -6,6 +6,8 @@ from warnings import warn
 from loguru import logger
 
 import numpy as np
+from loguru import logger
+from scipy.special import comb
 from sklearn.cluster import KMeans
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
@@ -23,16 +25,6 @@ class SmoothNetHist(BaseEstimator):
     Args:
         bandwidth (float): bandwidth of the original non-smoothed :py:class:`~pygraphon.estimators.HistogramEstimator`
         graphon.
-
-    Functions:
-        _approximate_graphon_from_adjacency(): Estimate the graphon function from an adjacency matrix using Smoothing.
-        _first_approximate_graphon_from_adjacency(): First histogram fit of the graphon function.
-        _smoothing_histLC(): Smoothing the histogram using the theory of edge clustering.
-        _flat_to_tensor(): Convert a list of flat vector to a tensor, each slice representing a Pij matrix.
-        _from_graphon_to_adjacency(): Convert a graphon to a Pij matrix, given node assignments.
-        _select_best_graphon(): Select the best graphon from a tensor of Pij matrix, using BIC.
-        _log_likelihood(): Compute the log likelihood of a Pij matrix.
-        _bic(): Compute the BIC of a Pij matrix.
     """
 
     def __init__(self, bandwidth: Optional[float] = None) -> None:
@@ -42,6 +34,8 @@ class SmoothNetHist(BaseEstimator):
         self._num_par_nethist = -1
         self._num_par_smooth = -1
         self._bic_nethist = np.inf
+        logger.warning("toleration is set to 1e-4, arbitrary value, argue")
+        self._tolerance = 1e-4
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -52,6 +46,7 @@ class SmoothNetHist(BaseEstimator):
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
         use_default_bandwidth: bool = True,
+        progress_bar: bool = False,
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -74,6 +69,7 @@ class SmoothNetHist(BaseEstimator):
             maxNumIterations,
             past_non_improving,
             use_default_bandwidth,
+            progress_bar,
         )
 
         tensor_graphon, n_link_com = self._smoothing_histLC(
@@ -95,6 +91,7 @@ class SmoothNetHist(BaseEstimator):
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
         use_default_bandwidth: bool = False,
+        progress_bar: bool = False,
     ) -> Tuple[StepGraphon, Assignment]:
         """Estimate the graphon function f(x,y) from an adjacency matrix from a first histogram from [1].
 
@@ -114,7 +111,6 @@ class SmoothNetHist(BaseEstimator):
         ----------
             [1]: 2013 Sofia C. Olhede and Patrick J. Wolfe (arXiv:1312.5306)
         """
-        rho = edge_density(adjacencyMatrix)
         # ---------------------------------------------------------------------------------------------
         # This section is the same HistogramEstimator.py _approximate
         # network histogram approximation
@@ -131,12 +127,14 @@ class SmoothNetHist(BaseEstimator):
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
+            progress_bar=progress_bar,
         )
+
         bandwidthHist = h / adjacencyMatrix.shape[0]
         self._bic_nethist = bic(
             log_likelihood_val=assignment_nethist.log_likelihood,
             n=adjacencyMatrix.shape[0],
-            num_par=len(np.unique(assignment_nethist.theta)),
+            num_par=comb(assignment_nethist.theta.shape[0] + 1, 2),
         )
 
         # ---------------------------------------------------------------------------------------------
@@ -144,7 +142,6 @@ class SmoothNetHist(BaseEstimator):
         graphon_nethist = StepGraphon(
             assignment_nethist.theta,
             bandwidthHist=bandwidthHist,
-            initial_rho=rho,
         )
         return graphon_nethist, assignment_nethist
 
@@ -164,7 +161,7 @@ class SmoothNetHist(BaseEstimator):
             adjancency matrix of the graph
         number_link_communities : int, optional
             number of link communities to be obtained after smoothing, by default None.
-            will try all of them.
+            will try all of them up tp the maximum number of unique values im hist_approx.
 
         Returns
         -------
@@ -186,19 +183,20 @@ class SmoothNetHist(BaseEstimator):
         """
         # Flattening the graphon and the areas
         nrow_tile = hist_approx.graphon.shape[0]
-        flat_graphon = hist_approx.graphon[np.triu_indices(nrow_tile)]
+        flat_graphon = hist_approx.get_theta()[np.triu_indices(nrow_tile)]
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
 
         # Number of link communities and input check
-        self._num_par_nethist = len(np.unique(flat_graphon))
-        if number_link_communities is not None and number_link_communities > self._num_par_nethist:
+        self._num_par_nethist = comb(nrow_tile + 1, 2)
+        num_par_diff = len(np.unique(flat_graphon))
+        if number_link_communities is not None and number_link_communities > num_par_diff:
             raise ValueError(
                 f"The number of link communities {number_link_communities} is greater "
-                + f"than the number of clusters {self._num_par_nethist} in the histogram estimator"
+                + f"than the number of clusters {num_par_diff} in the histogram estimator"
             )
 
         clusters = (
-            list(range(1, self._num_par_nethist + 1))
+            list(range(1, num_par_diff + 1))
             if number_link_communities is None
             else [number_link_communities]
         )
@@ -254,7 +252,6 @@ class SmoothNetHist(BaseEstimator):
             init=method,
             n_init=10,
         ).fit(flat_graphon.reshape(-1, 1))
-
         return kmeans.labels_
 
     def _smoothing_operator(
@@ -331,7 +328,7 @@ class SmoothNetHist(BaseEstimator):
             StepGraphon(
                 graphon=sym_KM_smooth_g[i],
                 bandwidthHist=hist_approx.bandwidthHist,
-                initial_rho=None,
+                initial_rho=hist_approx.initial_rho,
             )
             for i in range(nclust_hist)
         ]
@@ -380,20 +377,22 @@ class SmoothNetHist(BaseEstimator):
             best_bic = np.inf
             best_graphon = tensor_graphon[0]
             best_pij = np.ones((n_nodes, n_nodes)) / 2
+            best_num_link = 0
             for i, graphon in enumerate(tensor_graphon):
                 pij = graphon._get_edge_probabilities(n=n_nodes, latentVarArray=latentVarArray)
                 log_likelihood_value = log_likelihood(pij, adjacencyMatrix)
                 logger.debug(f"Log likelihood for {n_link_com[i]} link communities: {log_likelihood_value}")
                 bic_candidate = bic(log_likelihood_value, n=n_nodes, num_par=n_link_com[i])
-                logger.debug(f"BIC for {n_link_com[i]} link communities: {bic_candidate}")
-                if bic_candidate < best_bic:
-                    logger.debug(f"New best BIC: {bic_candidate}, with {n_link_com[i]} link communities.")
+                improv = (best_bic - bic_candidate) / best_bic if best_bic != np.inf else 1
+                if improv >= self._tolerance and improv > 0:
                     best_bic = bic_candidate
+                    best_num_link = n_link_com[i]
                     best_graphon = graphon
                     best_pij = pij
                     self._num_par_smooth = n_link_com[i]
 
         self._bic = best_bic
+        logger.debug(f"Best BIC: {best_bic}, with {best_num_link} link communities.")
         return best_graphon, best_pij
 
     def get_bic(self) -> float:

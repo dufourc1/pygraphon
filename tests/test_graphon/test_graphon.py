@@ -60,10 +60,9 @@ def test_no_initial_rho_given():
         graphon = Graphon(lambda x, y: 0.5, initial_rho=-1)
 
 
-def test_raise_warning_incompatible_initial_rho():
+def test_incompatible_initial_rho():
     """Test that a warning is raised if the initial rho is not compatible."""
-    with pytest.warns(UserWarning):
-        graphon = Graphon(lambda x, y: 0.5, initial_rho=0.2)
+    graphon = Graphon(lambda x, y: 0.5, initial_rho=0.2)
     assert math.isclose(graphon.initial_rho, 0.5)
     P = graphon.get_edge_probabilities(n=20, wholeMatrix=False)
     assert np.all(P == 0.5)

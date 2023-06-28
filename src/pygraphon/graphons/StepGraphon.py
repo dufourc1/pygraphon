@@ -33,7 +33,12 @@ class StepGraphon(Graphon):
             raise ValueError("The bandwidth should be between 0 and 1.")
         self.bandwidthHist = bandwidthHist
         if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
+            raise ValueError("The graphon matrix should have size consistent with the bandwidth.")
+
+        if np.max(graphon) > 1 and initial_rho is None:
+            raise ValueError(
+                "The graphon matrix should be between 0 and 1 if no initial rho is given."
+            )
 
         self.areas = compute_areas_histogram(self.graphon, self.bandwidthHist)
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
@@ -49,6 +54,16 @@ class StepGraphon(Graphon):
         self.repr += "\n\n "
         self.repr += np.array2string(self.areas[0, :], precision=3, floatmode="maxprec_equal")
         self.repr += " (size of the blocks)"
+
+    def get_theta(self) -> np.ndarray:
+        """Return the theta matrix in [0,1]^KxK.
+
+        Returns
+        -------
+        np.ndarray
+            theta matrix
+        """
+        return self.graphon * self.initial_rho
 
     def graphon_function_builder(self) -> Callable:
         """Build the graphon function f(x,y).

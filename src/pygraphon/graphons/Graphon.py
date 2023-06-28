@@ -1,11 +1,11 @@
 """Graphon based on a continuous function."""
 import inspect
 import math
-import warnings
 from copy import deepcopy
 from typing import Callable, Optional
 
 import numpy as np
+from loguru import logger
 from scipy.integrate import dblquad, simpson
 
 from pygraphon.utils.utils_func import copy_func
@@ -76,11 +76,20 @@ class Graphon:
                 raise ValueError("Initial edge density must be in  ]0,1[")
 
             if scaled and not math.isclose(self.integral_value, 1):
+<<<<<<< HEAD
                 warnings.warn(
                     f"function provided does not integrate to 1, disregarding initial_rho ({initial_rho:.3f}), replacing with "
                     + f"integral_value {self.integral_value:.3f} of given function",
                     UserWarning,
                     stacklevel=2,
+=======
+                diff = abs(self.integral_value - initial_rho)
+                logger.warning(
+                    f"function provided does not integrate to 1, disregarding initial_rho {initial_rho:.3f},"
+                    + " replacing with "
+                    + f"integral_value {self.integral_value:.3f} of given function this may be due to numerical"
+                    + f" errors in the integration. Error is {diff:.3f}",
+>>>>>>> master
                 )
                 self.initial_rho = deepcopy(self.integral_value)
             else:
