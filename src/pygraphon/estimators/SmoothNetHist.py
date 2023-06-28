@@ -6,7 +6,6 @@ from warnings import warn
 from loguru import logger
 
 import numpy as np
-from loguru import logger
 from scipy.special import comb
 from sklearn.cluster import KMeans
 
@@ -381,7 +380,9 @@ class SmoothNetHist(BaseEstimator):
             for i, graphon in enumerate(tensor_graphon):
                 pij = graphon._get_edge_probabilities(n=n_nodes, latentVarArray=latentVarArray)
                 log_likelihood_value = log_likelihood(pij, adjacencyMatrix)
-                logger.debug(f"Log likelihood for {n_link_com[i]} link communities: {log_likelihood_value}")
+                logger.debug(
+                    f"Log likelihood for {n_link_com[i]} link communities: {log_likelihood_value}"
+                )
                 bic_candidate = bic(log_likelihood_value, n=n_nodes, num_par=n_link_com[i])
                 improv = (best_bic - bic_candidate) / best_bic if best_bic != np.inf else 1
                 if improv >= self._tolerance and improv > 0:

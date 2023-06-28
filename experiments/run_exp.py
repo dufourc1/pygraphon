@@ -22,6 +22,8 @@ from utils_data import (
 from utils_generators import AssociativeFullyRandom, AssociativeSimpleNonDiagonal, ER
 from pygraphon.norm import MseProbaEdge, MaeProbaEdge, AUCEdge, AUPRCEdge
 from typing import List, Optional
+from scipy.special import comb
+
 
 
 class TqdmToLogger(io.StringIO):
@@ -71,7 +73,10 @@ def main(
     norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
     norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
     # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
-    graphon_repr = f"sbm {len(np.unique(est.get_graphon().graphon))}" if isinstance(graphon, StepGraphon) else  graphon.repr 
+    if method == "SmoothNetHist":
+        graphon_repr = f"sbm {len(np.unique(est.get_graphon().graphon))}" if isinstance(graphon, StepGraphon) else  graphon.repr
+    if method == "HistogramEstimator":
+        graphon_repr = f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}" if isinstance(graphon, StepGraphon) else  graphon.repr
     if method == "SmoothNetHist":
         result = [
             method,
@@ -112,14 +117,18 @@ if __name__ == "__main__":
 
     n = 100
 
-    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
+    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "sbm_ssm":
         k_max = 2
         # theta init
-        theta_intra_min, theta_intra_max = 0.9, 0.9
-        theta_inter_min, theta_inter_max = 0, 0
+        theta_intra_min, theta_intra_max = 0.5, 0.7
+        theta_inter_min, theta_inter_max = 0.1, 0.4
+
+        # -----------------------------------
         # ----- If multiple repetitions -----
+        # -----------------------------------
         if mult_rep:
             # n init
             n_min, n_step = 50, 50
@@ -132,6 +141,7 @@ if __name__ == "__main__":
                 n_it=len(n_list) * len(k_list),
                 SBM_SSM=True,
             )
+            csv_gen_graphon(path="\sbm_ssm", file_name= f"_{folder_name}" + ".csv", n_graphons=len(n_list) * len(k_list))
             for i, k in enumerate(k_list):
                 theta = AssociativeFullyRandom(
                     K=k,
@@ -150,7 +160,15 @@ if __name__ == "__main__":
                         method="SmoothNetHist",
                         folder_name=folder_name,
                     )
-        # ----- If single repetition -----
+                    update_row(
+                folder_name="sbm_ssm",
+                file_name="comparison" + f"_{folder_name}",
+                new_row=result,
+                row_index = i * len(n_list) + j + 1,
+            )
+        # ------------------------------------
+        # ------- If single repetition -------
+        # ------------------------------------
         else:
             csv_gen_graphon(path = "results\sbm_ssm", file_name="comparison" + f"_{folder_name}" + ".csv", n_graphons=k_max)
             theta = AssociativeFullyRandom(
@@ -174,7 +192,9 @@ if __name__ == "__main__":
                 row_index=1,
             )
 
-    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    # If generate with other graphons
+    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     graphons = []
     if folder_name == "comparison":
         method = ["SmoothNetHist", "SAS", "UVST", "Completion"]
@@ -193,5 +213,5 @@ if __name__ == "__main__":
                     path="\comparison",
                     file_name="comparison" + f"_{folder_name}" + ".csv",
                     row=result,
-                    row_index=1+i * len(graphons) + j,
+                    row_index=i * len(graphons) + j + 1,
                 )
