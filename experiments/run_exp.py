@@ -1,10 +1,7 @@
-import io
-import logging
 import pickle
 
 import numpy as np
 from loguru import logger
-from tqdm import tqdm
 
 # import os
 # import shutil
@@ -12,40 +9,15 @@ from pygraphon.graphons import Graphon
 from pygraphon.graphons import StepGraphon
 from pygraphon.graphons import common_graphons
 from pygraphon import estimators
-from pygraphon.estimators import USVT, Completion, SAS, SmoothNetHist
 from utils_data import (
-    parser_argument,
-    clean_temp_folder,
     csv_gen_graphon,
     csv_store_StepGraphon_parameters,
     update_row,
 )
-from utils_generators import AssociativeFullyRandom, AssociativeSimpleNonDiagonal, ER
+from utils_generators import AssociativeFullyRandom
 from pygraphon.norm import MseProbaEdge, MaeProbaEdge, AUCEdge, AUPRCEdge
-from typing import List, Optional
+from typing import Optional
 from scipy.special import comb
-
-
-class TqdmToLogger(io.StringIO):
-    """
-    Output stream for TQDM which will output to logger module instead of
-    the StdOut.
-    """
-
-    logger = None
-    level = None
-    buf = ""
-
-    def __init__(self, logger, level=None):
-        super(TqdmToLogger, self).__init__()
-        self.logger = logger
-        self.level = level or logging.INFO
-
-    def write(self, buf):
-        self.buf = buf.strip("\r\n\t ")
-
-    def flush(self):
-        self.logger.log(self.level, self.buf)
 
 
 def main(
@@ -75,11 +47,15 @@ def main(
     # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
     if method == "SmoothNetHist":
         graphon_repr = (
-            f"sbm {len(np.unique(est.get_graphon().graphon))}" if isinstance(graphon, StepGraphon) else graphon.repr
+            f"sbm {len(np.unique(est.get_graphon().graphon))}"
+            if isinstance(graphon, StepGraphon)
+            else graphon.repr
         )
     if method == "HistogramEstimator":
         graphon_repr = (
-            f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}" if isinstance(graphon, StepGraphon) else graphon.repr
+            f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}"
+            if isinstance(graphon, StepGraphon)
+            else graphon.repr
         )
     if method == "SmoothNetHist":
         result = [
@@ -110,18 +86,11 @@ def main(
 
 
 if __name__ == "__main__":
-    # init logger because Charles corrupted me
-    # logger.remove()
-    # logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-    # logger.add("log_exp.txt", level="INFO", mode="w")
-
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_rep = True
-    # parser_argument(folder_name)
 
     n = 100
-    n += 1
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
@@ -138,7 +107,7 @@ if __name__ == "__main__":
         if mult_rep:
             # n init
             n_min, n_step = 50, 50
-            n_list = np.arange(n_min, n, n_step)
+            n_list = np.arange(n_min, n+1, n_step)
             # k init
             k_list = list(range(2, k_max + 1))
             csv_store_StepGraphon_parameters(
@@ -148,7 +117,9 @@ if __name__ == "__main__":
                 SBM_SSM=True,
             )
             csv_gen_graphon(
-                path="results/sbm_ssm", file_name=f"_{folder_name}" + ".csv", n_graphons=len(n_list) * len(k_list)
+                path="results/sbm_ssm",
+                file_name=f"_{folder_name}" + ".csv",
+                n_graphons=len(n_list) * len(k_list),
             )
             for i, k in enumerate(k_list):
                 theta = AssociativeFullyRandom(
@@ -185,7 +156,9 @@ if __name__ == "__main__":
         # ------------------------------------
         else:
             csv_gen_graphon(
-                path="results/sbm_ssm", file_name="comparison" + f"_{folder_name}" + ".csv", n_graphons=k_max
+                path="results/sbm_ssm",
+                file_name="comparison" + f"_{folder_name}" + ".csv",
+                n_graphons=k_max,
             )
             theta = AssociativeFullyRandom(
                 K=k_max,
@@ -213,19 +186,17 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
         graphons = []
-        method = ["SAS", "USVT", "Completion"]#"SmoothNetHist", "HistogramEstimator", 
+        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "Completion"]
         for g in common_graphons.values():
-            print(g)
             graphons.append(g)
         csv_gen_graphon(
-                    path="results/usual_graphon",
-                    file_name="method_comp" + f"_{folder_name}" + ".csv",
-                    n_graphons=len(graphons) * len(method),
-                )
+            path="results/usual_graphon",
+            file_name="method_comp" + f"_{folder_name}" + ".csv",
+            n_graphons=len(graphons) * len(method),
+        )
 
-        for i, m in enumerate(method):
-            print(m)
-            for j, g in enumerate(graphons):
+        for j, g in enumerate(graphons):
+            for i, m in enumerate(method):
                 result = main(
                     adjacency_matrix=g.draw(n=n, exchangeable=False),
                     graphon=g,
