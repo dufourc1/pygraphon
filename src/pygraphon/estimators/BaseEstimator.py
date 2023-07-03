@@ -74,6 +74,8 @@ class BaseEstimator:
             self.graphon,
             self.edge_connectivity,
         ) = self._approximate_graphon_from_adjacency(adjacency_matrix, *args, **kwargs)
+        if self.edge_connectivity is not None:
+            self.edge_connectivity[np.diag_indices_from(self.edge_connectivity)] = 0
         self.fitted = True
 
     @abstractclassmethod
