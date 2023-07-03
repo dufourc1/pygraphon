@@ -94,6 +94,7 @@ def main(
             est.get_ratio_par(),
         ]
     else:
+        graphon_repr = graphon.repr if graphon is not None else None
         result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, None, None]
     # ----------------------
     logger.info("Computing done")
@@ -210,10 +211,11 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with other graphons
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    graphons = []
     if folder_name == "usual_graphon":
+        graphons = []
         method = ["SAS", "USVT", "Completion"]#"SmoothNetHist", "HistogramEstimator", 
         for g in common_graphons.values():
+            print(g)
             graphons.append(g)
         csv_gen_graphon(
                     path="results/usual_graphon",
