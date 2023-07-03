@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 from warnings import warn
-from loguru import logger
 
 import numpy as np
+from loguru import logger
 from scipy.special import comb
 from sklearn.cluster import KMeans
 

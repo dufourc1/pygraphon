@@ -5,8 +5,9 @@ import pickle
 import numpy as np
 from loguru import logger
 from tqdm import tqdm
-import os
-import shutil
+
+# import os
+# import shutil
 from pygraphon.graphons import Graphon
 from pygraphon.graphons import StepGraphon
 from pygraphon.graphons import common_graphons
@@ -23,7 +24,6 @@ from utils_generators import AssociativeFullyRandom, AssociativeSimpleNonDiagona
 from pygraphon.norm import MseProbaEdge, MaeProbaEdge, AUCEdge, AUPRCEdge
 from typing import List, Optional
 from scipy.special import comb
-
 
 
 class TqdmToLogger(io.StringIO):
@@ -74,9 +74,13 @@ def main(
     norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
     # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
     if method == "SmoothNetHist":
-        graphon_repr = f"sbm {len(np.unique(est.get_graphon().graphon))}" if isinstance(graphon, StepGraphon) else  graphon.repr
+        graphon_repr = (
+            f"sbm {len(np.unique(est.get_graphon().graphon))}" if isinstance(graphon, StepGraphon) else graphon.repr
+        )
     if method == "HistogramEstimator":
-        graphon_repr = f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}" if isinstance(graphon, StepGraphon) else  graphon.repr
+        graphon_repr = (
+            f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}" if isinstance(graphon, StepGraphon) else graphon.repr
+        )
     if method == "SmoothNetHist":
         result = [
             method,
@@ -97,7 +101,7 @@ def main(
         pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     logger.info(f"Cleaning {folder_name}/")
-    #clean_temp_folder(folder_name)
+    # clean_temp_folder(folder_name)
 
     logger.info("Results saved, bye")
 
@@ -106,16 +110,17 @@ def main(
 
 if __name__ == "__main__":
     # init logger because Charles corrupted me
-    #logger.remove()
-    #logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-    #logger.add("log_exp.txt", level="INFO", mode="w")
+    # logger.remove()
+    # logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
+    # logger.add("log_exp.txt", level="INFO", mode="w")
 
     # sparse regime import and init
-    folder_name = "sbm_ssm"
-    mult_rep = False
-    #parser_argument(folder_name)
+    folder_name = "usual_graphon"
+    mult_rep = True
+    # parser_argument(folder_name)
 
     n = 100
+    n += 1
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
@@ -136,12 +141,14 @@ if __name__ == "__main__":
             # k init
             k_list = list(range(2, k_max + 1))
             csv_store_StepGraphon_parameters(
-                path="\sbm_ssm",
+                path="results/sbm_ssm",
                 file_name="parameters" + f"_{folder_name}" + ".csv",
                 n_it=len(n_list) * len(k_list),
                 SBM_SSM=True,
             )
-            csv_gen_graphon(path="\sbm_ssm", file_name= f"_{folder_name}" + ".csv", n_graphons=len(n_list) * len(k_list))
+            csv_gen_graphon(
+                path="results/sbm_ssm", file_name=f"_{folder_name}" + ".csv", n_graphons=len(n_list) * len(k_list)
+            )
             for i, k in enumerate(k_list):
                 theta = AssociativeFullyRandom(
                     K=k,
@@ -150,8 +157,14 @@ if __name__ == "__main__":
                     min_outside_classes=theta_inter_min,
                     max_outside_classes=theta_inter_max,
                 )
+                update_row(
+                    folder_name="sbm_ssm",
+                    file_name="parameters" + f"_{folder_name}",
+                    new_row=theta.Theta,
+                    row_index=i + 1,
+                )
                 graphon = StepGraphon(
-                    theta.Theta, bandwidthHist=1 / k_max
+                    theta.Theta, bandwidthHist=1 / k
                 )  # can add arg repr to specify the name as a str (default is "Step Graphon")
                 for j, n in enumerate(n_list):
                     result = main(
@@ -161,16 +174,18 @@ if __name__ == "__main__":
                         folder_name=folder_name,
                     )
                     update_row(
-                folder_name="sbm_ssm",
-                file_name="comparison" + f"_{folder_name}",
-                new_row=result,
-                row_index = i * len(n_list) + j + 1,
-            )
+                        folder_name="sbm_ssm",
+                        file_name=f"_{folder_name}",
+                        new_row=result,
+                        row_index=i * len(n_list) + j + 1,
+                    )
         # ------------------------------------
         # ------- If single repetition -------
         # ------------------------------------
         else:
-            csv_gen_graphon(path = "results\sbm_ssm", file_name="comparison" + f"_{folder_name}" + ".csv", n_graphons=k_max)
+            csv_gen_graphon(
+                path="results/sbm_ssm", file_name="comparison" + f"_{folder_name}" + ".csv", n_graphons=k_max
+            )
             theta = AssociativeFullyRandom(
                 K=k_max,
                 min_inside_classes=theta_intra_min,
@@ -196,12 +211,18 @@ if __name__ == "__main__":
     # If generate with other graphons
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     graphons = []
-    if folder_name == "comparison":
-        method = ["SmoothNetHist", "SAS", "UVST", "Completion"]
+    if folder_name == "usual_graphon":
+        method = ["SAS", "USVT", "Completion"]#"SmoothNetHist", "HistogramEstimator", 
         for g in common_graphons.values():
             graphons.append(g)
+        csv_gen_graphon(
+                    path="results/usual_graphon",
+                    file_name="method_comp" + f"_{folder_name}" + ".csv",
+                    n_graphons=len(graphons) * len(method),
+                )
 
         for i, m in enumerate(method):
+            print(m)
             for j, g in enumerate(graphons):
                 result = main(
                     adjacency_matrix=g.draw(n=n, exchangeable=False),
@@ -210,8 +231,8 @@ if __name__ == "__main__":
                     folder_name=folder_name,
                 )
                 update_row(
-                    path="\comparison",
-                    file_name="comparison" + f"_{folder_name}" + ".csv",
-                    row=result,
+                    folder_name="usual_graphon",
+                    file_name="method_comp" + f"_{folder_name}",
+                    new_row=result,
                     row_index=i * len(graphons) + j + 1,
                 )

@@ -118,9 +118,7 @@ def plot_noisy_graph(
     g_to_plot = (
         G.copy()
         if with_noisy_nodes
-        else G.subgraph(
-            [n for n, d in G.nodes(data=True) if not d["noisy_node_mask"]]
-        ).copy()
+        else G.subgraph([n for n, d in G.nodes(data=True) if not d["noisy_node_mask"]]).copy()
     )
 
     if drop_isolated_nodes:
@@ -134,46 +132,28 @@ def plot_noisy_graph(
 
     options_node = {
         "node_size": kwargs.pop("node_size", 80),
-        "node_color": list(
-            nx.get_node_attributes(
-                g_to_plot, f"signal_{index_node_signal}"
-            ).values()
-        )
+        "node_color": list(nx.get_node_attributes(g_to_plot, f"signal_{index_node_signal}").values())
         if index_node_signal is not None
         else "blue",
-        "alpha": [
-            alpha_noisy_nodes if d["noisy_node_mask"] else 1
-            for _, d in g_to_plot.nodes(data=True)
-        ]
+        "alpha": [alpha_noisy_nodes if d["noisy_node_mask"] else 1 for _, d in g_to_plot.nodes(data=True)]
         if with_noisy_nodes
         else None,
         "cmap": node_cmap if index_node_signal is not None else None,
         "edgecolors": [
-            node_border_noisy if d["noisy_node_mask"] else node_border
-            for _, d in g_to_plot.nodes(data=True)
+            node_border_noisy if d["noisy_node_mask"] else node_border for _, d in g_to_plot.nodes(data=True)
         ],
     }
 
     options_edges = {
         "width": 2,
-        "edge_color": list(
-            nx.get_edge_attributes(
-                g_to_plot, f"signal_{index_edge_signal}"
-            ).values()
-        )
+        "edge_color": list(nx.get_edge_attributes(g_to_plot, f"signal_{index_edge_signal}").values())
         if index_edge_signal is not None
         else "black",
         "edge_cmap": edge_cmap if index_edge_signal is not None else None,
-        "alpha": [
-            alpha_noisy_edges if d["noisy_edge_mask"] else 1
-            for _, _, d in g_to_plot.edges(data=True)
-        ]
+        "alpha": [alpha_noisy_edges if d["noisy_edge_mask"] else 1 for _, _, d in g_to_plot.edges(data=True)]
         if with_noisy_nodes
         else None,
-        "style": [
-            "dashed" if d["noisy_edge_mask"] else "solid"
-            for _, _, d in g_to_plot.edges(data=True)
-        ]
+        "style": ["dashed" if d["noisy_edge_mask"] else "solid" for _, _, d in g_to_plot.edges(data=True)]
         if with_noisy_nodes
         else "solid",
     }
@@ -193,9 +173,7 @@ def plot_noisy_graph(
                 vmax_edge = np.max(options_edges["edge_color"])
     if index_node_signal is not None and index_edge_signal is not None:
         if same_clim:
-            vmin_node, vmax_node = min(vmin_node, vmin_edge), max(
-                vmax_node, vmax_edge
-            )
+            vmin_node, vmax_node = min(vmin_node, vmin_edge), max(vmax_node, vmax_edge)
             vmin_edge, vmax_edge = vmin_node, vmax_node
     options_node["vmin"] = vmin_node
     options_node["vmax"] = vmax_node
@@ -262,14 +240,10 @@ def plot_noisy_graph(
     return fig, ax
 
 
-def _fig_with_2_colorbar_bottom(
-    figsize=(6.4, 4.8), fig=None, subplot_spec=None
-):
+def _fig_with_2_colorbar_bottom(figsize=(6.4, 4.8), fig=None, subplot_spec=None):
     if subplot_spec is None:
         fig = plt.figure(constrained_layout=True, figsize=figsize)
-        gs = fig.add_gridspec(
-            2, 3, height_ratios=[1, 0.05], width_ratios=[1, 0.2, 1]
-        )
+        gs = fig.add_gridspec(2, 3, height_ratios=[1, 0.05], width_ratios=[1, 0.2, 1])
     else:
         if fig is None:
             fig = plt.gcf()
