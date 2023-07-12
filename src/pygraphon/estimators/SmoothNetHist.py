@@ -35,6 +35,7 @@ class SmoothNetHist(BaseEstimator):
         self._bic_nethist = np.inf
         logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-4
+        self._first_fit_graphon = None
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -70,6 +71,7 @@ class SmoothNetHist(BaseEstimator):
             use_default_bandwidth,
             progress_bar,
         )
+        self._first_fit_graphon = first_fit_graphon
 
         tensor_graphon, n_link_com = self._smoothing_histLC(
             first_fit_graphon, adjacencyMatrix, number_link_communities
