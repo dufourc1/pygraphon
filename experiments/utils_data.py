@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-from loguru import logger
+# from loguru
 import csv
 from typing import Optional
 import shutil
@@ -21,8 +21,8 @@ def parser_argument(folder_name: str) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder_name", default=folder_name)
     args = parser.parse_args()
-    logger.info(args.regime)
-    logger.info(type(args.regime))
+    # logger.info(args.regime)
+    # logger.info(type(args.regime))
 
 
 def csv_gen_graphon(
@@ -71,7 +71,7 @@ def csv_gen_graphon(
         for _ in range(n_graphons):
             writer.writerow([])
 
-    logger.debug(f"Empty CSV file '{path_to_file}' with {n_graphons} lines created.")
+    # logger.debug(f"Empty CSV file '{path_to_file}' with {n_graphons} lines created.")
 
 
 def csv_store_StepGraphon_parameters(
@@ -112,7 +112,7 @@ def csv_store_StepGraphon_parameters(
         for _ in range(n_it):
             writer.writerow([])
 
-    logger.debug(f"Empty CSV file '{path_to_file}' with {n_it} lines created.")
+    # logger.debug(f"Empty CSV file '{path_to_file}' with {n_it} lines created.")
 
 
 def update_row(file_name: str, folder_name: str, row_index: int, new_row: list) -> None:
@@ -153,3 +153,29 @@ def clean_temp_folder(folder_name: str) -> None:
                     shutil.rmtree(file_path)
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
+
+
+def get_result_with_std(list_of_results: list) -> list:
+    """Computes the mean and the standard deviation of a list of results.
+    Creates a list of strings with the mean and the standard deviation.
+
+    Parameters
+    ----------
+    list_of_results : list
+        list of ndarray of results
+
+    Returns
+    -------
+    list
+        mean and standard deviation
+    """
+    result = []
+    result.append(list_of_results[0][0])
+    result.append(list_of_results[0][1])
+    selected_elements = [sublist[2:] for sublist in list_of_results]
+
+    result_mean = np.mean(selected_elements, axis=0)
+    result_stds = np.std(selected_elements, axis=0)
+    for mean, std in zip(result_mean, result_stds):
+        result.append("{:.5f} +- {:.5f}".format(mean, std))
+    return result
