@@ -1,7 +1,7 @@
 import pickle
 
 import numpy as np
-from loguru import logger
+# from loguru
 
 # import os
 # import shutil
@@ -13,6 +13,7 @@ from utils_data import (
     csv_gen_graphon,
     csv_store_StepGraphon_parameters,
     update_row,
+    get_result_with_std,
 )
 from utils_generators import AssociativeFullyRandom
 from pygraphon.norm import MseProbaEdge, MaeProbaEdge, AUCEdge, AUPRCEdge
@@ -26,7 +27,7 @@ def main(
     method: str,
     folder_name: str,
 ):
-    logger.info("Starting experiment")
+    # logger.info("Starting experiment")
     # Initialise experiments
     # ----------------------
     method_est = getattr(estimators, method)
@@ -73,14 +74,14 @@ def main(
         graphon_repr = graphon.repr if graphon is not None else None
         result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, None, None]
     # ----------------------
-    logger.info("Computing done")
+    # logger.info("Computing done")
     with open("results" + f"{folder_name}.pkl", "wb") as f:
         pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    logger.info(f"Cleaning {folder_name}/")
+    # logger.info(f"Cleaning {folder_name}/")
     # clean_temp_folder(folder_name)
 
-    logger.info("Results saved, bye")
+    # logger.info("Results saved, bye")
 
     return result
 
@@ -88,7 +89,8 @@ def main(
 if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
-    mult_rep = True
+    mult_par = True
+    mult_rep = 3
 
     n = 100
 
@@ -104,7 +106,7 @@ if __name__ == "__main__":
         # -----------------------------------
         # ----- If multiple repetitions -----
         # -----------------------------------
-        if mult_rep:
+        if mult_par:
             # n init
             n_min, n_step = 50, 50
             n_list = np.arange(n_min, n+1, n_step)
@@ -118,8 +120,9 @@ if __name__ == "__main__":
             )
             csv_gen_graphon(
                 path="results/sbm_ssm",
-                file_name=f"_{folder_name}" + ".csv",
+                file_name=f"mult_{folder_name}" + ".csv",
                 n_graphons=len(n_list) * len(k_list),
+                smoothnethist_par=True,
             )
             for i, k in enumerate(k_list):
                 theta = AssociativeFullyRandom(
@@ -138,17 +141,20 @@ if __name__ == "__main__":
                 graphon = StepGraphon(
                     theta.Theta, bandwidthHist=1 / k
                 )  # can add arg repr to specify the name as a str (default is "Step Graphon")
+
                 for j, n in enumerate(n_list):
-                    result = main(
-                        adjacency_matrix=graphon.draw(n=n, exchangeable=False),
-                        graphon=graphon,
-                        method="SmoothNetHist",
-                        folder_name=folder_name,
-                    )
+                    result = []
+                    for r in range(mult_rep):
+                        result.append(main(
+                            adjacency_matrix=graphon.draw(n=n, exchangeable=False),
+                            graphon=graphon,
+                            method="SmoothNetHist",
+                            folder_name=folder_name,
+                        ))
                     update_row(
                         folder_name="sbm_ssm",
                         file_name=f"_{folder_name}",
-                        new_row=result,
+                        new_row=get_result_with_std(result),
                         row_index=i * len(n_list) + j + 1,
                     )
         # ------------------------------------
@@ -159,6 +165,7 @@ if __name__ == "__main__":
                 path="results/sbm_ssm",
                 file_name="comparison" + f"_{folder_name}" + ".csv",
                 n_graphons=k_max,
+                smoothnethist_par=True,
             )
             theta = AssociativeFullyRandom(
                 K=k_max,
@@ -168,16 +175,18 @@ if __name__ == "__main__":
                 max_outside_classes=theta_inter_max,
             )
             graphon = StepGraphon(theta.Theta, bandwidthHist=1 / k_max)
-            result = main(
-                adjacency_matrix=graphon.draw(n=n, exchangeable=False),
-                graphon=graphon,
-                method="SmoothNetHist",
-                folder_name=folder_name,
-            )
+            result = []
+            for r in range(mult_rep):
+                result.append(main(
+                    adjacency_matrix=graphon.draw(n=n, exchangeable=False),
+                    graphon=graphon,
+                    method="SmoothNetHist",
+                    folder_name=folder_name,
+                ))
             update_row(
                 folder_name="sbm_ssm",
                 file_name="comparison" + f"_{folder_name}",
-                new_row=result,
+                new_row=get_result_with_std(result),
                 row_index=1,
             )
 
@@ -193,19 +202,22 @@ if __name__ == "__main__":
             path="results/usual_graphon",
             file_name="method_comp" + f"_{folder_name}" + ".csv",
             n_graphons=len(graphons) * len(method),
+            smoothnethist_par=True,
         )
 
         for j, g in enumerate(graphons):
             for i, m in enumerate(method):
-                result = main(
-                    adjacency_matrix=g.draw(n=n, exchangeable=False),
-                    graphon=g,
-                    method=m,
-                    folder_name=folder_name,
-                )
+                result = []
+                for r in range(mult_rep):
+                    result.append(main(
+                        adjacency_matrix=g.draw(n=n, exchangeable=False),
+                        graphon=g,
+                        method=m,
+                        folder_name=folder_name,
+                    ))
                 update_row(
                     folder_name="usual_graphon",
                     file_name="method_comp" + f"_{folder_name}",
-                    new_row=result,
+                    new_row=get_result_with_std(result),
                     row_index=i * len(graphons) + j + 1,
                 )
