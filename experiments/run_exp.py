@@ -72,7 +72,7 @@ def main(
         ]
     else:
         graphon_repr = graphon.repr if graphon is not None else None
-        result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, None, None]
+        result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
     # ----------------------
     # logger.info("Computing done")
     with open("results" + f"{folder_name}.pkl", "wb") as f:
@@ -206,7 +206,9 @@ if __name__ == "__main__":
         )
 
         for j, g in enumerate(graphons):
+            print(g)
             for i, m in enumerate(method):
+                print(m)
                 result = []
                 for r in range(mult_rep):
                     result.append(main(
