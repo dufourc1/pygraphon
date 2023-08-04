@@ -36,9 +36,13 @@ class Completion(BaseEstimator):
         np.clip(P_hat, 0, 1, out=P_hat)
 
         if not np.allclose(P_hat, P_hat.T):
-            logger.warning(f"P_hat is not symmetric on  {np.where(P_hat != P_hat.T)[0].shape} indices")
+            logger.warning(
+                f"P_hat is not symmetric on  {np.where(P_hat != P_hat.T)[0].shape} indices"
+            )
             P_hat_new = (P_hat + P_hat.T) / 2
-            logger.debug(f"mean of absolute difference with corrected P_hat {np.abs(P_hat - P_hat_new).mean()}")
+            logger.debug(
+                f"mean of absolute difference with corrected P_hat {np.abs(P_hat - P_hat_new).mean()}"
+            )
             P_hat = P_hat_new
 
         graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])

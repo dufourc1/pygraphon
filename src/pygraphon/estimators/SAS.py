@@ -105,7 +105,7 @@ class SAS(BaseEstimator):
             if self.h is None:
                 h = int(np.log(n))
             else:
-                if type(self.h) == float:
+                if isinstance(self.h, float):
                     h = int(self.h * n)
                 else:
                     h = self.h
