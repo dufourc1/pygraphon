@@ -1,12 +1,16 @@
 """Test matrix completion estimator."""
 
+import pytest
 import numpy as np
 from pygraphon.estimators import Completion
-from pygraphon.graphons import graphon_product
+from pygraphon.graphons import common_graphons
 
 
-def test_product_graphon():
+@pytest.mark.parametrize("graphon", common_graphons.values())
+@pytest.mark.parametrize("n", [33, 100])
+@pytest.mark.parametrize("seed", [0, 1, 2])
+def test_product_graphon(graphon, n, seed):
+    np.random.seed(seed)
     estimator = Completion()
-    n = 1000
-    g = graphon_product.draw(n)
+    g = graphon.draw(n)
     estimator.fit(g)
