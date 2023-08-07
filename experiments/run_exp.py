@@ -91,7 +91,7 @@ if __name__ == "__main__":
     folder_name = "usual_graphon"
     mult_par = True
     mult_rep = 3
-    n_min, n_max, n_step = 100, 300, 50
+    n_min, n_max, n_step = 100, 2000, 50
     n_list = np.arange(n_min, n_max+1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -201,12 +201,9 @@ if __name__ == "__main__":
             n_graphons=len(graphons) * len(method) * len(n_list)+1,
             smoothnethist_par=True,
         )
-        print(len(graphons) * len(method) * len(n_list)+1)
         for j, g in enumerate(graphons):
             for k, n in enumerate(n_list):
-                print(g)
                 for i, m in enumerate(method):
-                    print(m)
                     result = []
                     for r in range(mult_rep):
                         result.append(main(
@@ -215,8 +212,6 @@ if __name__ == "__main__":
                             method=m,
                             folder_name=folder_name,
                         ))
-                    print(k * len(graphons) + i + 1 + j * len(graphons) * len(method))
-
                     update_row(
                         folder_name="usual_graphon",
                         file_name="method_comp" + f"_{folder_name}",
