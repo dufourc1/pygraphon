@@ -91,14 +91,14 @@ if __name__ == "__main__":
     folder_name = "usual_graphon"
     mult_par = True
     mult_rep = 3
-
-    n = 100
+    n_min, n_max, n_step = 100, 300, 50
+    n_list = np.arange(n_min, n_max+1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "sbm_ssm":
-        k_max = 2
+        k_max = 8
         # theta init
         theta_intra_min, theta_intra_max = 0.5, 0.7
         theta_inter_min, theta_inter_max = 0.1, 0.4
@@ -107,9 +107,6 @@ if __name__ == "__main__":
         # ----- If multiple repetitions -----
         # -----------------------------------
         if mult_par:
-            # n init
-            n_min, n_step = 50, 50
-            n_list = np.arange(n_min, n+1, n_step)
             # k init
             k_list = list(range(2, k_max + 1))
             csv_store_StepGraphon_parameters(
@@ -195,31 +192,34 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
         graphons = []
-        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "Completion"]
+        method = ["SAS", "USVT"]  # ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth"]
         for g in common_graphons.values():
             graphons.append(g)
         csv_gen_graphon(
             path="results/usual_graphon",
             file_name="method_comp" + f"_{folder_name}" + ".csv",
-            n_graphons=len(graphons) * len(method),
+            n_graphons=len(graphons) * len(method) * len(n_list)+1,
             smoothnethist_par=True,
         )
-
+        print(len(graphons) * len(method) * len(n_list)+1)
         for j, g in enumerate(graphons):
-            print(g)
-            for i, m in enumerate(method):
-                print(m)
-                result = []
-                for r in range(mult_rep):
-                    result.append(main(
-                        adjacency_matrix=g.draw(n=n, exchangeable=False),
-                        graphon=g,
-                        method=m,
-                        folder_name=folder_name,
-                    ))
-                update_row(
-                    folder_name="usual_graphon",
-                    file_name="method_comp" + f"_{folder_name}",
-                    new_row=get_result_with_std(result),
-                    row_index=i * len(graphons) + j + 1,
-                )
+            for k, n in enumerate(n_list):
+                print(g)
+                for i, m in enumerate(method):
+                    print(m)
+                    result = []
+                    for r in range(mult_rep):
+                        result.append(main(
+                            adjacency_matrix=g.draw(n=n, exchangeable=False),
+                            graphon=g,
+                            method=m,
+                            folder_name=folder_name,
+                        ))
+                    print(k * len(graphons) + i + 1 + j * len(graphons) * len(method))
+
+                    update_row(
+                        folder_name="usual_graphon",
+                        file_name="method_comp" + f"_{folder_name}",
+                        new_row=get_result_with_std(result),
+                        row_index=k * len(method) + i + 1 + j * len(n_list) * len(method),
+                    )
