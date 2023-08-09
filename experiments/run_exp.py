@@ -25,8 +25,10 @@ from scipy.special import comb
 def setup_logger_file(folder_name: str):
     logger.remove()
     logger.enable("pygraphon")
-    logger.add(os.path.join(folder_name, "log_exp.txt"), level="TRACE", mode="w", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
-    logger.add(os.path.join(folder_name, "log_errors.txt"), level="CRITICAL", mode="w", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
+    logger.add(os.path.join(folder_name, "log_exp.txt"), level="TRACE", mode="w",
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
+    logger.add(os.path.join(folder_name, "log_errors.txt"), level="CRITICAL", mode="w",
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
     logger.info("Logger set up")
 
 

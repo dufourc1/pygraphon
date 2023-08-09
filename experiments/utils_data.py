@@ -1,4 +1,3 @@
-import argparse
 import numpy as np
 # from loguru
 import csv
@@ -8,21 +7,6 @@ import os
 
 
 THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-
-
-def parser_argument(folder_name: str) -> None:
-    """Gives the possibility to run the experiment from the command line, changing
-
-    Parameters
-    ----------
-    folder_name : str
-        folder to save the results
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--folder_name", default=folder_name)
-    args = parser.parse_args()
-    # logger.info(args.regime)
-    # logger.info(type(args.regime))
 
 
 def csv_gen_graphon(
@@ -45,20 +29,21 @@ def csv_gen_graphon(
     if not file_name.endswith(".csv"):
         file_name = file_name + ".csv"
     path_to_file = os.path.join(THIS_FOLDER, path, file_name)
-    if smoothnethist_par:
-        column_names = [
+    column_names = [
             "Method",
             "Type of Graphon",
             "n",
             "MSE",
+            "std(MSE)",
             "MAE",
+            "std(MAE)",
             "AUC",
+            "std(AUC)",
             "AUPRC",
+            "std(AUPRC)",
             "BIC",
-            "RatioPar",
+            "RatioPar"
         ]
-    else:
-        column_names = ["Method", "Type of Graphon", "n", "MSE", "MAE", "AUC", "AUPRC"]
 
     # Write the column names to the CSV file
     with open(path_to_file, "w", newline="") as csvfile:
@@ -177,5 +162,6 @@ def get_result_with_std(list_of_results: list) -> list:
     result_mean = np.mean(selected_elements, axis=0)
     result_stds = np.std(selected_elements, axis=0)
     for mean, std in zip(result_mean, result_stds):
-        result.append("{:.5f} +- {:.5f}".format(mean, std))
+        result.append(mean)
+        result.append(std)
     return result
