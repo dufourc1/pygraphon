@@ -1,9 +1,10 @@
 import pickle
 
 import numpy as np
-# from loguru
+from loguru import logger
+from tqdm import tqdm
 
-# import os
+import os
 # import shutil
 from pygraphon.graphons import Graphon
 from pygraphon.graphons import StepGraphon
@@ -21,58 +22,70 @@ from typing import Optional
 from scipy.special import comb
 
 
+def setup_logger_file(folder_name: str):
+    logger.remove()
+    logger.enable("pygraphon")
+    logger.add(os.path.join(folder_name, "log_exp.txt"), level="TRACE", mode="w", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
+    logger.add(os.path.join(folder_name, "log_errors.txt"), level="CRITICAL", mode="w", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
+    logger.info("Logger set up")
+
+
 def main(
     adjacency_matrix: np.ndarray,
     graphon: Optional[Graphon],
     method: str,
     folder_name: str,
 ):
-    # logger.info("Starting experiment")
     # Initialise experiments
     # ----------------------
     method_est = getattr(estimators, method)
     # Run experiments
     # ----------------------
     est = method_est()
-    est.fit(adjacency_matrix)
     n = adjacency_matrix.shape[0]
-    if graphon is not None:
-        norm_mse = MseProbaEdge(n_nodes=n)(graphon, est.get_graphon())
-        norm_mae = MaeProbaEdge(n_nodes=n)(graphon, est.get_graphon())
-    else:
-        norm_mse = MseProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
-        norm_mae = MaeProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
-    # Compute AUC and AUPRC
-    norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
-    norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
-    # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
-    if method == "SmoothNetHist":
-        graphon_repr = (
-            f"sbm {len(np.unique(est.get_graphon().graphon))}"
-            if isinstance(graphon, StepGraphon)
-            else graphon.repr
-        )
-    if method == "HistogramEstimator":
-        graphon_repr = (
-            f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}"
-            if isinstance(graphon, StepGraphon)
-            else graphon.repr
-        )
-    if method == "SmoothNetHist":
-        result = [
-            method,
-            graphon_repr,
-            n,
-            norm_mse,
-            norm_mae,
-            norm_auc,
-            norm_auprc,
-            est.get_bic(),
-            est.get_ratio_par(),
-        ]
-    else:
-        graphon_repr = graphon.repr if graphon is not None else None
-        result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
+    try:
+        est.fit(adjacency_matrix)
+        if graphon is not None:
+            norm_mse = MseProbaEdge(n_nodes=n)(graphon, est.get_graphon())
+            norm_mae = MaeProbaEdge(n_nodes=n)(graphon, est.get_graphon())
+        else:
+            norm_mse = MseProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
+            norm_mae = MaeProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
+        # Compute AUC and AUPRC
+        norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
+        norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
+        # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
+        if method == "SmoothNetHist":
+            graphon_repr = (
+                f"sbm {len(np.unique(est.get_graphon().graphon))}"
+                if isinstance(graphon, StepGraphon)
+                else graphon.repr
+            )
+        if method == "HistogramEstimator":
+            graphon_repr = (
+                f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}"
+                if isinstance(graphon, StepGraphon)
+                else graphon.repr
+            )
+        if method == "SmoothNetHist":
+            result = [
+                method,
+                graphon_repr,
+                n,
+                norm_mse,
+                norm_mae,
+                norm_auc,
+                norm_auprc,
+                est.get_bic(),
+                est.get_ratio_par(),
+            ]
+        else:
+            graphon_repr = graphon.repr if graphon is not None else None
+            result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
+    except Exception as e:
+        logger.critical(f"Error with {method} on {graphon.repr} with n={n}")
+        logger.critical(e)
+        result = [method, None, n, np.nan, np.nan, np.nan, np.nan, 0, 0]
     # ----------------------
     # logger.info("Computing done")
     with open("results" + f"{folder_name}.pkl", "wb") as f:
@@ -87,6 +100,7 @@ def main(
 
 
 if __name__ == "__main__":
+    setup_logger_file(folder_name="results")
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
@@ -192,7 +206,7 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
         graphons = []
-        method = ["SAS", "USVT"]  # ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth"]
+        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
         for g in common_graphons.values():
             graphons.append(g)
         csv_gen_graphon(
@@ -201,17 +215,20 @@ if __name__ == "__main__":
             n_graphons=len(graphons) * len(method) * len(n_list)+1,
             smoothnethist_par=True,
         )
-        for j, g in enumerate(graphons):
-            for k, n in enumerate(n_list):
-                for i, m in enumerate(method):
+        for j, g in tqdm(enumerate(graphons)):
+            for k, n in tqdm(enumerate(n_list), leave=False):
+                for i, m in tqdm(enumerate(method), leave=False):
+                    logger.info(f"method: {m}, graphon: {g.repr}, n: {n}")
                     result = []
                     for r in range(mult_rep):
-                        result.append(main(
+                        inter_result = main(
                             adjacency_matrix=g.draw(n=n, exchangeable=False),
                             graphon=g,
                             method=m,
                             folder_name=folder_name,
-                        ))
+                        )
+                        logger.info(f"result: {inter_result}")
+                        result.append(inter_result)
                     update_row(
                         folder_name="usual_graphon",
                         file_name="method_comp" + f"_{folder_name}",
