@@ -36,6 +36,8 @@ class SmoothNetHist(BaseEstimator):
         logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-4
         self._first_fit_graphon = None
+        self.cluster_it_list = []
+        self.all_cluster_graphons = None
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -212,9 +214,11 @@ class SmoothNetHist(BaseEstimator):
             elif number_groups == self._num_par_nethist:
                 pass
             else:
+                labels = self._cluster(number_groups, flat_graphon)
+                self.cluster_it_list.append(labels)
                 avr_graphon[index] = self._smoothing_operator(
                     tensor_slice_graphon=avr_graphon[index],
-                    labels=self._cluster(number_groups, flat_graphon),
+                    labels=labels,
                     number_link_communities=number_groups,
                     flat_graphon=flat_graphon,
                     flat_areas=flat_areas,
@@ -333,6 +337,7 @@ class SmoothNetHist(BaseEstimator):
             )
             for i in range(nclust_hist)
         ]
+        self.all_cluster_graphons = smoothed_graphons
         return smoothed_graphons
 
     def _select_best_graphon(
