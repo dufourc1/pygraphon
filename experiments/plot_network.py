@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from matplotlib.colors import Colormap, ListedColormap
+import matplotlib.pyplot as plt
+import scienceplots
 
 
 def plot_noisy_graph(
@@ -173,7 +175,8 @@ def plot_noisy_graph(
                 vmax_edge = np.max(options_edges["edge_color"])
     if index_node_signal is not None and index_edge_signal is not None:
         if same_clim:
-            vmin_node, vmax_node = min(vmin_node, vmin_edge), max(vmax_node, vmax_edge)
+            vmin_node, vmax_node = min(
+                vmin_node, vmin_edge), max(vmax_node, vmax_edge)
             vmin_edge, vmax_edge = vmin_node, vmax_node
     options_node["vmin"] = vmin_node
     options_node["vmax"] = vmax_node
@@ -240,10 +243,37 @@ def plot_noisy_graph(
     return fig, ax
 
 
+def sciplot_style(x: np.ndarray,
+                  y: list[np.ndarray],
+                  p: list[str] = None,
+                  llegend: Optional[dict] = None,
+                  pparam: Optional[dict] = None,
+                  style: Optional[str] = 'science',
+                  fname: Optional[str] = None,
+                  **kwargs):
+    """Set the style from github.com/garrettj403/SciencePlots/."""
+    with plt.style.context(style):
+        plt.rc('text', usetex=False) #to get around the RuntimeError: LaTeX was not able to process the following string:
+        fig, ax = plt.subplots()
+        for i,val in enumerate(y):
+            if p is None:
+                ax.plot(x, val, label='Order {}'.format(i+1))
+            else:
+                ax.plot(x, val, label=p[i])
+        ax.legend(**llegend)
+        ax.autoscale(tight=True)
+        ax.set(**pparam)
+        if fname is not None:
+            fig.savefig(fname, dpi=600)
+        plt.show()
+    return fig, ax
+
+
 def _fig_with_2_colorbar_bottom(figsize=(6.4, 4.8), fig=None, subplot_spec=None):
     if subplot_spec is None:
         fig = plt.figure(constrained_layout=True, figsize=figsize)
-        gs = fig.add_gridspec(2, 3, height_ratios=[1, 0.05], width_ratios=[1, 0.2, 1])
+        gs = fig.add_gridspec(2, 3, height_ratios=[
+                              1, 0.05], width_ratios=[1, 0.2, 1])
     else:
         if fig is None:
             fig = plt.gcf()
