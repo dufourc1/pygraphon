@@ -4,6 +4,7 @@ from itertools import permutations
 from typing import Iterable
 
 import numpy as np
+from kneed import KneeLocator
 from scipy.stats import bernoulli
 
 EPS = np.spacing(1)
@@ -25,7 +26,7 @@ def generate_all_permutations(size: int = 3) -> Iterable:
     return permutations(range(size))
 
 
-def bic(log_likelihood_val: float, n: int, num_par: int) -> float:
+def bic(log_likelihood_val: float, n: int, num_par: int, *args, **kwargs) -> float:
     """Compute the BIC score of the graphon.
 
     Parameters
@@ -43,6 +44,104 @@ def bic(log_likelihood_val: float, n: int, num_par: int) -> float:
         BIC score of the graphon
     """
     return -2 * log_likelihood_val + num_par * math.log(n * (n - 1) / 2)
+
+
+def aic(log_likelihood_val: float, num_par: int, *args, **kwargs) -> float:
+    """Compute the AIC score of the graphon.
+
+    Parameters
+    ----------
+    log_likelihood_val : float
+        log-likelihood of the graphon given the adjacency matrix
+    num_par : int
+        number of parameters of the graphon
+
+    Returns
+    -------
+    float
+        AIC score of the graphon
+    """
+    return -2 * log_likelihood_val + 2 * num_par
+
+
+def elbow_point(norm: np.ndarray, *args, **kwargs) -> int:
+    """Return the index of the elbow point of the curve.
+
+    Parameters
+    ----------
+    norm : np.ndarray
+        values of the norm
+
+    Returns
+    -------
+    int
+        index of the elbow point of the curve
+    """
+    x = np.arange(len(norm))
+    kn = KneeLocator(x, norm, S=1, curve="convex", direction="decreasing")
+    return kn.knee
+
+
+def mallows_cp(norm: float, var: float, num_par: int, n: int, *args, **kwargs) -> float:
+    """Compute the Mallows' Cp score.
+
+    Parameters
+    ----------
+    norm : float
+        sum of squared errors
+    var : float
+        variance
+    num_par : int
+        number of parameters
+    n : int
+        number of nodes of the graph
+
+    Returns
+    -------
+    float
+        Mallows' Cp score
+    """
+    return (norm + 2 * num_par * var) / n
+
+
+def hqic(log_likelihood_val: float, num_par: int, n: int, *args, **kwargs) -> float:
+    """Compute the HQIC score of the graphon.
+
+    Parameters
+    ----------
+    log_likelihood_val : float
+        log-likelihood of the graphon given the adjacency matrix
+    num_par : int
+        number of parameters of the graphon
+    n : int
+        number of nodes of the graph
+
+    Returns
+    -------
+    float
+        HQIC score of the graphon
+    """
+    return -2 * log_likelihood_val + 2 * num_par * math.log(math.log(n))
+
+
+def fpe(norm: float, num_par: int, n: int, *args, **kwargs) -> float:
+    """Compute the Aikake final prediction error score of the graphon.
+
+    Parameters
+    ----------
+    norm : float
+        sum of squared errors
+    num_par : int
+        number of parameters of the graphon
+    n : int
+        number of nodes of the graph
+
+    Returns
+    -------
+    float
+        FPE score of the graphon
+    """
+    return norm * (n + num_par + 1) / (n - num_par - 1)
 
 
 def log_likelihood(probs: np.ndarray, A: np.ndarray) -> float:
