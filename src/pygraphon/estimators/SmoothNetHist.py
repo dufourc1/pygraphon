@@ -58,6 +58,7 @@ class SmoothNetHist(BaseEstimator):
             self.criterion_values = {k: np.inf for k in CRITERIONS.keys()}
             self.best_pairs = {k: {"graphon": None, "pij": None} for k in CRITERIONS.keys()}
             self._criterion_nethist = {k: np.inf for k in CRITERIONS.keys()}
+            self._num_par_smooth = {k: -1 for k in CRITERIONS.keys()}
         else:
             # self.gof is the criterion function
             self.gof = CRITERIONS[criterion.lower()]
@@ -66,9 +67,9 @@ class SmoothNetHist(BaseEstimator):
             self.criterion_values = {self.criterion_name: np.inf}
             self.best_pairs = {self.criterion_name: {"graphon": None, "pij": None}}
             self._criterion_nethist = {self.criterion_name: np.inf}
-        self.bandwidth = bandwidth
+            self._num_par_smooth = {self.criterion_name: -1}
         self._num_par_nethist = -1
-        self._num_par_smooth = -1
+        self.bandwidth = bandwidth
         logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-4
 
@@ -428,7 +429,7 @@ class SmoothNetHist(BaseEstimator):
                 self.gof = CRITERIONS[criterion.lower()]
                 self._criterion_nethist[criterion] = self.gof(**params)
                 self.criterion_values[criterion] = self.gof(**params)
-            self._num_par_smooth = n_link_com
+                self._num_par_smooth[criterion] = n_link_com
         else:
             best_graphon, best_pij = self._model_selection_from_criterion(
                 tensor_graphon,
@@ -477,10 +478,7 @@ class SmoothNetHist(BaseEstimator):
                 tensor_graphon, adjacencyMatrix, latentVar, n_link_com, criterion
             )
             best_index = self.choose_best(np.array(all_criterion_values), criterion)
-            if criterion == ref_criterion:
-                idx = best_index
-                self._num_par_smooth = n_link_com[idx]
-
+            self._num_par_smooth[criterion] = n_link_com[best_index]
             self.criterion_values[criterion] = all_criterion_values[best_index]
             self.best_pairs[criterion]["graphon"] = tensor_graphon[best_index]
             self.best_pairs[criterion]["pij"] = tensor_graphon[best_index]._get_edge_probabilities(
@@ -491,7 +489,7 @@ class SmoothNetHist(BaseEstimator):
         best_pij = self.best_pairs[ref_criterion]["pij"]
         logger.debug(
             f"Best {ref_criterion} among criterions: {self.criterion_values[ref_criterion]}, "
-            + f" with {n_link_com[idx]} link communities."
+            + f" with {self._num_par_smooth[ref_criterion]} link communities."
         )
 
         return best_graphon, best_pij
@@ -580,5 +578,5 @@ class SmoothNetHist(BaseEstimator):
         if self.fitted is False:
             warn("The model has not been fitted yet, returning np.inf.")
             return np.inf
-
-        return self._num_par_smooth / self._num_par_nethist
+        for criterion in self._num_par_smooth.keys():
+            self._num_par_smooth[criterion] /= self._num_par_nethist
