@@ -42,7 +42,9 @@ def csv_gen_graphon(
             "AUPRC",
             "std(AUPRC)",
             "BIC",
-            "RatioPar"
+            "std(BIC)",
+            "RatioPar",
+            "std(RatioPar)"
         ]
 
     # Write the column names to the CSV file
