@@ -157,10 +157,10 @@ def get_result_with_std(list_of_results: list) -> list:
         mean and standard deviation
     """
     result = []
-    result.append(list_of_results[0][0])
+    result.append(list_of_results[0][0]+'_'+list_of_results[0][-1])
     result.append(list_of_results[0][1])
     result.append(list_of_results[0][2])
-    selected_elements = [sublist[3:] for sublist in list_of_results]
+    selected_elements = [sublist[3:-1] for sublist in list_of_results]
 
     result_mean = np.mean(selected_elements, axis=0)
     result_stds = np.std(selected_elements, axis=0)
