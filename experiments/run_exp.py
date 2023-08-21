@@ -148,8 +148,8 @@ if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
-    mult_rep = 2
-    n_min, n_max, n_step = 100, 100, 50
+    mult_rep = 5
+    n_min, n_max, n_step = 100, 2000, 50
     n_list = np.arange(n_min, n_max+1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
         graphons = []
-        method = ["SmoothNetHist"]
+        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
         for g in common_graphons.values():
             graphons.append(g)
         csv_gen_graphon(
