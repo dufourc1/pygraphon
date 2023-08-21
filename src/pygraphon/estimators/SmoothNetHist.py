@@ -70,7 +70,7 @@ class SmoothNetHist(BaseEstimator):
             self._num_par_smooth = {self.criterion_name: -1}
         self._num_par_nethist = -1
         self.bandwidth = bandwidth
-        logger.warning("toleration is set to 1e-4, arbitrary value, argue")
+        #logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-4
         self._first_fit_graphon = None
         self.cluster_it_list = []
@@ -415,7 +415,6 @@ class SmoothNetHist(BaseEstimator):
             best graphon matrix and P_ij selected by the BIC.
         """
         latentVarArray = assignment.labels_to_latent_variables()
-        logger.debug(f"latentVarArray: {latentVarArray}")
         n_nodes = adjacencyMatrix.shape[0]
 
         if len(tensor_graphon) == 1:
@@ -495,10 +494,6 @@ class SmoothNetHist(BaseEstimator):
         # Return by default bic to preserve estimator structure, other criterion are available in self.best_pairs.
         best_graphon = self.best_pairs[ref_criterion]["graphon"]
         best_pij = self.best_pairs[ref_criterion]["pij"]
-        logger.debug(
-            f"Best {ref_criterion} among criterions: {self.criterion_values[ref_criterion]}, "
-            + f" with {self._num_par_smooth[ref_criterion]} link communities."
-        )
 
         return best_graphon, best_pij
 
