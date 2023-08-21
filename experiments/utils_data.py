@@ -159,6 +159,7 @@ def get_result_with_std(list_of_results: list) -> list:
     result = []
     result.append(list_of_results[0][0])
     result.append(list_of_results[0][1])
+    result.append(list_of_results[0][2])
     selected_elements = [sublist[3:] for sublist in list_of_results]
 
     result_mean = np.mean(selected_elements, axis=0)
