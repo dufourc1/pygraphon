@@ -68,6 +68,7 @@ class SmoothNetHist(BaseEstimator):
             self.best_pairs = {self.criterion_name: {"graphon": None, "pij": None}}
             self._criterion_nethist = {self.criterion_name: np.inf}
             self._num_par_smooth = {self.criterion_name: -1}
+        self.kmeans_labels_evolution = {"labels": [], "nLC": []}
         self._num_par_nethist = -1
         self.bandwidth = bandwidth
         #logger.warning("toleration is set to 1e-4, arbitrary value, argue")
@@ -307,6 +308,8 @@ class SmoothNetHist(BaseEstimator):
             init=method,
             n_init=10,
         ).fit(flat_graphon.reshape(-1, 1))
+        self.kmeans_labels_evolution["labels"].append(kmeans.labels_)
+        self.kmeans_labels_evolution["nLC"].append(number_link_communities)
         return kmeans.labels_
 
     def _smoothing_operator(
