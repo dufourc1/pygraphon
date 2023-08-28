@@ -30,22 +30,22 @@ def csv_gen_graphon(
         file_name = file_name + ".csv"
     path_to_file = os.path.join(THIS_FOLDER, path, file_name)
     column_names = [
-            "Method",
-            "Type of Graphon",
-            "n",
-            "MSE",
-            "std(MSE)",
-            "MAE",
-            "std(MAE)",
-            "AUC",
-            "std(AUC)",
-            "AUPRC",
-            "std(AUPRC)",
-            "BIC",
-            "std(BIC)",
-            "RatioPar",
-            "std(RatioPar)"
-        ]
+        "Method",
+        "Type of Graphon",
+        "n",
+        "MSE",
+        "std(MSE)",
+        "MAE",
+        "std(MAE)",
+        "AUC",
+        "std(AUC)",
+        "AUPRC",
+        "std(AUPRC)",
+        "BIC",
+        "std(BIC)",
+        "RatioPar",
+        "std(RatioPar)"
+    ]
 
     # Write the column names to the CSV file
     with open(path_to_file, "w", newline="") as csvfile:
@@ -117,7 +117,8 @@ def update_row(file_name: str, folder_name: str, row_index: int, new_row: list) 
         new row
     """
 
-    csv_file = os.path.join(THIS_FOLDER, "results", folder_name, file_name + ".csv")
+    csv_file = os.path.join(THIS_FOLDER, "results",
+                            folder_name, file_name + ".csv")
     with open(csv_file, "r") as file:
         rows = list(csv.reader(file))
         rows[row_index] = new_row
@@ -142,7 +143,7 @@ def clean_temp_folder(folder_name: str) -> None:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
 
-def get_result_with_std(list_of_results: list) -> list:
+def get_result_with_std(list_of_results: list, method=str) -> list:
     """Computes the mean and the standard deviation of a list of results.
     Creates a list of strings with the mean and the standard deviation.
 
@@ -157,7 +158,10 @@ def get_result_with_std(list_of_results: list) -> list:
         mean and standard deviation
     """
     result = []
-    result.append(list_of_results[0][0]+'_'+list_of_results[0][-1])
+    if method == 'SmoothNetHist':
+        result.append(list_of_results[0][0]+'_'+list_of_results[0][-1])
+    else:
+        result.append(list_of_results[0][0])
     result.append(list_of_results[0][1])
     result.append(list_of_results[0][2])
     selected_elements = [sublist[3:-1] for sublist in list_of_results]
