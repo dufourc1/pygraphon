@@ -149,7 +149,7 @@ if __name__ == "__main__":
     folder_name = "usual_graphon"
     mult_par = True
     mult_rep = 5
-    n_min, n_max, n_step = 100, 2000, 50
+    n_min, n_max, n_step = 100, 200, 50
     n_list = np.arange(n_min, n_max+1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -255,23 +255,27 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
         graphons = []
-        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
+        # , "USVT", "NBDsmooth", "Completion"]
+        method = ["SmoothNetHist", "HistogramEstimator", "SAS"]
         for g in common_graphons.values():
             graphons.append(g)
         csv_gen_graphon(
             path="results/usual_graphon",
             file_name="method_comp" + f"_{folder_name}" + ".csv",
-            n_graphons=len(graphons) * len(method) * len(n_list)*len(CRITERIONS)+1,
+            n_graphons=len(graphons) * len(method) *
+            len(n_list)*len(CRITERIONS)+1,
             smoothnethist_par=True,
         )
         crit_idx = 0
         for j, g in tqdm(enumerate(graphons)):
-            for k, n in tqdm(enumerate(n_list), leave=False):
-                for i, m in tqdm(enumerate(method), leave=False):
+            for i, m in tqdm(enumerate(method), leave=False):
+                for k, n in tqdm(enumerate(n_list), leave=False):
                     result = []
                     for r in range(mult_rep):
+                        np.random.seed(42+k+(r+1)*(len(n_list)+1))
+                        adj_mat = g.draw(n=n, exchangeable=False)
                         inter_result = main(
-                            adjacency_matrix=g.draw(n=n, exchangeable=False),
+                            adjacency_matrix=adj_mat,
                             graphon=g,
                             method=m,
                             folder_name=folder_name,
@@ -283,8 +287,8 @@ if __name__ == "__main__":
                                 folder_name="usual_graphon",
                                 file_name="method_comp" + f"_{folder_name}",
                                 new_row=get_result_with_std(
-                                    [sublist[crit_idx]+[criterion] for sublist in result]),
-                                row_index=k * len(method)*len(CRITERIONS) + i*len(CRITERIONS) +
+                                    [sublist[crit_idx]+[criterion] for sublist in result], method=m),
+                                row_index=i*len(method)*len(CRITERIONS) + k*len(CRITERIONS) +
                                 j * len(n_list) * len(method) *
                                 len(CRITERIONS) + crit_idx + 1,
                             )
@@ -292,7 +296,7 @@ if __name__ == "__main__":
                         update_row(
                             folder_name="usual_graphon",
                             file_name="method_comp" + f"_{folder_name}",
-                            new_row=get_result_with_std(result),
-                            row_index=k * len(method)*len(CRITERIONS) + i*len(CRITERIONS) + crit_idx + 1 +
+                            new_row=get_result_with_std(result, method=m),
+                            row_index=i * len(method)*len(CRITERIONS) + k*len(CRITERIONS) + 1 +
                             j * len(n_list) * len(method)*len(CRITERIONS),
                         )
