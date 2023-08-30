@@ -2,8 +2,7 @@ import pickle
 
 import numpy as np
 from loguru import logger
-from tqdm import tqdm
-
+import sys
 import os
 # import shutil
 from pygraphon.graphons import Graphon
@@ -28,9 +27,10 @@ def setup_logger_file(folder_name: str):
     logger.remove()
     logger.enable("pygraphon")
     logger.add(os.path.join(folder_name, "log_exp.txt"), level="TRACE", mode="w",
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | {level} | {message}")
     logger.add(os.path.join(folder_name, "log_errors.txt"), level="CRITICAL", mode="w",
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | | {level} | {message}")
+    logger.add(sys.stderr, level="INFO",  format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | {level} | {message}")
     logger.info("Logger set up")
 
 
@@ -131,7 +131,7 @@ def main(
         logger.critical(e)
         result = [method, None, n, np.nan, np.nan, np.nan, np.nan, 0, 0]
     # ----------------------
-    logger.info("Computing done")
+    logger.info("Saving results ")
     with open("results" + f"{folder_name}.pkl", "wb") as f:
         pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -148,8 +148,8 @@ if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
-    mult_rep = 5
-    n_min, n_max, n_step = 100, 200, 50
+    mult_rep = 2
+    n_min, n_max, n_step = 30, 1750, 50
     n_list = np.arange(n_min, n_max+1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -256,7 +256,7 @@ if __name__ == "__main__":
     if folder_name == "usual_graphon":
         graphons = []
         # , "USVT", "NBDsmooth", "Completion"]
-        method = ["SmoothNetHist", "HistogramEstimator", "SAS"]
+        method = ["SmoothNetHist", "HistogramEstimator", "USVT", "NBDsmooth", "Completion"]
         for g in common_graphons.values():
             graphons.append(g)
         csv_gen_graphon(
@@ -267,11 +267,13 @@ if __name__ == "__main__":
             smoothnethist_par=True,
         )
         crit_idx = 0
-        for j, g in tqdm(enumerate(graphons)):
-            for i, m in tqdm(enumerate(method), leave=False):
-                for k, n in tqdm(enumerate(n_list), leave=False):
+        for j, g in enumerate(graphons):
+            for i, m in enumerate(method):
+                for k, n in enumerate(n_list):
+                    logger.info(f"Graphon {g.repr} with method {m} and n={n}")
                     result = []
                     for r in range(mult_rep):
+                        logger.info(f"Repetition {r+1}/{mult_rep}")
                         np.random.seed(42+k+(r+1)*(len(n_list)+1))
                         adj_mat = g.draw(n=n, exchangeable=False)
                         inter_result = main(

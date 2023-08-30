@@ -4,7 +4,10 @@
 
 import numpy as np
 
-from pygraphon.utils.utils_graphon import compute_areas_histogram
+from pygraphon.utils.utils_graphon import (
+    check_consistency_graphon_shape_with_bandwidth,
+    compute_areas_histogram,
+)
 
 
 def test_compute_areas_histogram():
@@ -29,3 +32,10 @@ def test_compute_areas_histogram_notzero():
     theta = np.ones((3, 3))
     areas = compute_areas_histogram(theta, bandwidth)
     assert np.allclose(areas, theoretical_areas)
+
+
+def test_check_consistency_bandwidth_shape_graphon():
+    """Test that the bandwidth and the shape of the graphon matrix are consistent."""
+    for n in range(3, 2000, 14):
+        bandwidth = 1 / n
+        check_consistency_graphon_shape_with_bandwidth((n, n), bandwidth)
