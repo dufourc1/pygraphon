@@ -175,3 +175,18 @@ def test_check_graphon_positive():
     graphon = np.array([[0.8, 0.2], [0.2, -0.8]])
     with pytest.raises(ValueError):
         StepGraphon(graphon=graphon, bandwidthHist=0.5)
+
+
+def test_bandwidth_step_graphon(n_min=33, n_max=200, step=15) -> None:
+    """Test that bandwidth and graphon shapes are consistent."""
+    theta_test = np.random.rand(n_max, n_max)
+    theta_test = (theta_test + theta_test.T) / 2
+    np.fill_diagonal(theta_test, 0)
+    for n in range(n_min, n_max, step):
+        graphon = StepGraphon(theta_test[0:n, 0:n], bandwidthHist=1 / n)
+        assert graphon.get_number_groups() == n
+    # test 1/3 vs 0.3
+    with pytest.raises(ValueError):
+        StepGraphon(theta_test[0:3, 0:3], bandwidthHist=0.3)
+    _ = StepGraphon(theta_test[0:3, 0:3], bandwidthHist=1 / 3)
+    _ = StepGraphon(theta_test[0:4, 0:4], bandwidthHist=0.3)

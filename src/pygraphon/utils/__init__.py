@@ -6,7 +6,7 @@ from .utils_graph import (
     edge_density,
     get_adjacency_matrix_from_graph,
 )
-from .utils_graphon import compute_areas_histogram
+from .utils_graphon import check_consistency_graphon_shape_with_bandwidth, compute_areas_histogram
 from .utils_maths import (
     EPS,
     aic,
@@ -43,4 +43,5 @@ __all__ = [
     "hqic",
     "fpe",
     "log_likelihood",
+    "check_consistency_graphon_shape_with_bandwidth",
 ]
