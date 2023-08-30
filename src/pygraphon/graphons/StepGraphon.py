@@ -1,11 +1,14 @@
 """Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
-import math
 from typing import Callable, Optional
 
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils import check_symmetric, compute_areas_histogram
+from pygraphon.utils import (
+    check_consistency_graphon_shape_with_bandwidth,
+    check_symmetric,
+    compute_areas_histogram,
+)
 
 
 class StepGraphon(Graphon):
@@ -28,18 +31,15 @@ class StepGraphon(Graphon):
         initial_rho: Optional[float] = None,
     ) -> None:
         # save args
-        self.graphon = graphon
         if bandwidthHist > 1 or bandwidthHist <= 0:
             raise ValueError("The bandwidth should be between 0 and 1.")
-        self.bandwidthHist = bandwidthHist
-        if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consistent with the bandwidth.")
-
+        check_consistency_graphon_shape_with_bandwidth(graphon.shape, bandwidthHist)
         if np.max(graphon) > 1 and initial_rho is None:
             raise ValueError(
                 "The graphon matrix should be between 0 and 1 if no initial rho is given."
             )
-
+        self.bandwidthHist = bandwidthHist
+        self.graphon = graphon
         self.areas = compute_areas_histogram(self.graphon, self.bandwidthHist)
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
 
@@ -162,4 +162,4 @@ class StepGraphon(Graphon):
         int
             number of groups
         """
-        return int(1 // self.bandwidthHist) + 1
+        return self.graphon.shape[0]
