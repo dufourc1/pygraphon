@@ -33,15 +33,7 @@ class StepGraphon(Graphon):
         # save args
         if bandwidthHist > 1 or bandwidthHist <= 0:
             raise ValueError("The bandwidth should be between 0 and 1.")
-<<<<<<< HEAD
-        self.bandwidthHist = bandwidthHist
-        if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consistent with the bandwidth with shape " +
-                             str(self.graphon.shape[0]) + " and bandwidth "+str(int(math.ceil(1 / self.bandwidthHist))))
-
-=======
         check_consistency_graphon_shape_with_bandwidth(graphon.shape, bandwidthHist)
->>>>>>> 28e94ffaa7f125d7e75e9b2169e787e1fbd734ec
         if np.max(graphon) > 1 and initial_rho is None:
             raise ValueError(
                 "The graphon matrix should be between 0 and 1 if no initial rho is given."
