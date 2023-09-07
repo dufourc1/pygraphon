@@ -149,7 +149,7 @@ if __name__ == "__main__":
     folder_name = "usual_graphon"
     mult_par = True
     mult_rep = 2
-    n_min, n_max, n_step = 30, 1750, 50
+    n_min, n_max, n_step = 50, 300, 50
     n_list = np.arange(n_min, n_max+1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -262,11 +262,10 @@ if __name__ == "__main__":
         csv_gen_graphon(
             path="results/usual_graphon",
             file_name="method_comp" + f"_{folder_name}" + ".csv",
-            n_graphons=len(graphons) * len(method) *
-            len(n_list)*len(CRITERIONS)+1,
+            n_graphons=len(graphons) * (len(method)+len(CRITERIONS)-1) *len(n_list)+1,
             smoothnethist_par=True,
         )
-        crit_idx = 0
+        idx = 1
         for j, g in enumerate(graphons):
             for i, m in enumerate(method):
                 for k, n in enumerate(n_list):
@@ -290,15 +289,14 @@ if __name__ == "__main__":
                                 file_name="method_comp" + f"_{folder_name}",
                                 new_row=get_result_with_std(
                                     [sublist[crit_idx]+[criterion] for sublist in result], method=m),
-                                row_index=i*len(method)*len(CRITERIONS) + k*len(CRITERIONS) +
-                                j * len(n_list) * len(method) *
-                                len(CRITERIONS) + crit_idx + 1,
+                                row_index=idx,
                             )
+                            idx += 1
                     else:
                         update_row(
                             folder_name="usual_graphon",
                             file_name="method_comp" + f"_{folder_name}",
                             new_row=get_result_with_std(result, method=m),
-                            row_index=i * len(method)*len(CRITERIONS) + k*len(CRITERIONS) + 1 +
-                            j * len(n_list) * len(method)*len(CRITERIONS),
+                            row_index=idx,
                         )
+                        idx += 1
