@@ -245,7 +245,7 @@ class SmoothNetHist(BaseEstimator):
             )
 
         clusters = (
-            list(range(1, num_par_diff + 1))
+            list(range(nrow_tile, num_par_diff + 1))
             if number_link_communities is None
             else [number_link_communities]
         )
