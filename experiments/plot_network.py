@@ -260,12 +260,13 @@ def sciplot_style(x: np.ndarray,
                 ax.plot(x, val, label='Order {}'.format(i+1))
             else:
                 ax.plot(x, val, label=p[i])
-        ax.legend(**llegend)
+        if llegend is not None:
+            ax.legend(**llegend)
+            ax.set(**pparam)
         ax.autoscale(tight=True)
-        ax.set(**pparam)
         if fname is not None:
             fig.savefig(fname, dpi=600)
-        plt.show()
+        #plt.show()
     return fig, ax
 
 
