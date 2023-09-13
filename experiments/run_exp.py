@@ -4,6 +4,7 @@ import numpy as np
 from loguru import logger
 import sys
 import os
+
 # import shutil
 from pygraphon.graphons import Graphon
 from pygraphon.graphons import StepGraphon
@@ -26,11 +27,23 @@ CRITERIONS = ["bic", "aic", "elbow", "mallows_cp", "hqic", "fpe"]
 def setup_logger_file(folder_name: str):
     logger.remove()
     logger.enable("pygraphon")
-    logger.add(os.path.join(folder_name, "log_exp.txt"), level="TRACE", mode="w",
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | {level} | {message}")
-    logger.add(os.path.join(folder_name, "log_errors.txt"), level="CRITICAL", mode="w",
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | | {level} | {message}")
-    logger.add(sys.stderr, level="INFO",  format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | {level} | {message}")
+    logger.add(
+        os.path.join(folder_name, "log_exp.txt"),
+        level="TRACE",
+        mode="w",
+        format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | {level} | {message}",
+    )
+    logger.add(
+        os.path.join(folder_name, "log_errors.txt"),
+        level="CRITICAL",
+        mode="w",
+        format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | | {level} | {message}",
+    )
+    logger.add(
+        sys.stderr,
+        level="INFO",
+        format="{time:YYYY-MM-DD at HH:mm:ss} | {file} | line {line} | {level} | {message}",
+    )
     logger.info("Logger set up")
 
 
@@ -54,78 +67,75 @@ def main(
         if method == "SmoothNetHist":
             result = []
             est.fit(adjacency_matrix)
+            logger.info("Finished fitting SmoothNetHist")
             est.get_ratio_par()
             for criterion in CRITERIONS:
                 if graphon is not None:
                     norm_mse = MseProbaEdge(n_nodes=n)(
-                        graphon, est.best_pairs[criterion]["graphon"])
+                        graphon, est.best_pairs[criterion]["graphon"]
+                    )
                     norm_mae = MaeProbaEdge(n_nodes=n)(
-                        graphon, est.best_pairs[criterion]["graphon"])
+                        graphon, est.best_pairs[criterion]["graphon"]
+                    )
                 else:
                     norm_mse = MseProbaEdge(n_nodes=n)(
-                        adjacency_matrix, est.best_pairs[criterion]["graphon"])
+                        adjacency_matrix, est.best_pairs[criterion]["graphon"]
+                    )
                     norm_mae = MaeProbaEdge(n_nodes=n)(
-                        adjacency_matrix, est.best_pairs[criterion]["graphon"])
+                        adjacency_matrix, est.best_pairs[criterion]["graphon"]
+                    )
                 # Compute AUC and AUPRC
-                norm_auc = AUCEdge(n_nodes=n)(
-                    adjacency_matrix, est.best_pairs[criterion]["pij"])
+                norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.best_pairs[criterion]["pij"])
                 norm_auprc = AUPRCEdge(n_nodes=n)(
-                    adjacency_matrix, est.best_pairs[criterion]["pij"])
-                # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
-                s = len(
-                    np.unique(est.best_pairs[criterion]["graphon"].graphon))
-                graphon_repr = (
-                    f"ssm {s}"
-                    if isinstance(graphon, StepGraphon)
-                    else graphon.repr
+                    adjacency_matrix, est.best_pairs[criterion]["pij"]
                 )
-                sub_result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc,
-                              norm_auprc, est.criterion_values[criterion], est._num_par_smooth[criterion]]
+                # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
+                s = len(np.unique(est.best_pairs[criterion]["graphon"].graphon))
+                graphon_repr = f"ssm {s}" if isinstance(graphon, StepGraphon) else graphon.repr
+                sub_result = [
+                    method,
+                    graphon_repr,
+                    n,
+                    norm_mse,
+                    norm_mae,
+                    norm_auc,
+                    norm_auprc,
+                    est.criterion_values[criterion],
+                    est._num_par_smooth[criterion],
+                ]
                 result.append(sub_result)
         elif method == "HistogramEstimator":
             est.fit(adjacency_matrix)
+            logger.info("Finished fitting HistogramEstimator")
             if graphon is not None:
-                norm_mse = MseProbaEdge(n_nodes=n)(
-                    graphon, est.get_graphon())
-                norm_mae = MaeProbaEdge(n_nodes=n)(
-                    graphon, est.get_graphon())
+                norm_mse = MseProbaEdge(n_nodes=n)(graphon, est.get_graphon())
+                norm_mae = MaeProbaEdge(n_nodes=n)(graphon, est.get_graphon())
             else:
-                norm_mse = MseProbaEdge(n_nodes=n)(
-                    adjacency_matrix, est.get_graphon())
-                norm_mae = MaeProbaEdge(n_nodes=n)(
-                    adjacency_matrix, est.get_graphon())
+                norm_mse = MseProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
+                norm_mae = MaeProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
             # Compute AUC and AUPRC
-            norm_auc = AUCEdge(n_nodes=n)(
-                adjacency_matrix, est.get_edge_connectivity())
-            norm_auprc = AUPRCEdge(n_nodes=n)(
-                adjacency_matrix, est.get_edge_connectivity())
+            norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
+            norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
             graphon_repr = (
                 f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}"
                 if isinstance(graphon, StepGraphon)
                 else graphon.repr
             )
-            result = [method, graphon_repr, n, norm_mse,
-                      norm_mae, norm_auc, norm_auprc, 0, 0]
+            result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
         else:
             est.fit(adjacency_matrix)
+            logger.info("Finished fitting " + method)
             if graphon is not None:
-                norm_mse = MseProbaEdge(n_nodes=n)(
-                    graphon, est.get_graphon())
-                norm_mae = MaeProbaEdge(n_nodes=n)(
-                    graphon, est.get_graphon())
+                norm_mse = MseProbaEdge(n_nodes=n)(graphon, est.get_graphon())
+                norm_mae = MaeProbaEdge(n_nodes=n)(graphon, est.get_graphon())
             else:
-                norm_mse = MseProbaEdge(n_nodes=n)(
-                    adjacency_matrix, est.get_graphon())
-                norm_mae = MaeProbaEdge(n_nodes=n)(
-                    adjacency_matrix, est.get_graphon())
+                norm_mse = MseProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
+                norm_mae = MaeProbaEdge(n_nodes=n)(adjacency_matrix, est.get_graphon())
             # Compute AUC and AUPRC
-            norm_auc = AUCEdge(n_nodes=n)(
-                adjacency_matrix, est.get_edge_connectivity())
-            norm_auprc = AUPRCEdge(n_nodes=n)(
-                adjacency_matrix, est.get_edge_connectivity())
+            norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
+            norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
             graphon_repr = graphon.repr if graphon is not None else None
-            result = [method, graphon_repr, n, norm_mse,
-                      norm_mae, norm_auc, norm_auprc, 0, 0]
+            result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
     except Exception as e:
         logger.critical(f"Error with {method} on {graphon.repr} with n={n}")
         logger.critical(e)
@@ -150,7 +160,7 @@ if __name__ == "__main__":
     mult_par = True
     mult_rep = 2
     n_min, n_max, n_step = 50, 300, 50
-    n_list = np.arange(n_min, n_max+1, n_step)
+    n_list = np.arange(n_min, n_max + 1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
@@ -200,22 +210,23 @@ if __name__ == "__main__":
                 for j, n in enumerate(n_list):
                     result = []
                     for r in range(mult_rep):
-                        result.append(main(
-                            adjacency_matrix=graphon.draw(
-                                n=n, exchangeable=False),
-                            graphon=graphon,
-                            method="SmoothNetHist",
-                            folder_name=folder_name,
-                        ))
+                        result.append(
+                            main(
+                                adjacency_matrix=graphon.draw(n=n, exchangeable=False),
+                                graphon=graphon,
+                                method="SmoothNetHist",
+                                folder_name=folder_name,
+                            )
+                        )
                     for crit_idx, criterion in CRITERIONS:
                         update_row(
                             folder_name="sbm_ssm",
                             file_name=f"_{folder_name}",
-                            new_row=get_result_with_std(
-                                [sublist[crit_idx] for sublist in result]),
-                            row_index=i *
-                            len(n_list)*len(CRITERIONS) + j *
-                            len(CRITERIONS) + crit_idx + 1,
+                            new_row=get_result_with_std([sublist[crit_idx] for sublist in result]),
+                            row_index=i * len(n_list) * len(CRITERIONS)
+                            + j * len(CRITERIONS)
+                            + crit_idx
+                            + 1,
                         )
         # ------------------------------------
         # ------- If single repetition -------
@@ -237,12 +248,14 @@ if __name__ == "__main__":
             graphon = StepGraphon(theta.Theta, bandwidthHist=1 / k_max)
             result = []
             for r in range(mult_rep):
-                result.append(main(
-                    adjacency_matrix=graphon.draw(n=n_max, exchangeable=False),
-                    graphon=graphon,
-                    method="SmoothNetHist",
-                    folder_name=folder_name,
-                ))
+                result.append(
+                    main(
+                        adjacency_matrix=graphon.draw(n=n_max, exchangeable=False),
+                        graphon=graphon,
+                        method="SmoothNetHist",
+                        folder_name=folder_name,
+                    )
+                )
             update_row(
                 folder_name="sbm_ssm",
                 file_name="comparison" + f"_{folder_name}",
@@ -256,13 +269,13 @@ if __name__ == "__main__":
     if folder_name == "usual_graphon":
         graphons = []
         # , "USVT", "NBDsmooth", "Completion"]
-        method = ["SmoothNetHist", "HistogramEstimator", "USVT", "NBDsmooth", "Completion"]
+        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
         for g in common_graphons.values():
             graphons.append(g)
         csv_gen_graphon(
             path="results/usual_graphon",
             file_name="method_comp" + f"_{folder_name}" + ".csv",
-            n_graphons=len(graphons) * (len(method)+len(CRITERIONS)-1) *len(n_list)+1,
+            n_graphons=len(graphons) * (len(method) + len(CRITERIONS) - 1) * len(n_list) + 1,
             smoothnethist_par=True,
         )
         idx = 1
@@ -273,8 +286,10 @@ if __name__ == "__main__":
                     result = []
                     for r in range(mult_rep):
                         logger.info(f"Repetition {r+1}/{mult_rep}")
-                        np.random.seed(42+k+(r+1)*(len(n_list)+1))
+                        np.random.seed(42 + k + (r + 1) * (len(n_list) + 1))
+                        logger.info("Generating adjacency matrix")
                         adj_mat = g.draw(n=n, exchangeable=False)
+                        logger.info("Adjacency matrix generated")
                         inter_result = main(
                             adjacency_matrix=adj_mat,
                             graphon=g,
@@ -288,7 +303,9 @@ if __name__ == "__main__":
                                 folder_name="usual_graphon",
                                 file_name="method_comp" + f"_{folder_name}",
                                 new_row=get_result_with_std(
-                                    [sublist[crit_idx]+[criterion] for sublist in result], method=m),
+                                    [sublist[crit_idx] + [criterion] for sublist in result],
+                                    method=m,
+                                ),
                                 row_index=idx,
                             )
                             idx += 1
