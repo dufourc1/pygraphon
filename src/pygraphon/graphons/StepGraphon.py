@@ -8,6 +8,7 @@ from pygraphon.utils import (
     check_consistency_graphon_shape_with_bandwidth,
     check_symmetric,
     compute_areas_histogram,
+    scatter_symmetric_matrix,
 )
 
 
@@ -163,3 +164,24 @@ class StepGraphon(Graphon):
             number of groups
         """
         return self.graphon.shape[0]
+
+    def _get_edge_probabilities(self, n, latentVarArray, wholeMatrix=True):
+        """Generate a matrix P_ij with  0 =< i,j <= n-1.
+
+        Parameters
+        ----------
+        n : int
+            number of nodes in the edge probability matrix returned
+        latentVarArray : np.ndarray
+            array of latent variables (n) used to generate the edge probabilities
+
+        Returns
+        -------
+        np.ndarray
+            matrix of edge probabilities (nxn)
+        """
+        group_membership = np.floor(latentVarArray / self.bandwidthHist).astype(int)
+        probs = scatter_symmetric_matrix(self.graphon, group_membership) * self.initial_rho
+        if not wholeMatrix:
+            return probs[np.triu_indices(n, 1)]
+        return probs

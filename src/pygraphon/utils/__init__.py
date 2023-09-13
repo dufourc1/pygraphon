@@ -22,6 +22,7 @@ from .utils_matrix import (
     bound_away_from_one_and_zero_arrays,
     check_symmetric,
     permute_matrix,
+    scatter_symmetric_matrix,
     upper_triangle_values,
 )
 
@@ -44,4 +45,5 @@ __all__ = [
     "fpe",
     "log_likelihood",
     "check_consistency_graphon_shape_with_bandwidth",
+    "scatter_symmetric_matrix",
 ]

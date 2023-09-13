@@ -3,9 +3,9 @@ import math
 from itertools import permutations
 from typing import Iterable
 
+import numba as nb
 import numpy as np
 from kneed import KneeLocator
-from scipy.stats import bernoulli
 
 EPS = np.spacing(1)
 
@@ -144,7 +144,8 @@ def fpe(norm: float, num_par: int, n: int, *args, **kwargs) -> float:
     return norm * (n + num_par + 1) / (n - num_par - 1)
 
 
-def log_likelihood(probs: np.ndarray, A: np.ndarray) -> float:
+@nb.jit(nopython=True)
+def log_likelihood(probs: np.ndarray, A: np.ndarray, eps=1e-8) -> float:
     r"""Compute the log-likelihood of the graphon given the adjacency matrix of a simple graph.
 
     .. math::
@@ -184,6 +185,21 @@ def log_likelihood(probs: np.ndarray, A: np.ndarray) -> float:
         This function assumes the graph is simple, i.e. only undirected edges and no self-loops.
         For this reason, only the upper triangular part of :py:obj:`probs` and :py:obj:`A` are considered.
     """
-    if np.any(np.triu(probs, k=1) > 1):
-        raise ValueError("The probability matrix cannot contain values greater than 1")
-    return bernoulli.logpmf(np.triu(A, k=1), np.clip(np.triu(probs, k=1), EPS, 1 - EPS)).sum()
+    result = 0
+    n = A.shape[0]
+    for i in range(n):
+        for j in range(i + 1, n):
+            x = A[i, j]
+            p = probs[i, j]
+            if p > 1:
+                raise ValueError("Probability matrix contains values greater than 1")
+            if p < eps:
+                result += x * np.log(eps)
+                result += (1 - x) * np.log(1 - eps)
+            elif p > 1 - eps:
+                result += x * np.log(1 - eps)
+                result += (1 - x) * np.log(eps)
+            else:
+                result += x * np.log(p)
+                result += (1 - x) * np.log(1 - p)
+    return result

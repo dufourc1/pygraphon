@@ -2,6 +2,7 @@
 from copy import copy
 from typing import Tuple
 
+import numba as nb
 import numpy as np
 
 EPS = np.spacing(1)
@@ -84,3 +85,31 @@ def bound_away_from_one_and_zero_arrays(array: np.ndarray, eps: float = EPS) -> 
     array[array <= eps] = eps
     array[array >= 1 - eps] = 1 - eps
     return array
+
+
+@nb.jit(nopython=True)
+def scatter_symmetric_matrix(blocks: np.ndarray, group_membership: np.ndarray) -> np.ndarray:
+    """Write all values from the blocks at the indices specified by group_membership.
+
+    Will return a symmetric matrix such that the value at index (i,j) is the value of
+    the block corresponding to the group_membership of i and j.
+
+    Parameters
+    ----------
+    blocks : np.ndarray
+        blocks of the graphon (theta matrix)
+    group_membership : np.ndarray
+        group membership of the nodes (n)
+
+    Returns
+    -------
+    np.ndarray
+        edge probability matrix (nxn)
+    """
+    n = group_membership.shape[0]
+    P_ij = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            P_ij[i, j] = blocks[group_membership[i], group_membership[j]]
+    P_ij = P_ij + P_ij.T
+    return P_ij

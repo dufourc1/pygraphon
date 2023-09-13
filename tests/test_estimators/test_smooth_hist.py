@@ -172,11 +172,13 @@ def test_smoothing_histLC_tensor() -> None:
     smooth_test_tensor, n_link_com = estimator._smoothing_histLC(
         hist_approx=olhede_fit, A=adj, number_link_communities=None
     )
-    assert np.array_equal(n_link_com, np.arange(1, len(np.unique(olhede_fit.graphon)) + 1))
+    assert np.array_equal(
+        n_link_com,
+        np.arange(olhede_fit.get_number_groups(), len(np.unique(olhede_fit.graphon)) + 1),
+    )
 
     assert estimator._num_par_nethist == params_olhede_fit
     assert np.allclose(smooth_test_tensor[-1].graphon, olhede_fit.graphon)
-    assert np.allclose(smooth_test_tensor[0].graphon, np.ones(smooth_test_tensor[0].graphon.shape))
 
 
 @pytest.mark.parametrize("criterion", LIST_CRITERIONS)

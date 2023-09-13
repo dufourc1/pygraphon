@@ -77,12 +77,13 @@ class Graphon:
 
             if scaled and not math.isclose(self.integral_value, 1):
                 diff = abs(self.integral_value - initial_rho)
-                logger.debug(
-                    f"function provided does not integrate to 1, disregarding initial_rho {initial_rho:.3f},"
-                    + " replacing with "
-                    + f"integral_value {self.integral_value:.3f} of given function this may be due to numerical"
-                    + f" errors in the integration. Error is {diff:.3f}",
-                )
+                if diff > 1e-2:
+                    logger.debug(
+                        f"function provided does not integrate to 1, disregarding initial_rho {initial_rho:.3f},"
+                        + " replacing with "
+                        + f"integral_value {self.integral_value:.3f} of given function this may be due to numerical"
+                        + f" errors in the integration. Error is {diff:.3f}",
+                    )
                 self.initial_rho = deepcopy(self.integral_value)
             else:
                 self.initial_rho = deepcopy(initial_rho)
