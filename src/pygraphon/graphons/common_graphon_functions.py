@@ -7,7 +7,7 @@ The common_graphons dictionary is ordered as in the paper.
     PMLR, 2014.
 """
 import numpy as np
-
+from pygraphon.utils.utils_ssm import graph_celtic, graph_concentric_circle, graph2_celtic
 from .Graphon import Graphon
 
 graphon_product = Graphon(function=lambda x, y: x * y, repr="f(x,y) = x*y")
@@ -39,7 +39,20 @@ graphon_exp_polynomial = Graphon(
 graphon_log_1_p = Graphon(
     function=lambda x, y: np.log1p(0.5 * np.maximum(x, y)), repr="log(1 + 0.5*max(x,y))"
 )
-
+graphon_celtic = Graphon(
+    function=lambda x, y: graph_celtic(x, y, [0.25,0.75,0.1], [0.75, 0.5, 0.25, 0.1]),
+    repr="celtic",
+)
+graphon_celtic2 = Graphon(
+    function=lambda x, y: graph2_celtic(x, y, [0.25,0.75,0.2,0.25,0.25,0.2], [0.75, 0.5, 0.25, 0.1, 0.05]),
+    repr="celtic2",
+)
+graphon_concentric_circle = Graphon(
+    function=lambda x, y: graph_concentric_circle(
+        x, y, [0.25, 0.75, 0.05, 0.1, 0.15, 0.2], [0.75, 0.5, 0.25, 0.1, 0.05]
+    ),
+    repr="concentric_circle",
+)
 
 common_graphons = {
     "product": graphon_product,
@@ -52,4 +65,7 @@ common_graphons = {
     "exp_max_power": graphon_exp_max_power,
     "exp_polynomial": graphon_exp_polynomial,
     "log_1_p": graphon_log_1_p,
+    "celtic": graphon_celtic,
+    "concentric_circle": graphon_concentric_circle,
+    "celtic2": graphon_celtic2,
 }
