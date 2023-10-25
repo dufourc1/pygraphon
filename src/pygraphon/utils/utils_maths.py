@@ -6,6 +6,7 @@ from typing import Iterable
 import numba as nb
 import numpy as np
 from kneed import KneeLocator
+from loguru import logger
 
 EPS = np.spacing(1)
 
@@ -79,7 +80,11 @@ def elbow_point(norm: np.ndarray, *args, **kwargs) -> int:
     """
     x = np.arange(len(norm))
     kn = KneeLocator(x, norm, S=1, curve="convex", direction="decreasing")
-    return kn.knee
+    inflection_point = kn.knee
+    if inflection_point is None:
+        logger.warning("No elbow point found, returning minimum of the curve")
+        inflection_point = np.argmin(norm)
+    return inflection_point
 
 
 def mallows_cp(norm: float, var: float, num_par: int, n: int, *args, **kwargs) -> float:

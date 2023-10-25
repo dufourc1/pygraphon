@@ -116,9 +116,10 @@ def update_row(file_name: str, folder_name: str, row_index: int, new_row: list) 
     new_row : list
         new row
     """
-
+    if not file_name.endswith(".csv"):
+        file_name += ".csv"
     csv_file = os.path.join(THIS_FOLDER, "results",
-                            folder_name, file_name + ".csv")
+                            folder_name, file_name)
     with open(csv_file, "r") as file:
         rows = list(csv.reader(file))
         rows[row_index] = new_row

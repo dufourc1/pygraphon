@@ -4,6 +4,7 @@ import numpy as np
 from loguru import logger
 import sys
 import os
+import traceback
 
 # import shutil
 from pygraphon.graphons import Graphon
@@ -20,8 +21,9 @@ from utils_generators import AssociativeFullyRandom
 from pygraphon.norm import MseProbaEdge, MaeProbaEdge, AUCEdge, AUPRCEdge
 from typing import Optional
 from scipy.special import comb
+from datetime import datetime
 
-CRITERIONS = ["bic", "aic", "elbow", "mallows_cp", "hqic", "fpe"]
+CRITERIONS = ["bic", "aic", "mallows_cp", "hqic", "fpe", "elbow"]
 
 
 def setup_logger_file(folder_name: str):
@@ -56,6 +58,7 @@ def main(
     # Initialise experiments
     # ----------------------
     method_est = getattr(estimators, method)
+    graphon_repr = graphon.repr if graphon is not None else ""
     # Run experiments
     # ----------------------
     if method == "SmoothNetHist":
@@ -134,12 +137,12 @@ def main(
             # Compute AUC and AUPRC
             norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
             norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
-            graphon_repr = graphon.repr if graphon is not None else None
             result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
     except Exception as e:
-        logger.critical(f"Error with {method} on {graphon.repr} with n={n}")
+        logger.critical(f"Error with {method} on {graphon_repr} with n={n}")
         logger.critical(e)
-        result = [method, None, n, np.nan, np.nan, np.nan, np.nan, 0, 0]
+        traceback.print_exc()
+        result = [method, graphon_repr, n, np.nan, np.nan, np.nan, np.nan, 0, 0]
     # ----------------------
     logger.info("Saving results ")
     with open("results" + f"{folder_name}.pkl", "wb") as f:
@@ -158,8 +161,8 @@ if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
-    mult_rep = 2
-    n_min, n_max, n_step = 50, 300, 50
+    mult_rep = 5
+    n_min, n_max, n_step = 50, 1000, 50
     n_list = np.arange(n_min, n_max + 1, n_step)
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -267,14 +270,22 @@ if __name__ == "__main__":
     # If generate with other graphons
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
+        file_name = (
+            "method_comp"
+            + f"_{folder_name}"
+            + datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+            + ".csv"
+        )
         graphons = []
-        # , "USVT", "NBDsmooth", "Completion"]
         method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
+        factor = 1 / 6
+        logger.info(f"Generating graphons, with sparsification factor {factor}")
         for g in common_graphons.values():
+            g.sparsify(factor)
             graphons.append(g)
         csv_gen_graphon(
             path="results/usual_graphon",
-            file_name="method_comp" + f"_{folder_name}" + ".csv",
+            file_name=file_name,
             n_graphons=len(graphons) * (len(method) + len(CRITERIONS) - 1) * len(n_list) + 1,
             smoothnethist_par=True,
         )
@@ -301,7 +312,7 @@ if __name__ == "__main__":
                         for crit_idx, criterion in enumerate(CRITERIONS):
                             update_row(
                                 folder_name="usual_graphon",
-                                file_name="method_comp" + f"_{folder_name}",
+                                file_name=file_name,
                                 new_row=get_result_with_std(
                                     [sublist[crit_idx] + [criterion] for sublist in result],
                                     method=m,
@@ -312,7 +323,7 @@ if __name__ == "__main__":
                     else:
                         update_row(
                             folder_name="usual_graphon",
-                            file_name="method_comp" + f"_{folder_name}",
+                            file_name=file_name,
                             new_row=get_result_with_std(result, method=m),
                             row_index=idx,
                         )
