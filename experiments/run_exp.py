@@ -94,7 +94,7 @@ def main(
                 )
                 # if SmoothNetHist, compute BIC and ratio_par, leave None otherwise
                 s = len(np.unique(est.best_pairs[criterion]["graphon"].graphon))
-                graphon_repr = f"ssm {s}" if isinstance(graphon, StepGraphon) else graphon.repr
+                graphon_repr = graphon.repr
                 sub_result = [
                     method,
                     graphon_repr,
@@ -161,9 +161,10 @@ if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
-    mult_rep = 5
+    mult_rep = 10
     n_min, n_max, n_step = 50, 1000, 50
     n_list = np.arange(n_min, n_max + 1, n_step)
+    n_list = [500, 1000, 2000]
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
@@ -271,16 +272,18 @@ if __name__ == "__main__":
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if folder_name == "usual_graphon":
         file_name = (
-            "method_comp"
+            "method_comp_subset_fn"
             + f"_{folder_name}"
             + datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
             + ".csv"
         )
         graphons = []
         method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
-        factor = 1 / 6
+        factor = 1/6
         logger.info(f"Generating graphons, with sparsification factor {factor}")
-        for g in common_graphons.values():
+        list_graphons = ["sinusoidal", "latent_distance", "assortative_sbm", "dissassortative_sbm", "hsbm", "hsbm_partition", "partition", "logit_sum", "log_1_p"]
+        for g in list_graphons:
+            g = common_graphons[g]
             g.sparsify(factor)
             graphons.append(g)
         csv_gen_graphon(
