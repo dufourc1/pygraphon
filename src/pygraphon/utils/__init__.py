@@ -25,7 +25,7 @@ from .utils_matrix import (
     scatter_symmetric_matrix,
     upper_triangle_values,
 )
-from .utils_ssm import graph_celtic, graph_concentric_circle, graph2_celtic
+from .utils_ssm import generate_hierarchical_theta, AssociativeFullyRandom
 
 __all__ = [
     "copy_func",
@@ -47,7 +47,6 @@ __all__ = [
     "log_likelihood",
     "check_consistency_graphon_shape_with_bandwidth",
     "scatter_symmetric_matrix",
-    "graph_celtic",
-    "graph_concentric_circle",
-    "graph2_celtic",
+    "generate_hierarchical_theta",
+    "AssociativeFullyRandom",
 ]
