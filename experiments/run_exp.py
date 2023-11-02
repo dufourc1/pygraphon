@@ -119,11 +119,7 @@ def main(
             # Compute AUC and AUPRC
             norm_auc = AUCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
             norm_auprc = AUPRCEdge(n_nodes=n)(adjacency_matrix, est.get_edge_connectivity())
-            graphon_repr = (
-                f"sbm {comb(est.get_graphon().graphon.shape[0]+1,2)}"
-                if isinstance(graphon, StepGraphon)
-                else graphon.repr
-            )
+            graphon_repr = graphon.repr
             result = [method, graphon_repr, n, norm_mse, norm_mae, norm_auc, norm_auprc, 0, 0]
         else:
             est.fit(adjacency_matrix)
@@ -161,10 +157,10 @@ if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
-    mult_rep = 10
-    n_min, n_max, n_step = 50, 1000, 50
+    mult_rep = 5
+    n_min, n_max, n_step = 100, 2000, 100
     n_list = np.arange(n_min, n_max + 1, n_step)
-    n_list = [500, 1000, 2000]
+    #n_list = [500, 1000, 2000]
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
@@ -279,7 +275,7 @@ if __name__ == "__main__":
         )
         graphons = []
         method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
-        factor = 1/6
+        factor = 1
         logger.info(f"Generating graphons, with sparsification factor {factor}")
         list_graphons = ["sinusoidal", "latent_distance", "assortative_sbm", "dissassortative_sbm", "hsbm", "hsbm_partition", "partition", "logit_sum", "log_1_p"]
         for g in list_graphons:
