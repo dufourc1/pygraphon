@@ -69,7 +69,7 @@ class BaseEstimator:
             raise ValueError(
                 f"type of graph is not supported, got {type(graph)}, but expected nx.Graph or np.ndarray"
             )
-        check_simple_adjacency_matrix(adjacency_matrix)
+        # check_simple_adjacency_matrix(adjacency_matrix)
         (
             self.graphon,
             self.edge_connectivity,

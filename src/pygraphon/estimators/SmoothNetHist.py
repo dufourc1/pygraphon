@@ -73,6 +73,8 @@ class SmoothNetHist(BaseEstimator):
         self.bandwidth = bandwidth
         # logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-4
+        logger.warning("toleration is set to 1e-4, arbitrary value, argue")
+        self._tolerance = 1e-2
         self._first_fit_graphon = None
         self.cluster_it_list = []
         self.all_cluster_graphons = None
@@ -250,6 +252,9 @@ class SmoothNetHist(BaseEstimator):
                 + f"than the number of clusters {num_par_diff} in the histogram estimator"
             )
         # logger.debug(f"num_par_diff: {num_par_diff}, nrows: {nrow_tile}")
+
+        print("nrow_tile", nrow_tile)
+        print("num_par_diff", num_par_diff)
         clusters = (
             list(range(nrow_tile, num_par_diff + 1))
             if number_link_communities is None
