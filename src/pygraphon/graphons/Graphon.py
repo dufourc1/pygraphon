@@ -338,3 +338,24 @@ class Graphon:
             return 0.5 * self.graphon_function(x, y) + 0.5 * other.graphon_function(x, y)
 
         return Graphon(_function, check=False)
+
+    def sparsify(self, sparse_factor: float):
+        """Reduce the edge density of the graphon by a factor.
+
+        Parameters
+        ----------
+        sparse_factor : float
+            factor by which to reduce the edge density of the graphon
+
+        Raises
+        ------
+        ValueError
+            if sparse_factor is not in :math:`]0,1[`
+        """
+        if sparse_factor < 0 or sparse_factor > 1:
+            raise ValueError("Edge density must be in  ]0,1[")
+        logger.warning(
+            f"Sparsifying graphon by factor {sparse_factor}, this is irreversible until you restart Python"
+        )
+        # TODO: should return a copy of the graphon instead of modifying it
+        self.initial_rho *= sparse_factor

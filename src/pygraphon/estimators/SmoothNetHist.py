@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 from warnings import warn
 
 import numpy as np
-from loguru import logger
+# from loguru import logger
 from scipy.special import comb
 from sklearn.cluster import KMeans
 
@@ -71,6 +71,8 @@ class SmoothNetHist(BaseEstimator):
         self.kmeans_labels_evolution = {"labels": [], "nLC": []}
         self._num_par_nethist = -1
         self.bandwidth = bandwidth
+        # logger.warning("toleration is set to 1e-4, arbitrary value, argue")
+        self._tolerance = 1e-4
         logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-2
         self._first_fit_graphon = None
@@ -238,6 +240,7 @@ class SmoothNetHist(BaseEstimator):
         # Flattening the graphon and the areas
         nrow_tile = hist_approx.graphon.shape[0]
         flat_graphon = hist_approx.get_theta()[np.triu_indices(nrow_tile)]
+        # logger.debug(f"flat_graphon: {flat_graphon}")
         flat_areas = hist_approx.areas[np.triu_indices(nrow_tile)]
 
         # Number of link communities and input check
@@ -248,6 +251,7 @@ class SmoothNetHist(BaseEstimator):
                 f"The number of link communities {number_link_communities} is greater "
                 + f"than the number of clusters {num_par_diff} in the histogram estimator"
             )
+        # logger.debug(f"num_par_diff: {num_par_diff}, nrows: {nrow_tile}")
 
         print("nrow_tile", nrow_tile)
         print("num_par_diff", num_par_diff)
@@ -256,12 +260,15 @@ class SmoothNetHist(BaseEstimator):
             if number_link_communities is None
             else [number_link_communities]
         )
+        # logger.debug(f"clusters: {clusters}")
         avr_graphon = np.asarray([flat_graphon.copy() for _ in clusters])
+        # logger.debug(f"tiles: {avr_graphon}")
 
         # smoothing based on kmeans if needed
         for index, number_groups in enumerate(clusters):
             # erdos renyi approximation
             if number_groups == 1:
+                # logger.debug("YEP ALRIGHT FACK")
                 avr_graphon[index] = edge_density(A) * np.ones_like(flat_graphon)
             # original histogram estimator
             elif number_groups == self._num_par_nethist:
@@ -376,6 +383,8 @@ class SmoothNetHist(BaseEstimator):
         # deflatte the smoothed histograms and put them in a tensor
         KM_smooth_g = np.zeros((nclust_hist, nrow_tile, nrow_tile))
         i, j = np.triu_indices(nrow_tile)
+        # logger.debug(f"KM shape : nclust_hist: {nclust_hist}, nrow_tile: {nrow_tile}")
+        # logger.debug(f"avr_graphon shape : {avr_graphon.shape}")
         KM_smooth_g[:, i, j] = avr_graphon
         # Make it symmetric
         i, j = np.diag_indices(nrow_tile)
@@ -573,6 +582,8 @@ class SmoothNetHist(BaseEstimator):
                     index_best = i
         elif criterion_name == "elbow":
             index_best = elbow_point(values)
+        else:
+            raise ValueError(f"Criterion {criterion_name} not available.")
         return index_best
 
     def get_ratio_par(self) -> float:

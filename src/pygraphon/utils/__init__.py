@@ -25,6 +25,7 @@ from .utils_matrix import (
     scatter_symmetric_matrix,
     upper_triangle_values,
 )
+from .utils_ssm import graph_celtic, graph_concentric_circle, graph2_celtic
 
 __all__ = [
     "copy_func",
@@ -46,4 +47,7 @@ __all__ = [
     "log_likelihood",
     "check_consistency_graphon_shape_with_bandwidth",
     "scatter_symmetric_matrix",
+    "graph_celtic",
+    "graph_concentric_circle",
+    "graph2_celtic",
 ]
