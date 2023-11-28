@@ -4,13 +4,12 @@ from typing import Optional, Tuple
 import numpy as np
 import scipy
 import scipy.sparse.linalg
-from scipy import stats
 from loguru import logger
+from numba import jit
+from scipy import stats
 
 from .assignment import Assignment
 from .greedy_readable import greedy_opt
-
-from numba import jit
 
 
 def nethist(
@@ -24,7 +23,7 @@ def nethist(
 ) -> Tuple[Assignment, int]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
-    adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
+    Adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
 
     Parameters
     ----------
@@ -47,7 +46,6 @@ def nethist(
     Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]
         [idx,h] return the vector of group membership of the nodes and the parameter h
     """
-
     # Compute necessary summaries from A
     n = A.shape[0]
 
@@ -84,7 +82,11 @@ def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float 
 
 
 def oracbwplugin(
-    A: np.ndarray, c: float, type_: str = "degs", alpha: float = 1, num_diff_degrees: int = 100,
+    A: np.ndarray,
+    c: float,
+    type_: str = "degs",
+    alpha: float = 1,
+    num_diff_degrees: int = 100,
 ) -> Tuple[float, float]:
     """Oracle bandwidth plug-in estimtor for network histograms.
 
@@ -162,7 +164,7 @@ def oracbwplugin(
         u = np.sort(u.ravel())
         uMid = u[midPt]
         increment = 1
-        while np.unique(uMid).size <= num_diff_degrees:
+        while np.unique(uMid).size <= num_diff_degrees & np.min(midPt) > 0 & np.max(midPt) < n:
             midPt = np.arange(
                 round(n / 2 - c * np.sqrt(n)) - 1 - increment,
                 round(n / 2 + c * np.sqrt(n)) + increment,
@@ -241,11 +243,23 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float = 0.0) -> np.ndar
 
 @jit(nopython=True, parallel=False, fastmath=True)
 def fast_pairwise_distance(A):
+    """Compute the pairwise distance between each row of A.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        adjacency matrix
+
+    Returns
+    -------
+    np.ndarray
+        pairwise distance between each row of A
+    """
     n = A.shape[0]
     dist_matrix = np.zeros((n, n), dtype=np.float64)
     for i in range(n):
         for j in range(i, n):
-            dist = np.sum(np.abs(A[i] - A[j]))/n
+            dist = np.sum(np.abs(A[i] - A[j])) / n
             dist_matrix[i, j] = dist
             dist_matrix[j, i] = dist  # Symmetric matrix
     return dist_matrix
