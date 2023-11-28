@@ -45,32 +45,49 @@ class ER:
         self.Theta = np.array([self.p]).reshape(1, 1)
         self.K = 1
 
-
-def gen_sbm(
-    n_list: list,
-    k_list: list,
-    theta_intra_min: float,
-    theta_intra_max: float,
-    theta_inter_min: float,
-    theta_inter_max: float,
-    folder_name: str,
-) -> Tuple[Graphon, np.ndarray]:
-    """Generates the csv file to store results when testing estimator for different graphons.
-
-    Parameters
-    ----------
-    n_list : list
-        list of n
-    k_list : list
-        list of k
-    theta_intra_min : float
-        minimum value of theta_intra
-    theta_intra_max : float
-        maximum value of theta_intra
-    theta_inter_min : float
-        minimum value of theta_inter
-    theta_inter_max : float
-        maximum value of theta_inter
-    folder_name : str
-        folder to save the results
+def generate_hierarchical_theta(k, m, theta_min_intra, theta_max_intra, theta_min_meta_intra, theta_max_meta_intra, theta_min_inter, theta_max_inter):
     """
+    Generate a symmetric hierarchical connectivity matrix θ for an HSBM.
+
+    Parameters:
+    - k: total number of blocks
+    - m: number of meta-blocks
+    - theta_min_intra, theta_max_intra: intra-connectivity range within a block
+    - theta_min_meta_intra, theta_max_meta_intra: intra-connectivity range within a meta-block but across blocks
+    - theta_min_inter, theta_max_inter: inter-connectivity range between meta-blocks
+
+    Returns:
+    - θ: k x k symmetric hierarchical connectivity matrix
+    """
+
+    # Check if k is divisible by m
+    if k % m != 0:
+        raise ValueError("k should be divisible by m for a uniform hierarchical structure.")
+
+    n = k // m  # Number of blocks within each meta-block
+
+    theta = np.zeros((k, k))
+
+    for i in range(k):
+        for j in range(i, k):  # Only loop over the upper triangle including the diagonal
+            # Determine meta-blocks for i and j
+            meta_block_i = i // n
+            meta_block_j = j // n
+
+            if meta_block_i == meta_block_j:
+                # Within the same meta-block
+                if i == j:
+                    # Same block: intra-connectivity
+                    theta[i, j] = np.random.uniform(theta_min_intra, theta_max_intra)
+                else:
+                    # Different block but same meta-block: meta-intra-connectivity
+                    theta[i, j] = np.random.uniform(theta_min_meta_intra, theta_max_meta_intra)
+            else:
+                # Different meta-blocks: inter-connectivity
+                theta[i, j] = np.random.uniform(theta_min_inter, theta_max_inter)
+            
+            # Make the matrix symmetric
+            theta[j, i] = theta[i, j]
+
+    return theta
+
