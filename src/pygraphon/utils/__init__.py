@@ -25,7 +25,7 @@ from .utils_matrix import (
     scatter_symmetric_matrix,
     upper_triangle_values,
 )
-from .utils_ssm import generate_hierarchical_theta, AssociativeFullyRandom
+from .utils_ssm import AssociativeFullyRandom, generate_hierarchical_theta
 
 __all__ = [
     "copy_func",
