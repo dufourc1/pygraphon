@@ -274,10 +274,10 @@ if __name__ == "__main__":
             + ".csv"
         )
         graphons = []
-        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT", "NBDsmooth", "Completion"]
+        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT"]#, "NBDsmooth", "Completion"]
         factor = 1
         logger.info(f"Generating graphons, with sparsification factor {factor}")
-        list_graphons = ["sinusoidal", "latent_distance", "assortative_sbm", "dissassortative_sbm", "hsbm", "hsbm_partition", "partition", "logit_sum", "log_1_p"]
+        list_graphons = ["assortative_sbm", "dissassortative_sbm", "hsbm", "hsbm_partition", "partition"]
         for g in list_graphons:
             g = common_graphons[g]
             g.sparsify(factor)

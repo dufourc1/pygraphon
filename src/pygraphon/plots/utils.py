@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import axes_grid1
 
 
-def make_pretty(ax):
+def make_pretty(ax, aspect="equal"):
     """Remove the figure frame, x- and y-ticks, and set the aspect to equal.
 
     Parameters
@@ -12,7 +12,8 @@ def make_pretty(ax):
     """
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_aspect("equal")
+    if aspect == "equal":
+        ax.set_aspect("equal")
     ax.get_figure().set_facecolor("w")
     ax.set_frame_on(False)
 
