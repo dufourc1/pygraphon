@@ -25,6 +25,7 @@ from .utils_matrix import (
     scatter_symmetric_matrix,
     upper_triangle_values,
 )
+from .utils_ssm import AssociativeFullyRandom, generate_hierarchical_theta
 
 __all__ = [
     "copy_func",
@@ -46,4 +47,6 @@ __all__ = [
     "log_likelihood",
     "check_consistency_graphon_shape_with_bandwidth",
     "scatter_symmetric_matrix",
+    "generate_hierarchical_theta",
+    "AssociativeFullyRandom",
 ]

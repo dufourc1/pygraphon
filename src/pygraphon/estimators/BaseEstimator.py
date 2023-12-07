@@ -6,10 +6,7 @@ import networkx as nx
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils.utils_graph import (
-    check_simple_adjacency_matrix,
-    get_adjacency_matrix_from_graph,
-)
+from pygraphon.utils.utils_graph import get_adjacency_matrix_from_graph
 
 
 class BaseEstimator:
@@ -69,7 +66,7 @@ class BaseEstimator:
             raise ValueError(
                 f"type of graph is not supported, got {type(graph)}, but expected nx.Graph or np.ndarray"
             )
-        check_simple_adjacency_matrix(adjacency_matrix)
+        # check_simple_adjacency_matrix(adjacency_matrix)
         (
             self.graphon,
             self.edge_connectivity,

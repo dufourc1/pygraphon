@@ -68,10 +68,14 @@ class SmoothNetHist(BaseEstimator):
             self.best_pairs = {self.criterion_name: {"graphon": None, "pij": None}}
             self._criterion_nethist = {self.criterion_name: np.inf}
             self._num_par_smooth = {self.criterion_name: -1}
+        self.kmeans_labels_evolution = {"labels": [], "nLC": []}
         self._num_par_nethist = -1
         self.bandwidth = bandwidth
-        logger.warning("toleration is set to 1e-4, arbitrary value, argue")
         self._tolerance = 1e-4
+        logger.warning("toleration is set to 1e-4, arbitrary value, argue")
+        self._first_fit_graphon = None
+        self.cluster_it_list = []
+        self.all_cluster_graphons = None
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -107,6 +111,7 @@ class SmoothNetHist(BaseEstimator):
             use_default_bandwidth,
             progress_bar,
         )
+        self._first_fit_graphon = first_fit_graphon
 
         tensor_graphon, n_link_com = self._smoothing_histLC(
             first_fit_graphon, adjacencyMatrix, number_link_communities
@@ -243,26 +248,27 @@ class SmoothNetHist(BaseEstimator):
                 f"The number of link communities {number_link_communities} is greater "
                 + f"than the number of clusters {num_par_diff} in the histogram estimator"
             )
-
         clusters = (
             list(range(nrow_tile, num_par_diff + 1))
             if number_link_communities is None
             else [number_link_communities]
         )
         avr_graphon = np.asarray([flat_graphon.copy() for _ in clusters])
-
         # smoothing based on kmeans if needed
         for index, number_groups in enumerate(clusters):
             # erdos renyi approximation
             if number_groups == 1:
+                # logger.debug("YEP ALRIGHT FACK")
                 avr_graphon[index] = edge_density(A) * np.ones_like(flat_graphon)
             # original histogram estimator
             elif number_groups == self._num_par_nethist:
                 pass
             else:
+                labels = self._cluster(number_groups, flat_graphon)
+                self.cluster_it_list.append(labels)
                 avr_graphon[index] = self._smoothing_operator(
                     tensor_slice_graphon=avr_graphon[index],
-                    labels=self._cluster(number_groups, flat_graphon),
+                    labels=labels,
                     number_link_communities=number_groups,
                     flat_graphon=flat_graphon,
                     flat_areas=flat_areas,
@@ -301,6 +307,8 @@ class SmoothNetHist(BaseEstimator):
             init=method,
             n_init=10,
         ).fit(flat_graphon.reshape(-1, 1))
+        self.kmeans_labels_evolution["labels"].append(kmeans.labels_)
+        self.kmeans_labels_evolution["nLC"].append(number_link_communities)
         return kmeans.labels_
 
     def _smoothing_operator(
@@ -334,7 +342,7 @@ class SmoothNetHist(BaseEstimator):
         tensor_slice_graphon : np.ndarray
             tensor slice containing the smoothed graphon, smoothed with number_link_communities
         """
-        for j in range(number_link_communities):
+        for j in np.unique(labels):
             labels_j = np.argwhere(labels == j).reshape(-1)
             tensor_slice_graphon[labels_j] = np.sum(
                 flat_graphon[labels_j] * flat_areas[labels_j]
@@ -381,6 +389,7 @@ class SmoothNetHist(BaseEstimator):
             )
             for i in range(nclust_hist)
         ]
+        self.all_cluster_graphons = smoothed_graphons
         return smoothed_graphons
 
     def _select_best_graphon(
@@ -487,10 +496,6 @@ class SmoothNetHist(BaseEstimator):
         # Return by default bic to preserve estimator structure, other criterion are available in self.best_pairs.
         best_graphon = self.best_pairs[ref_criterion]["graphon"]
         best_pij = self.best_pairs[ref_criterion]["pij"]
-        logger.debug(
-            f"Best {ref_criterion} among criterions: {self.criterion_values[ref_criterion]}, "
-            + f" with {self._num_par_smooth[ref_criterion]} link communities."
-        )
 
         return best_graphon, best_pij
 
@@ -565,6 +570,8 @@ class SmoothNetHist(BaseEstimator):
                     index_best = i
         elif criterion_name == "elbow":
             index_best = elbow_point(values)
+        else:
+            raise ValueError(f"Criterion {criterion_name} not available.")
         return index_best
 
     def get_ratio_par(self) -> float:

@@ -4,10 +4,9 @@ from typing import Optional, Tuple
 import numpy as np
 import scipy
 import scipy.sparse.linalg
+from loguru import logger
+from numba import jit
 from scipy import stats
-from sklearn.metrics import pairwise_distances
-
-from pygraphon.utils.utils_graph import check_simple_adjacency_matrix
 
 from .assignment import Assignment
 from .greedy_readable import greedy_opt
@@ -19,11 +18,12 @@ def nethist(
     absTol: float = 2.5 * 1e-4,
     maxNumIterations: int = 500,
     past_non_improving: int = 3,
-    progress_bar: bool = False,
+    progress_bar: bool = True,
+    laplacian: bool = False,
 ) -> Tuple[Assignment, int]:
     """Compute the network histogram of an N-by-N adjacency matrix.
 
-    adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
+    Adjacency matrix is assumed to be  0-1 valued, symmetric, and with zero on the diagonal.
 
     Parameters
     ----------
@@ -46,11 +46,8 @@ def nethist(
     Tuple[List, int, Optional[Tuple[np.ndarray, np.ndarray]]]
         [idx,h] return the vector of group membership of the nodes and the parameter h
     """
-    check_simple_adjacency_matrix(A)
-
     # Compute necessary summaries from A
     n = A.shape[0]
-    rhoHat = np.sum(A) / (n * (n - 1))
 
     # use data driven h
     h = int(h) if h is not None else int(_oracle_analysis_badnwidth(A=A.astype(float)))
@@ -65,7 +62,7 @@ def nethist(
         h = h - 1
         lastGroupSize = n % h
 
-    idxInit = _first_guess_blocks(A, h, regParam=rhoHat / 4)
+    idxInit = _first_guess_blocks(A, h)
 
     best_assignment = greedy_opt(
         A,
@@ -73,6 +70,7 @@ def nethist(
         absTol=absTol,
         maxNumIterations=maxNumIterations,
         past_non_improving=past_non_improving,
+        progress_bar=progress_bar,
     )
     return best_assignment, h
 
@@ -84,7 +82,11 @@ def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float 
 
 
 def oracbwplugin(
-    A: np.ndarray, c: float, type_: str = "degs", alpha: float = 1
+    A: np.ndarray,
+    c: float,
+    type_: str = "degs",
+    alpha: float = 1,
+    num_diff_degrees: int = 100,
 ) -> Tuple[float, float]:
     """Oracle bandwidth plug-in estimtor for network histograms.
 
@@ -102,6 +104,9 @@ def oracbwplugin(
          Estimate slope from sorted vector ('degs' or 'eigs'). Defaults to "degs".
     alpha : float
          Holder exponent. Defaults to 1.
+    num_diff_degrees : int
+            Number of different degrees to use in slope estimation. Defaults to 100.
+            If the number of nodes is smaller than num_diff_degrees, then all the nodes are used.
 
     Returns
     -------
@@ -128,12 +133,12 @@ def oracbwplugin(
         raise ValueError("c must be positive")
     if alpha != 1:
         raise NotImplementedError("Currently only support alpha = 1")
-    check_simple_adjacency_matrix(A)
 
     # conversion for scipy functions
     A = A.astype(float)
 
     n = A.shape[0]
+    num_diff_degrees = min(num_diff_degrees, n)
     midPt = np.arange(round(n / 2 - c * np.sqrt(n)) - 1, round(n / 2 + c * np.sqrt(n)))
     rhoHat = np.sum(A) / (n * (n - 1))
     pseudo_inverse_rho_hat = 1 / rhoHat if rhoHat != 0 else 0
@@ -151,6 +156,7 @@ def oracbwplugin(
     if np.unique(u).size == 1:
         h = 1
         estMSqrd = 0
+        logger.warning("All the degrees are the same, there is no information in there")
     # if the slope is 0, we have an issue: we need to have a non uniform array
     # of degrees to compute the slope: we augment the value of c to get a non uniform array
     # if needed
@@ -158,7 +164,7 @@ def oracbwplugin(
         u = np.sort(u.ravel())
         uMid = u[midPt]
         increment = 1
-        while np.unique(uMid).size == 1:
+        while np.unique(uMid).size <= num_diff_degrees & np.min(midPt) > 0 & np.max(midPt) < n:
             midPt = np.arange(
                 round(n / 2 - c * np.sqrt(n)) - 1 - increment,
                 round(n / 2 + c * np.sqrt(n)) + increment,
@@ -187,7 +193,7 @@ def oracbwplugin(
     return h, estMSqrd
 
 
-def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
+def _first_guess_blocks(A: np.ndarray, h: int, regParam: float = 0.0) -> np.ndarray:
     """Compute the first guess of the node membership (block labels).
 
     Parameters
@@ -206,11 +212,12 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
     """
     n = A.shape[0]
 
-    if regParam == 0:
-        distVec = pairwise_distances(A, A, metric="manhattan") / n
+    if A.dtype != np.dtype("int"):
+        logger.info("A is not int, casting to int for faster computation")
+        distVec = fast_pairwise_distance(A.astype(int))
     else:
-        A_inter = A + regParam * np.ones_like(A) * regParam
-        distVec = pairwise_distances(A_inter, A_inter, metric="manhattan") / n
+        distVec = fast_pairwise_distance(A)
+
     L = np.ones_like(distVec) - distVec**2
     d = np.sum(L, axis=1)
     d = d[:, np.newaxis]
@@ -232,3 +239,27 @@ def _first_guess_blocks(A: np.ndarray, h: int, regParam: float) -> np.ndarray:
     for i in range(k):
         idxInit[ind[i * h : min(n, (i + 1) * h)]] = i
     return idxInit.astype(int)
+
+
+@jit(nopython=True, parallel=False, fastmath=True)
+def fast_pairwise_distance(A):
+    """Compute the pairwise distance between each row of A.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        adjacency matrix
+
+    Returns
+    -------
+    np.ndarray
+        pairwise distance between each row of A
+    """
+    n = A.shape[0]
+    dist_matrix = np.zeros((n, n), dtype=np.float64)
+    for i in range(n):
+        for j in range(i, n):
+            dist = np.sum(np.abs(A[i] - A[j])) / n
+            dist_matrix[i, j] = dist
+            dist_matrix[j, i] = dist  # Symmetric matrix
+    return dist_matrix
