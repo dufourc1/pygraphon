@@ -166,8 +166,8 @@ def oracbwplugin(
         increment = 1
         while np.unique(uMid).size <= num_diff_degrees & np.min(midPt) > 0 & np.max(midPt) < n:
             midPt = np.arange(
-                max(0,round(n / 2 - c * np.sqrt(n)) - 1 - increment),
-                min(n-1,round(n / 2 + c * np.sqrt(n)) + increment),
+                max(0, round(n / 2 - c * np.sqrt(n)) - 1 - increment),
+                min(n - 1, round(n / 2 + c * np.sqrt(n)) + increment),
             )
             uMid = u[midPt]
             increment += 1
@@ -202,8 +202,6 @@ def _first_guess_blocks(A: np.ndarray, h: int) -> np.ndarray:
         adjacency matrix
     h : int
         number of nodes per block
-    regParam : float
-        regularisation parameter to help decomposing the adjacency matrix
 
     Returns
     -------
