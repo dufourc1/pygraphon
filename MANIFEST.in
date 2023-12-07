@@ -23,8 +23,3 @@ exclude dev
 include docs/requirements.txt
 recursive-include docs *.bib
 exclude codecov.yml
-<<<<<<< HEAD
-recursive-include experiments *.py
-=======
-include CITATION.cff
->>>>>>> master
