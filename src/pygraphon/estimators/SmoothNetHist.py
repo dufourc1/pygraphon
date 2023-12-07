@@ -258,7 +258,6 @@ class SmoothNetHist(BaseEstimator):
         for index, number_groups in enumerate(clusters):
             # erdos renyi approximation
             if number_groups == 1:
-                # logger.debug("YEP ALRIGHT FACK")
                 avr_graphon[index] = edge_density(A) * np.ones_like(flat_graphon)
             # original histogram estimator
             elif number_groups == self._num_par_nethist:
