@@ -166,8 +166,8 @@ def oracbwplugin(
         increment = 1
         while np.unique(uMid).size <= num_diff_degrees & np.min(midPt) > 0 & np.max(midPt) < n:
             midPt = np.arange(
-                round(n / 2 - c * np.sqrt(n)) - 1 - increment,
-                round(n / 2 + c * np.sqrt(n)) + increment,
+                max(0,round(n / 2 - c * np.sqrt(n)) - 1 - increment),
+                min(n-1,round(n / 2 + c * np.sqrt(n)) + increment),
             )
             uMid = u[midPt]
             increment += 1
@@ -193,7 +193,7 @@ def oracbwplugin(
     return h, estMSqrd
 
 
-def _first_guess_blocks(A: np.ndarray, h: int, regParam: float = 0.0) -> np.ndarray:
+def _first_guess_blocks(A: np.ndarray, h: int) -> np.ndarray:
     """Compute the first guess of the node membership (block labels).
 
     Parameters
