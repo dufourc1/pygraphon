@@ -6,10 +6,7 @@ import networkx as nx
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils.utils_graph import (
-    check_simple_adjacency_matrix,
-    get_adjacency_matrix_from_graph,
-)
+from pygraphon.utils.utils_graph import get_adjacency_matrix_from_graph
 
 
 class BaseEstimator:

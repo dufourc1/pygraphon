@@ -9,6 +9,7 @@ import pytest
 
 from pygraphon.graphons import common_graphons as cgf
 from pygraphon.graphons.Graphon import Graphon
+from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils import edge_density
 
 
@@ -99,10 +100,17 @@ def test_integral():
         assert math.isclose(first_integral, second_integral, abs_tol=1e-3)
         assert math.isclose(first_integral, 1, abs_tol=1e-3)
         assert math.isclose(second_integral, 1, abs_tol=1e-3)
-        assert math.isclose(
-            graphon.unormalized_graphon_function(0.2, 0.3),
-            graphon.graphon_function(0.2, 0.3) * graphon.initial_rho,
-        )
+        # check if graphon is StepGraphon as it is already normalised
+        if not isinstance(graphon, StepGraphon):
+            assert math.isclose(
+                graphon.unormalized_graphon_function(0.2, 0.3),
+                graphon.graphon_function(0.2, 0.3) * graphon.initial_rho,
+            )
+        else:
+            assert math.isclose(
+                graphon.unormalized_graphon_function(0.2, 0.3),
+                graphon.graphon_function(0.2, 0.3),
+            )
 
 
 def test_error_on_not_implemented_integration():
