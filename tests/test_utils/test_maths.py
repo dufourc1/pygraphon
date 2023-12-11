@@ -6,7 +6,7 @@ from math import log
 import numpy as np
 import pytest
 
-from pygraphon.utils.utils_maths import EPS, log_likelihood
+from pygraphon.utils import EPS, log_likelihood
 
 
 def test_log_likelihood_simple_graph():

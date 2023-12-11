@@ -14,3 +14,4 @@ ignore:
   - "setup.py"
   - "src/pygraphon/__init__.py"
   - "src/pygraphon/version.py"
+  - "src/pygraphon/utils/utils_jit.py" # codecov does not support jitted code
