@@ -482,7 +482,7 @@ class SmoothNetHist(BaseEstimator):
         ref_criterion = "bic" if self.criterion_name == "all" else self.criterion_name
 
         for criterion in list_criterion:
-            all_criterion_values = self.get_criterion_values(
+            all_criterion_values = self._get_criterion_values(
                 tensor_graphon, adjacencyMatrix, latentVar, n_link_com, criterion
             )
             best_index = self.choose_best(np.array(all_criterion_values), criterion)
@@ -498,7 +498,7 @@ class SmoothNetHist(BaseEstimator):
 
         return best_graphon, best_pij
 
-    def get_criterion_values(
+    def _get_criterion_values(
         self,
         tensor_graphon: List[StepGraphon],
         adjacencyMatrix: np.ndarray,
