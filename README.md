@@ -181,25 +181,4 @@ $ pip install -r docs/requirements.txt
 ```
 
 note: to correctly format the documentation, one can use tool such as `rstfmt` (installable with `pip install rstfmt`).
-
-### 📦 Making a Release
-
-After installing the package in development mode and installing
-`tox` with `pip install tox`, the commands for making a new release are contained within the `finish` environment
-in `tox.ini`. Run the following from the shell:
-
-```shell
-$ tox -e finish
-```
-
-This script does the following:
-
-1. Uses BumpVersion to switch the version number in the `setup.cfg` and
-	 `src/pygraphon/version.py` to not have the `-dev` suffix
-2. Packages the code in both a tar archive and a wheel
-3. Uploads to PyPI using `twine`. Be sure to have a `.pypirc` file configured to avoid the need for manual input at this
-	 step
-4. Push to GitHub. You'll need to make a release going with the commit where the version was bumped.
-5. Bump the version to the next patch. If you made big changes and want to bump the version by minor, you can
-	 use `tox -e bumpversion minor` after.
 </details>
