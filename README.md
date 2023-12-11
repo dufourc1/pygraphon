@@ -87,6 +87,7 @@ $ git clone git+https://github.com/dufourc1/pygraphon.git
 $ cd pygraphon
 $ pip install -e .
 ```
+</details>
 
 ## 👐 Contributing
 
@@ -133,13 +134,14 @@ This project has been supported by the following grants:
 This package was created with [@audreyfeldroy](https://github.com/audreyfeldroy)'s
 [cookiecutter](https://github.com/cookiecutter/cookiecutter) package using [@cthoyt](https://github.com/cthoyt)'s
 [cookiecutter-snekpack](https://github.com/cthoyt/cookiecutter-snekpack) template.
+</details>
 
 ## 🛠️ For Developers
 
 <details>
 	<summary>See developer instructions</summary>
 
-	
+
 The final section of the README is for if you want to get involved by making a code contribution.
 
 ### ❓ Testing
