@@ -62,7 +62,7 @@ P_estimated = graphon_estimated.get_edge_connectivity()
 To cite this library, please use the following citation:
 
 ```bibtex
-@misc{dufour_2023_10355248_old,
+@misc{dufour_verdeyme_2023,
          author       = {Dufour, Charles and Verdeyme, Arthur},
          title        = {PyGraphon},
          year         = {2023},

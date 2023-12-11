@@ -39,7 +39,7 @@ To cite this library, please use the following:
 
 .. code:: latex
 
-   @misc{dufour_2023_10355248_old,
+   @misc{dufour_verdeyme_2023,
          author       = {Dufour, Charles and
                          Verdeyme, Arthur},
          title        = {PyGraphon},
