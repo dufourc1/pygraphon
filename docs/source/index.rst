@@ -39,14 +39,15 @@ To cite this library, please use the following:
 
 .. code:: latex
 
-   @misc{dufour_2023,
-        title = {{{PyGraphon}}},
-        author = {Dufour, Charles and Verdeyme, Arthur},
-        year = {2023},
-        month = dec,
-        doi = {10.5281/zenodo.10355248},
-        howpublished = {Zenodo}
-    }
+   @misc{dufour_2023_10355248_old,
+         author       = {Dufour, Charles and
+                         Verdeyme, Arthur},
+         title        = {PyGraphon},
+         year         = {2023},
+         howpublished = {Available from https://doi.org/10.5281/zenodo.10355248},
+         note         = {Zenodo},
+         doi          = {10.5281/zenodo.10355248}
+       }
 
 
 .. toctree::
