@@ -9,7 +9,6 @@ import pytest
 
 from pygraphon.graphons import common_graphons as cgf
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.graphons.StepGraphon import StepGraphon
 from pygraphon.utils import edge_density
 
 
