@@ -132,6 +132,7 @@ def test_print_method(capfd):
 
 
 def test_sparsification():
+    """Test that the sparsification method is correct."""
     g = Graphon(lambda x, y: 1)
     assert g.initial_rho == 1
     g.sparsify(0.5)
