@@ -19,7 +19,7 @@ authors:
     affiliation: EPFL
     orcid: 'https://orcid.org/0009-0003-5319-9228'
 repository-code: 'https://github.com/dufourc1/pygraphon'
-abstract: ' PyGraphon is a Python library for estimating graphons. This library specializes in providing algorithms and tools for estimating graphons from observed data, making it easier to work with these objects in a practical setting.'
+abstract: ' Python library for estimating graphons.'
 keywords:
   - graphon estimation
   - graphon
