@@ -34,8 +34,8 @@ random graphs, from observed data.
 
 To cite this library, please use the following:
 
-   Dufour, C., & Verdeyme, A. (2023). PyGraphon (v0.4). Zenodo.
-   https://doi.org/10.5281/zenodo.10355248
+   Dufour, C., & Verdeyme, A. (2023). PyGraphon. Zenodo.
+   https://doi.org/10.5281/zenodo.10355247
 
 .. code:: latex
 
@@ -44,9 +44,9 @@ To cite this library, please use the following:
                          Verdeyme, Arthur},
          title        = {PyGraphon},
          year         = {2023},
-         howpublished = {Available from https://doi.org/10.5281/zenodo.10355248},
+         howpublished = {Available from https://doi.org/10.5281/zenodo.10355247},
          note         = {Zenodo},
-         doi          = {10.5281/zenodo.10355248}
+         doi          = {10.5281/zenodo.10355247}
        }
 
 

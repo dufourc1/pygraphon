@@ -58,6 +58,20 @@ theta = graphon_estimated.get_theta()
 P_estimated = graphon_estimated.get_edge_connectivity()
 ```
 
+
+To cite this library, please use the following citation:
+
+```bibtex
+@misc{dufour_2023_10355248_old,
+         author       = {Dufour, Charles and Verdeyme, Arthur},
+         title        = {PyGraphon},
+         year         = {2023},
+         howpublished = {https://doi.org/10.5281/zenodo.10355247},
+         note         = {Zenodo},
+         doi          = {10.5281/zenodo.10355247}
+    }
+```
+
 ## 🚀 Installation
 
 <details>
