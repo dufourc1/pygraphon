@@ -339,7 +339,7 @@ class Graphon:
 
         return Graphon(_function, check=False)
 
-    def sparsify(self, sparse_factor: float):
+    def sparsify(self, sparse_factor: float) -> None:
         """Reduce the edge density of the graphon by a factor.
 
         Parameters

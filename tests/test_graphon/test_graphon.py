@@ -129,3 +129,12 @@ def test_print_method(capfd):
     print(g2)  # noqa: T201
     out, _ = capfd.readouterr()
     assert out == "Erdos-Renyi\n"
+
+
+def test_sparsification():
+    g = Graphon(lambda x, y: 1)
+    assert g.initial_rho == 1
+    g.sparsify(0.5)
+    assert g.initial_rho == 0.5
+    with pytest.raises(ValueError):
+        g.sparsify(2)

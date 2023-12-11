@@ -62,6 +62,9 @@ P_estimated = graphon_estimated.get_edge_connectivity()
 
 ## 🚀 Installation
 
+<details>
+ <summary>See Installation instructions</summary>
+
 <!-- Uncomment this section after your first ``tox -e finish``
 The most recent release can be installed from
 [PyPI](https://pypi.org/project/pygraphon/) with:
@@ -91,6 +94,10 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 [CONTRIBUTING.rst](https://github.com//pygraphon/blob/master/CONTRIBUTING.rst) for more information on getting involved.
 
 ## 👋 Attribution
+
+<details>
+ <summary>See Attributions</summary>
+
 
 ### ⚖️ License
 
@@ -130,7 +137,7 @@ This package was created with [@audreyfeldroy](https://github.com/audreyfeldroy)
 ## 🛠️ For Developers
 
 <details>
-	<summary>See developer instrutions</summary>
+	<summary>See developer instructions</summary>
 
 	
 The final section of the README is for if you want to get involved by making a code contribution.
