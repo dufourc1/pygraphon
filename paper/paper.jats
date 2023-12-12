@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>PyGraphon: a Python package for graphon
+estimation</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author" equal-contrib="yes">
+<contrib-id contrib-id-type="orcid">https://orcid.org/0009-0000-3612-7335</contrib-id>
+<name>
+<surname>Dufour</surname>
+<given-names>Charles</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<contrib contrib-type="author" equal-contrib="yes">
+<contrib-id contrib-id-type="orcid">https://orcid.org/0009-0003-5319-9228</contrib-id>
+<name>
+<surname>Verdeyme</surname>
+<given-names>Arthur</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>EPFL, Switzerland</institution>
+</institution-wrap>
+</aff>
+</contrib-group>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2023-12-12">
+<day>12</day>
+<month>12</month>
+<year>2023</year>
+</pub-date>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>2022</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>Python</kwd>
+<kwd>statistics</kwd>
+<kwd>graph limit</kwd>
+<kwd>graphon</kwd>
+<kwd>networks</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+  <p><italic>describing the high-level functionality and purpose of the
+  software for a diverse, non-specialist audience</italic></p>
+  <p><monospace>Pygraphon</monospace> is a Python library designed to
+  estimate graphons, providing an intuitive interface for researchers
+  and practitioners to model and analyze graph structures efficiently.
+  Graphons are probability distributions on the space of graphs,
+  allowing users to infer underlying network characteristics from
+  observed data. This library caters to a broad audience, enabling
+  non-specialists to engage with graphon estimation techniques and apply
+  them in various fields, including social networks, neuroscience, and
+  machine learning.</p>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of need</title>
+  <p><italic>clearly illustrates the research purpose of the software
+  and places it in the context of related work.</italic></p>
+  <p>Graphon estimation stands as a crucial tool in the analysis of
+  large-scale networks, serving as a fundamental step in understanding
+  complex systems. <monospace>Pygraphon</monospace> addresses the need
+  for accessible, user-friendly tools that enable researchers across
+  domains to estimate graphons accurately. By providing a comprehensive
+  set of functionalities for graphon modeling, estimation, and
+  visualization, this library contributes to the advancement of network
+  science and facilitates insights into the structure and dynamics of
+  complex networks.</p>
+  <sec id="similar-software">
+    <title>Similar software</title>
+    <p><italic>A list of key references, including to other software
+    addressing related needs. Note that the references should include
+    full names of venues, e.g., journals and conferences, not
+    abbreviations only understood in the context of a specific
+    discipline.</italic></p>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>R</monospace> package
+        <ext-link ext-link-type="uri" xlink:href="https://cran.r-project.org/package=graphon"><monospace>graphon</monospace></ext-link>
+        (<xref alt="You, 2017" rid="ref-graphon" ref-type="bibr">You,
+        2017</xref>)</p>
+      </list-item>
+      <list-item>
+        <p><monospace>R</monospace> package
+        <ext-link ext-link-type="uri" xlink:href="https://enigmasong.github.io/nethist/index.html"><monospace>nethist</monospace></ext-link>
+        <italic>(development stage)</italic>
+        (<xref alt="Song &amp; Olhede, 2023" rid="ref-song2023" ref-type="bibr">Song
+        &amp; Olhede, 2023</xref>)</p>
+      </list-item>
+      <list-item>
+        <p><monospace>Julia</monospace> package
+        <ext-link ext-link-type="uri" xlink:href="https://docs.juliahub.com/General/NetworkHistogram/stable/"><monospace>NetworkHistogram.jl</monospace></ext-link>
+        (<xref alt="Dufour &amp; Grainger, 2023" rid="ref-Dufour2023" ref-type="bibr">Dufour
+        &amp; Grainger, 2023</xref>)</p>
+      </list-item>
+    </list>
+    <p>We list the different methods implemented in
+    <monospace>Pygraphon</monospace>, <monospace>graphon</monospace>,
+    and <monospace>NetworkHistogram.jl</monospace> latter in Table
+    2.</p>
+    <p><italic>Mention (if applicable) a representative set of past or
+    ongoing research projects using the software and recent scholarly
+    publications enabled by it.</italic></p>
+    <p>Recent Scholarly Publications Enabled by
+    <monospace>Pygraphon</monospace>:</p>
+    <list list-type="bullet">
+      <list-item>
+        <p>Verdeyme &amp; Olhede
+        (<xref alt="2024" rid="ref-verdeyme2024shape" ref-type="bibr">2024</xref>)</p>
+      </list-item>
+    </list>
+  </sec>
+</sec>
+<sec id="functionality-and-implementation">
+  <title>Functionality and implementation</title>
+  <p>For more details, please refer to the
+  <ext-link ext-link-type="uri" xlink:href="https://pygraphon.readthedocs.io/en/latest/">documentation</ext-link>.</p>
+  <p><disp-formula><alternatives>
+  <tex-math><![CDATA[ A\_{ij} | \xi_i, \xi_j \sim \mathrm{Bernoulli}(W(\xi_i, \xi_j)) ]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>A</mml:mi><mml:mi>_</mml:mi><mml:mrow><mml:mi>i</mml:mi><mml:mi>j</mml:mi></mml:mrow><mml:mo stretchy="false" form="prefix">|</mml:mo><mml:msub><mml:mi>ξ</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mo>,</mml:mo><mml:msub><mml:mi>ξ</mml:mi><mml:mi>j</mml:mi></mml:msub><mml:mo>∼</mml:mo><mml:mrow><mml:mi mathvariant="normal">B</mml:mi><mml:mi mathvariant="normal">e</mml:mi><mml:mi mathvariant="normal">r</mml:mi><mml:mi mathvariant="normal">n</mml:mi><mml:mi mathvariant="normal">o</mml:mi><mml:mi mathvariant="normal">u</mml:mi><mml:mi mathvariant="normal">l</mml:mi><mml:mi mathvariant="normal">l</mml:mi><mml:mi mathvariant="normal">i</mml:mi></mml:mrow><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>W</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:msub><mml:mi>ξ</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mo>,</mml:mo><mml:msub><mml:mi>ξ</mml:mi><mml:mi>j</mml:mi></mml:msub><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></disp-formula></p>
+  <table-wrap>
+    <table>
+      <thead>
+        <tr>
+          <th>Methods</th>
+          <th>class names</th>
+          <th>Reference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Matrix completion</td>
+          <td><monospace>Completion</monospace></td>
+          <td>(<xref alt="Keshavan et al., 2010" rid="ref-Keshavan2010" ref-type="bibr">Keshavan
+          et al., 2010</xref>)</td>
+        </tr>
+        <tr>
+          <td>Largest Gap algorithm</td>
+          <td><monospace>LG</monospace></td>
+          <td>(<xref alt="Channarond et al., 2012" rid="ref-channarond2012" ref-type="bibr">Channarond
+          et al., 2012</xref>)</td>
+        </tr>
+        <tr>
+          <td>Sort and Smooth</td>
+          <td><monospace>SAS</monospace></td>
+          <td>(<xref alt="Chan &amp; Airoldi, 2014" rid="ref-chan2014" ref-type="bibr">Chan
+          &amp; Airoldi, 2014</xref>)</td>
+        </tr>
+        <tr>
+          <td>Network Histogram</td>
+          <td><monospace>HistogramEstimator</monospace></td>
+          <td>(<xref alt="Olhede &amp; Wolfe, 2014" rid="ref-olhede2014" ref-type="bibr">Olhede
+          &amp; Wolfe, 2014</xref>)</td>
+        </tr>
+        <tr>
+          <td>Neighborhood smoothing</td>
+          <td><monospace>NBDsmooth</monospace></td>
+          <td>(<xref alt="Zhang et al., 2017" rid="ref-Zhang2015" ref-type="bibr">Zhang
+          et al., 2017</xref>)</td>
+        </tr>
+        <tr>
+          <td>USVT</td>
+          <td><monospace>USVT</monospace></td>
+          <td>(<xref alt="Chatterjee, 2015" rid="ref-Chatterjee2015" ref-type="bibr">Chatterjee,
+          2015</xref>)</td>
+        </tr>
+        <tr>
+          <td>Shape Histogram</td>
+          <td><monospace>SmoothNetHist</monospace></td>
+          <td>(<xref alt="Verdeyme &amp; Olhede, 2024" rid="ref-verdeyme2024shape" ref-type="bibr">Verdeyme
+          &amp; Olhede, 2024</xref>)</td>
+        </tr>
+      </tbody>
+    </table>
+  </table-wrap>
+  <p><bold>Table 1:</bold> Comparison of different methods implemented
+  in <monospace>Pygraphon</monospace> with their corresponding class
+  names and references.</p>
+  <sec id="comparison-with-existing-implementations">
+    <title>Comparison with existing implementations</title>
+    <p><monospace>nethist</monospace> and
+    <monospace>NetworkHistogram.jl</monospace> only implement the
+    network histogram method.</p>
+    <table-wrap>
+      <table>
+        <thead>
+          <tr>
+            <th align="left"></th>
+            <th align="center"><monospace>Pygraphon</monospace></th>
+            <th align="center"><monospace>graphon</monospace></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="left">Matrix completion</td>
+            <td align="center">Yes</td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">Largest Gap</td>
+            <td align="center">Yes</td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">SBA<xref ref-type="fn" rid="fn1">1</xref></td>
+            <td align="center"></td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">Sort and Smooth</td>
+            <td align="center">Yes</td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">Network Histogram</td>
+            <td align="center">Yes</td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">Neighborhood smoothing</td>
+            <td align="center">Yes</td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">USVT</td>
+            <td align="center">Yes</td>
+            <td align="center">Yes</td>
+          </tr>
+          <tr>
+            <td align="left">Shape Histogram</td>
+            <td align="center">Yes</td>
+            <td align="center"></td>
+          </tr>
+        </tbody>
+      </table>
+    </table-wrap>
+    <p><bold>Table 2:</bold> Comparison of different methods implemented
+    in <monospace>Pygraphon</monospace>, <monospace>graphon</monospace>,
+    and <monospace>NetworkHistogram.jl</monospace> with their
+    availability indicated by “Yes”.</p>
+  </sec>
+</sec>
+</body>
+<back>
+<ref-list>
+  <ref id="ref-channarond2012">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Channarond</surname><given-names>Antoine</given-names></name>
+        <name><surname>Daudin</surname><given-names>Jean-Jacques</given-names></name>
+        <name><surname>Robin</surname><given-names>Stéphane</given-names></name>
+      </person-group>
+      <article-title>Classification and estimation in the Stochastic Blockmodel based on the empirical degrees</article-title>
+      <source>Electronic Journal of Statistics</source>
+      <publisher-name>Institute of Mathematical Statistics and Bernoulli Society</publisher-name>
+      <year iso-8601-date="2012-01">2012</year><month>01</month>
+      <date-in-citation content-type="access-date"><year iso-8601-date="2023-03-28">2023</year><month>03</month><day>28</day></date-in-citation>
+      <volume>6</volume>
+      <issue>none</issue>
+      <issn>1935-7524</issn>
+      <pub-id pub-id-type="doi">10.1214/12-EJS753</pub-id>
+      <fpage>2574</fpage>
+      <lpage>2601</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-olhede2014">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Olhede</surname><given-names>Sofia C</given-names></name>
+        <name><surname>Wolfe</surname><given-names>Patrick J</given-names></name>
+      </person-group>
+      <article-title>Network histograms and universality of blockmodel approximation</article-title>
+      <source>Proceedings of the National Academy of Sciences</source>
+      <publisher-name>National Acad Sciences</publisher-name>
+      <year iso-8601-date="2014">2014</year>
+      <volume>111</volume>
+      <issue>41</issue>
+      <fpage>14722</fpage>
+      <lpage>14727</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-chan2014">
+    <element-citation publication-type="paper-conference">
+      <person-group person-group-type="author">
+        <name><surname>Chan</surname><given-names>Stanley H.</given-names></name>
+        <name><surname>Airoldi</surname><given-names>Edoardo M.</given-names></name>
+      </person-group>
+      <article-title>A consistent histogram estimator for exchangeable graph models</article-title>
+      <source>Proceedings of the 31st international conference on international conference on machine learning - volume 32</source>
+      <publisher-name>JMLR.org</publisher-name>
+      <publisher-loc>Beijing, China</publisher-loc>
+      <year iso-8601-date="2014">2014</year>
+      <fpage>I</fpage>
+      <lpage>208-I-216</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Chatterjee2015">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Chatterjee</surname><given-names>Sourav</given-names></name>
+      </person-group>
+      <article-title>Matrix estimation by universal singular value thresholding</article-title>
+      <source>Ann. Statist.</source>
+      <publisher-name>The Institute of Mathematical Statistics</publisher-name>
+      <year iso-8601-date="2015-02">2015</year><month>02</month>
+      <volume>43</volume>
+      <issue>1</issue>
+      <fpage>177</fpage>
+      <lpage>214</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Airoldi2013">
+    <element-citation publication-type="chapter">
+      <person-group person-group-type="author">
+        <name><surname>Airoldi</surname><given-names>Edo M</given-names></name>
+        <name><surname>Costa</surname><given-names>Thiago B</given-names></name>
+        <name><surname>Chan</surname><given-names>Stanley H</given-names></name>
+      </person-group>
+      <article-title>Stochastic blockmodel approximation of a graphon: Theory and consistent estimation</article-title>
+      <source>Advances in neural information processing systems 26</source>
+      <person-group person-group-type="editor">
+        <name><surname>Burges</surname><given-names>C. J. C.</given-names></name>
+        <name><surname>Bottou</surname><given-names>L.</given-names></name>
+        <name><surname>Welling</surname><given-names>M.</given-names></name>
+        <name><surname>Ghahramani</surname><given-names>Z.</given-names></name>
+        <name><surname>Weinberger</surname><given-names>K. Q.</given-names></name>
+      </person-group>
+      <publisher-name>Curran Associates, Inc.</publisher-name>
+      <year iso-8601-date="2013">2013</year>
+      <fpage>692</fpage>
+      <lpage>700</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Zhang2015">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Zhang</surname><given-names>Yuan</given-names></name>
+        <name><surname>Levina</surname><given-names>Elizaveta</given-names></name>
+        <name><surname>Zhu</surname><given-names>Ji</given-names></name>
+      </person-group>
+      <article-title>Estimating network edge probabilities by neighbourhood smoothing</article-title>
+      <source>Biometrika</source>
+      <year iso-8601-date="2017">2017</year>
+      <volume>104</volume>
+      <issue>4</issue>
+      <fpage>771</fpage>
+      <lpage>783</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Keshavan2010">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Keshavan</surname><given-names>R. H.</given-names></name>
+        <name><surname>Montanari</surname><given-names>A.</given-names></name>
+        <name><surname>Oh</surname><given-names>S.</given-names></name>
+      </person-group>
+      <article-title>Matrix completion from a few entries</article-title>
+      <source>IEEE Transactions on Information Theory</source>
+      <year iso-8601-date="2010">2010</year>
+      <volume>56</volume>
+      <issue>6</issue>
+      <issn>0018-9448</issn>
+      <fpage>2980</fpage>
+      <lpage>2998</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Dufour2023">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Dufour</surname><given-names>C.</given-names></name>
+        <name><surname>Grainger</surname><given-names>J.</given-names></name>
+      </person-group>
+      <article-title>NetworkHistogram.jl</article-title>
+      <publisher-name>Zenodo</publisher-name>
+      <year iso-8601-date="2023">2023</year>
+      <pub-id pub-id-type="doi">10.5281/zenodo.10212972</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-verdeyme2024shape">
+    <element-citation publication-type="manuscript">
+      <person-group person-group-type="author">
+        <name><surname>Verdeyme</surname><given-names>Arthur</given-names></name>
+        <name><surname>Olhede</surname><given-names>Sofia</given-names></name>
+      </person-group>
+      <article-title>Hybrid of node and link communities for graphon estimation</article-title>
+      <year iso-8601-date="2024">2024</year>
+    </element-citation>
+  </ref>
+  <ref id="ref-song2023">
+    <element-citation publication-type="book">
+      <person-group person-group-type="author">
+        <name><surname>Song</surname><given-names>Youngseok</given-names></name>
+        <name><surname>Olhede</surname><given-names>Sofia C.</given-names></name>
+      </person-group>
+      <source>Nethist: Network histogram</source>
+      <year iso-8601-date="2023">2023</year>
+      <uri>https://enigmasong.github.io/nethist/</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-graphon">
+    <element-citation publication-type="book">
+      <person-group person-group-type="author">
+        <name><surname>You</surname><given-names>Kisung</given-names></name>
+      </person-group>
+      <source>Graphon: A collection of graphon estimation methods</source>
+      <year iso-8601-date="2017">2017</year>
+      <uri>https://CRAN.R-project.org/package=graphon</uri>
+    </element-citation>
+  </ref>
+</ref-list>
+<fn-group>
+  <fn id="fn1">
+    <label>1</label><p>the SBA algorithm
+    (<xref alt="Airoldi et al., 2013" rid="ref-Airoldi2013" ref-type="bibr">Airoldi
+    et al., 2013</xref>) is not implemented in
+    <monospace>Pygraphon</monospace> yet as it is intended to be used
+    with multiple graphs and not a single observed graph. We plan to
+    implement it in the future.</p>
+  </fn>
+</fn-group>
+</back>
+</article>

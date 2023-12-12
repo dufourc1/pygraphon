@@ -1,101 +1,120 @@
 ---
-title: 'PyGraphon: a Python package for graphon estimation'
+title: "PyGraphon: a Python package for graphon estimation"
 tags:
   - Python
   - statistics
   - graph limit
+  - graphon
   - networks
 authors:
   - name: Charles Dufour
+    orcid: 0009-0000-3612-7335
     equal-contrib: true
     affiliation: 1
   - name: Arthur Verdeyme
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+    orcid: 0009-0003-5319-9228
+    equal-contrib: true
     affiliation: 1
 affiliations:
- - name: EPFL, Switzerland
-   index: 1
-date: 20 June 2023
+  - name: EPFL, Switzerland
+    index: 1
+date: 12 December 2023
 bibliography: paper.bib
 ---
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+_describing the high-level functionality and purpose of the software for a
+diverse, non-specialist audience_
+
+`Pygraphon` is a Python library designed to estimate graphons, providing an
+intuitive interface for researchers and practitioners to model and analyze
+graph structures efficiently. Graphons are probability distributions on the
+space of graphs, allowing users to infer underlying network characteristics
+from observed data. This library caters to a broad audience, enabling
+non-specialists to engage with graphon estimation techniques and apply them in
+various fields, including social networks, neuroscience, and machine learning.
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+_clearly illustrates the research purpose of the software and places it in the
+context of related work._
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+Graphon estimation stands as a crucial tool in the analysis of large-scale
+networks, serving as a fundamental step in understanding complex systems.
+`Pygraphon` addresses the need for accessible, user-friendly tools that enable
+researchers across domains to estimate graphons accurately. By providing a
+comprehensive set of functionalities for graphon modeling, estimation, and
+visualization, this library contributes to the advancement of network science
+and facilitates insights into the structure and dynamics of complex networks.
 
-# Mathematics
+## Similar software
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+_A list of key references, including to other software addressing related
+needs. Note that the references should include full names of venues, e.g.,
+journals and conferences, not abbreviations only understood in the context of a
+specific discipline._
 
-Double dollars make self-standing equations:
+- `R` package [`graphon`](https://cran.r-project.org/package=graphon)
+  [@graphon]
+- `R` package [`nethist`](https://enigmasong.github.io/nethist/index.html)
+  _(development stage)_ [@song2023]
+- `Julia` package
+  [`NetworkHistogram.jl`](https://docs.juliahub.com/General/NetworkHistogram/stable/)
+  [@Dufour2023]
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
+We list the different methods implemented in `Pygraphon`, `graphon`, and
+`NetworkHistogram.jl` latter in Table 2.
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
+_Mention (if applicable) a representative set of past or ongoing research
+projects using the software and recent scholarly publications enabled by it._
 
-# Citations
+Recent Scholarly Publications Enabled by `Pygraphon`:
 
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
+- @verdeyme2024shape
 
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
+# Functionality and implementation
 
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
+For more details, please refer to the [documentation](https://pygraphon.readthedocs.io/en/latest/).
 
-# Figures
+$$ A\_{ij} | \xi_i, \xi_j \sim \mathrm{Bernoulli}(W(\xi_i, \xi_j)) $$
 
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
+| Methods                | class names          | Reference            |
+| ---------------------- | -------------------- | -------------------- |
+| Matrix completion      | `Completion`         | [@Keshavan2010]      |
+| Largest Gap algorithm  | `LG`                 | [@channarond2012]    |
+| Sort and Smooth        | `SAS`                | [@chan2014]          |
+| Network Histogram      | `HistogramEstimator` | [@olhede2014]        |
+| Neighborhood smoothing | `NBDsmooth`          | [@Zhang2015]         |
+| USVT                   | `USVT`               | [@Chatterjee2015]    |
+| Shape Histogram        | `SmoothNetHist`      | [@verdeyme2024shape] |
 
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
+**Table 1:** Comparison of different methods implemented in `Pygraphon` with
+their corresponding class names and references.
 
-# Acknowledgements
+## Comparison with existing implementations
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+`nethist` and `NetworkHistogram.jl` only implement the network histogram
+method.
+
+|                        | `Pygraphon` | `graphon` |
+| :--------------------- | :---------: | :-------: |
+| Matrix completion      |     Yes     |    Yes    |
+| Largest Gap            |     Yes     |    Yes    |
+| SBA[^1]                |             |    Yes    |
+| Sort and Smooth        |     Yes     |    Yes    |
+| Network Histogram      |     Yes     |    Yes    |
+| Neighborhood smoothing |     Yes     |    Yes    |
+| USVT                   |     Yes     |    Yes    |
+| Shape Histogram        |     Yes     |           |
+
+**Table 2:** Comparison of different methods implemented in `Pygraphon`,
+`graphon`, and `NetworkHistogram.jl` with their availability indicated by
+"Yes".
 
 # References
+
+[^1]:
+    the SBA algorithm [@Airoldi2013] is not implemented in `Pygraphon` yet as
+    it is intended to be used with multiple graphs and not a single observed
+    graph. We plan to implement it in the future.

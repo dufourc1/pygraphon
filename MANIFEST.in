@@ -24,3 +24,4 @@ include docs/requirements.txt
 recursive-include docs *.bib
 exclude codecov.yml
 include CITATION.cff
+exclude paper/*
