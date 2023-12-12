@@ -6,3 +6,4 @@ tqdm==4.50.2
 numpy==1.21.4
 matplotlib==3.3.2
 scikit_learn==1.1.2
+kneed==0.8.5

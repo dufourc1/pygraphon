@@ -6,6 +6,7 @@ import numba as nb
 import numpy as np
 
 from pygraphon.utils import EPS
+from pygraphon.utils.utils_graph import compute_edge_between_groups
 
 
 class Assignment:
@@ -49,15 +50,21 @@ class Assignment:
 
         return counts, realized
 
-    def compute_log_likelihood(self) -> float:
+    def compute_log_likelihood(self, scale: bool = False) -> float:
         """Compute the likelihood of the assignment.
+
+        Parameters
+        ----------
+        scale : bool
+            Whether to scale the likelihood by the sample size, by default False
 
         Returns
         -------
         float
             log likelihood
         """
-        return np.sum(bernlikelihood(self.theta) * np.triu(self.counts))  # type: ignore
+        scaling = 1 / np.sum(np.triu(self.realized)) if scale else 1
+        return np.sum(bernlikelihood(self.theta) * np.triu(self.counts)) * scaling  # type: ignore
 
     def update(self, swap: Tuple[int, int], adjacency: np.ndarray) -> None:
         """Update the assignment after a swap of two node labels.
@@ -162,33 +169,6 @@ def update_realized_number(realized_edges, labels, adjacency, swap):
             realized_edges[group_i, group_node_1] = realized_edges[group_node_1, group_i]
 
     return realized_edges
-
-
-@nb.jit(nopython=True)
-def compute_edge_between_groups(A, indices_1, indices_2):
-    """Compute the number of edges between two groups of nodes.
-
-    If the two groups are the same, the number of edges will be double counted.
-
-    Parameters
-    ----------
-    A : np.ndarray
-        Adjacency matrix of the graph
-    indices_1 : np.ndarray
-        Indices of the first group
-    indices_2 : np.ndarray
-        Indices of the second group
-
-    Returns
-    -------
-    int
-        Number of edges between the two groups
-    """
-    result = 0
-    for i in indices_1:
-        for j in indices_2:
-            result += A[i, j]
-    return result
 
 
 @nb.vectorize("float64(float64)", nopython=True)

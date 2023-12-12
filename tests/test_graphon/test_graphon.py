@@ -60,10 +60,9 @@ def test_no_initial_rho_given():
         graphon = Graphon(lambda x, y: 0.5, initial_rho=-1)
 
 
-def test_raise_warning_incompatible_initial_rho():
+def test_incompatible_initial_rho():
     """Test that a warning is raised if the initial rho is not compatible."""
-    with pytest.warns(UserWarning):
-        graphon = Graphon(lambda x, y: 0.5, initial_rho=0.2)
+    graphon = Graphon(lambda x, y: 0.5, initial_rho=0.2)
     assert math.isclose(graphon.initial_rho, 0.5)
     P = graphon.get_edge_probabilities(n=20, wholeMatrix=False)
     assert np.all(P == 0.5)
@@ -100,6 +99,7 @@ def test_integral():
         assert math.isclose(first_integral, second_integral, abs_tol=1e-3)
         assert math.isclose(first_integral, 1, abs_tol=1e-3)
         assert math.isclose(second_integral, 1, abs_tol=1e-3)
+
         assert math.isclose(
             graphon.unormalized_graphon_function(0.2, 0.3),
             graphon.graphon_function(0.2, 0.3) * graphon.initial_rho,
@@ -129,3 +129,13 @@ def test_print_method(capfd):
     print(g2)  # noqa: T201
     out, _ = capfd.readouterr()
     assert out == "Erdos-Renyi\n"
+
+
+def test_sparsification():
+    """Test that the sparsification method is correct."""
+    g = Graphon(lambda x, y: 1)
+    assert g.initial_rho == 1
+    g.sparsify(0.5)
+    assert g.initial_rho == 0.5
+    with pytest.raises(ValueError):
+        g.sparsify(2)

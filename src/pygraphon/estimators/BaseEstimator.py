@@ -6,10 +6,7 @@ import networkx as nx
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils.utils_graph import (
-    check_simple_adjacency_matrix,
-    get_adjacency_matrix_from_graph,
-)
+from pygraphon.utils import check_simple_adjacency_matrix, get_adjacency_matrix_from_graph
 
 
 class BaseEstimator:
@@ -74,6 +71,8 @@ class BaseEstimator:
             self.graphon,
             self.edge_connectivity,
         ) = self._approximate_graphon_from_adjacency(adjacency_matrix, *args, **kwargs)
+        if self.edge_connectivity is not None:
+            self.edge_connectivity[np.diag_indices_from(self.edge_connectivity)] = 0
         self.fitted = True
 
     @abstractclassmethod

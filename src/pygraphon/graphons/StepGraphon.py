@@ -1,11 +1,15 @@
 """Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
-import math
 from typing import Callable, Optional
 
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils import check_symmetric, compute_areas_histogram
+from pygraphon.utils import (
+    check_consistency_graphon_shape_with_bandwidth,
+    check_symmetric,
+    compute_areas_histogram,
+    scatter_symmetric_matrix,
+)
 
 
 class StepGraphon(Graphon):
@@ -28,13 +32,15 @@ class StepGraphon(Graphon):
         initial_rho: Optional[float] = None,
     ) -> None:
         # save args
-        self.graphon = graphon
         if bandwidthHist > 1 or bandwidthHist <= 0:
             raise ValueError("The bandwidth should be between 0 and 1.")
+        check_consistency_graphon_shape_with_bandwidth(graphon.shape, bandwidthHist)
+        if np.max(graphon) > 1 and initial_rho is None:
+            raise ValueError(
+                "The graphon matrix should be between 0 and 1 if no initial rho is given."
+            )
         self.bandwidthHist = bandwidthHist
-        if self.graphon.shape[0] != int(math.ceil(1 / self.bandwidthHist)):
-            raise ValueError("The graphon matrix should have size consisten with the bandwidth.")
-
+        self.graphon = graphon
         self.areas = compute_areas_histogram(self.graphon, self.bandwidthHist)
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
 
@@ -49,6 +55,16 @@ class StepGraphon(Graphon):
         self.repr += "\n\n "
         self.repr += np.array2string(self.areas[0, :], precision=3, floatmode="maxprec_equal")
         self.repr += " (size of the blocks)"
+
+    def get_theta(self) -> np.ndarray:
+        """Return the theta matrix in [0,1]^KxK.
+
+        Returns
+        -------
+        np.ndarray
+            theta matrix
+        """
+        return self.graphon * self.initial_rho
 
     def graphon_function_builder(self) -> Callable:
         """Build the graphon function f(x,y).
@@ -147,4 +163,25 @@ class StepGraphon(Graphon):
         int
             number of groups
         """
-        return int(1 // self.bandwidthHist) + 1
+        return self.graphon.shape[0]
+
+    def _get_edge_probabilities(self, n, latentVarArray, wholeMatrix=True):
+        """Generate a matrix P_ij with  0 =< i,j <= n-1.
+
+        Parameters
+        ----------
+        n : int
+            number of nodes in the edge probability matrix returned
+        latentVarArray : np.ndarray
+            array of latent variables (n) used to generate the edge probabilities
+
+        Returns
+        -------
+        np.ndarray
+            matrix of edge probabilities (nxn)
+        """
+        group_membership = np.floor(latentVarArray / self.bandwidthHist).astype(int)
+        probs = scatter_symmetric_matrix(self.graphon, group_membership) * self.initial_rho
+        if not wholeMatrix:
+            return probs[np.triu_indices(n, 1)]
+        return probs

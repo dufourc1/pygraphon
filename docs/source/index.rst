@@ -1,17 +1,54 @@
-########################
+#########################
  PyGraphon Documentation
-########################
+#########################
 
+Welcome to the documentation of `PyGraphon
+<https://github.com/dufourc1/pygraphon>`_ for estimating graphons from
+observed data! Our library provides a powerful set of tools for
+estimating graphons, which are a type of object used to model large,
+random graphs, from observed data.
 
-Welcome to the documentation of `PyGraphon <https://github.com/dufourc1/pygraphon>`_ for estimating graphons from observed data! Our library provides a powerful set of tools for estimating graphons, which are a type of object used to model large, random graphs, from observed data.
+.. code:: python
 
-Graphons are a powerful tool for modeling real-world networks, as they can capture the complex, often random structure of these networks in a flexible and scalable way. However, estimating graphons from observed data can be a challenging task, especially when dealing with large and complex networks.
+   from pygraphon import HistogramEstimator
 
-Our library specializes in providing algorithms and tools for estimating graphons from observed data, making it easier to work with these objects in a practical setting. We provide a range of estimation methods that are well-suited to different types of data, including methods based on moments, spectral methods, and maximum likelihood estimation.
+   #  sample a graph with n nodes from one of the built-in graphons f(x,y) = x*y
+   from pygraphon import graphon_graphon_product
 
-In addition to estimation, our library also provides tools for working with estimated graphons, including visualization tools and algorithms for computing various graph statistics from estimated graphons.
+   A = graphon_product.draw(n=100)
 
-By providing a powerful set of tools for estimating graphons from observed data, our library can help researchers and practitioners gain new insights into the structure and behavior of complex networks. Whether you're analyzing social networks, biological networks, or transportation networks, our library has something to offer.
+   # Create a histogram estimator
+   estimator = HistogramEstimator()
+
+   # Fit the estimator to a graph with adjacency matrix A
+   estimator.fit(A)
+
+   # Get the estimated graphon
+   graphon_estimated = estimator.get_graphon()
+
+   # get the estimated block connectivity matrix
+   theta = graphon_estimated.get_theta()
+
+   # get the estimated edge probability matrix
+   P_estimated = graphon_estimated.get_edge_connectivity()
+
+To cite this library, please use the following:
+
+   Dufour, C., & Verdeyme, A. (2023). PyGraphon. Zenodo.
+   https://doi.org/10.5281/zenodo.10355247
+
+.. code:: latex
+
+   @misc{dufour_verdeyme_2023,
+         author       = {Dufour, Charles and
+                         Verdeyme, Arthur},
+         title        = {PyGraphon},
+         year         = {2023},
+         howpublished = {Available from https://doi.org/10.5281/zenodo.10355247},
+         note         = {Zenodo},
+         doi          = {10.5281/zenodo.10355247}
+       }
+
 
 .. toctree::
    :maxdepth: 1

@@ -1,6 +1,6 @@
 <!--
 <p align="center">
-	<img src="https://github.com//pygraphon/raw/main/docs/source/logo.png" height="150">
+	<img src="https://github.com/dufourc1/pygraphon/raw/main/docs/source/logo.png" height="150">
 </p>
 -->
 
@@ -8,27 +8,25 @@
 	PyGraphon
 </h1>
 
-<p align="center">
-		<a href="https://github.com/dufourc1/pygraphon/actions/workflows/build.yml">
-			<img alt="Build" src="https://github.com/dufourc1/pygraphon/workflows/build/badge.svg" />
-		</a>
-		<a href="https://codecov.io/gh/dufourc1/pygraphon" > 
-			<img src="https://codecov.io/gh/dufourc1/pygraphon/branch/master/graph/badge.svg?token=MDWJ6F86US"/> 
-		</a>
-		<a href='https://pygraphon.readthedocs.io/en/latest/?badge=latest'>
+
+<p>
+        <a href="https://zenodo.org/doi/10.5281/zenodo.10355247"><img src="https://zenodo.org/badge/446324463.svg" alt="DOI"></a>
+        <a href='https://pygraphon.readthedocs.io/en/latest/index.html'>
 				<img src='https://readthedocs.org/projects/pygraphon/badge/?version=latest' alt='Documentation Status' />
 		</a>
-		<a href="https://github.com/cthoyt/cookiecutter-python-package">
-				<img alt="Cookiecutter template from @cthoyt" src="https://img.shields.io/badge/Cookiecutter-python--package-yellow" /> 
-		</a>
+        <a href="https://codecov.io/gh/dufourc1/pygraphon" >
+            <img src="https://codecov.io/gh/dufourc1/pygraphon/branch/master/graph/badge.svg?token=MDWJ6F86US"/>
+        </a>
+</p>
+<p>
+        <a href="https://github.com/dufourc1/pygraphon/actions/workflows/build.yml">
+            <img alt="Build" src="https://github.com/dufourc1/pygraphon/workflows/build/badge.svg" />
+        </a>
 		<a href="https://pypi.org/project/pygraphon">
 				<img alt="PyPI" src="https://img.shields.io/pypi/v/pygraphon" />
 		</a>
 		<a href="https://pypi.org/project/pygraphon">
 				<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pygraphon" />
-		</a>
-		<a href="https://github.com/dufourc1/pygraphon/blob/master/LICENSE">
-				<img alt="PyPI - License" src="https://img.shields.io/pypi/l/pygraphon" />
 		</a>
 		<a href='https://github.com/psf/black'>
 				<img src='https://img.shields.io/badge/code%20style-black-000000.svg' alt='Code style: black' />
@@ -37,15 +35,47 @@
 
 Welcome to the documentation of our Python library for estimating graphons from observed data! Our library provides a powerful set of tools for estimating graphons, which are a type of object used to model large, random graphs, from observed data.
 
-Graphons are a powerful tool for modeling real-world networks, as they can capture the complex, often random structure of these networks in a flexible and scalable way. However, estimating graphons from observed data can be a challenging task, especially when dealing with large and complex networks.
+```python
+from pygraphon import HistogramEstimator
 
-Our library specializes in providing algorithms and tools for estimating graphons from observed data, making it easier to work with these objects in a practical setting. We provide a range of estimation methods that are well-suited to different types of data, including methods based on moments, spectral methods, and maximum likelihood estimation.
+#  sample a graph with n nodes from one of the built-in graphons f(x,y) = x*y
+from pygraphon import graphon_graphon_product
+A = graphon_product.draw(n = 100)
 
-In addition to estimation, our library also provides tools for working with estimated graphons, including visualization tools and algorithms for computing various graph statistics from estimated graphons.
+# Create a histogram estimator
+estimator = HistogramEstimator()
 
-By providing a powerful set of tools for estimating graphons from observed data, our library can help researchers and practitioners gain new insights into the structure and behavior of complex networks. Whether you're analyzing social networks, biological networks, or transportation networks, our library has something to offer.
+# Fit the estimator to a graph with adjacency matrix A
+estimator.fit(A)
+
+# Get the estimated graphon
+graphon_estimated = estimator.get_graphon()
+
+# get the estimated block connectivity matrix
+theta = graphon_estimated.get_theta()
+
+# get the estimated edge probability matrix
+P_estimated = graphon_estimated.get_edge_connectivity()
+```
+
+
+To cite this library, please use the following citation:
+
+```bibtex
+@misc{dufour_verdeyme_2023,
+         author       = {Dufour, Charles and Verdeyme, Arthur},
+         title        = {PyGraphon},
+         year         = {2023},
+         howpublished = {https://doi.org/10.5281/zenodo.10355247},
+         note         = {Zenodo},
+         doi          = {10.5281/zenodo.10355247}
+    }
+```
 
 ## 🚀 Installation
+
+<details>
+ <summary>See Installation instructions</summary>
 
 <!-- Uncomment this section after your first ``tox -e finish``
 The most recent release can be installed from
@@ -69,13 +99,18 @@ $ git clone git+https://github.com/dufourc1/pygraphon.git
 $ cd pygraphon
 $ pip install -e .
 ```
+</details>
 
 ## 👐 Contributing
 
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
-[CONTRIBUTING.rst](https://github.com//pygraphon/blob/master/CONTRIBUTING.rst) for more information on getting involved.
+[CONTRIBUTING.rst](https://github.com/dufourc1/pygraphon/blob/master/CONTRIBUTING.rst) for more information on getting involved.
 
 ## 👋 Attribution
+
+<details>
+ <summary>See Attributions</summary>
+
 
 ### ⚖️ License
 
@@ -111,13 +146,14 @@ This project has been supported by the following grants:
 This package was created with [@audreyfeldroy](https://github.com/audreyfeldroy)'s
 [cookiecutter](https://github.com/cookiecutter/cookiecutter) package using [@cthoyt](https://github.com/cthoyt)'s
 [cookiecutter-snekpack](https://github.com/cthoyt/cookiecutter-snekpack) template.
+</details>
 
 ## 🛠️ For Developers
 
 <details>
-	<summary>See developer instrutions</summary>
+	<summary>See developer instructions</summary>
 
-	
+
 The final section of the README is for if you want to get involved by making a code contribution.
 
 ### ❓ Testing
@@ -129,7 +165,7 @@ run reproducibly with:
 $ tox -q 
 ```
 
-Additionally, these tests are automatically re-run with each commit in a [GitHub Action](https://github.com//pygraphon/actions?query=workflow%3ATests).
+Additionally, these tests are automatically re-run with each commit in a [GitHub Action](https://github.com/dufourc1/pygraphon/actions?query=workflow%3ATests).
 
 ### 📝 Documentation
 
@@ -157,25 +193,4 @@ $ pip install -r docs/requirements.txt
 ```
 
 note: to correctly format the documentation, one can use tool such as `rstfmt` (installable with `pip install rstfmt`).
-
-### 📦 Making a Release
-
-After installing the package in development mode and installing
-`tox` with `pip install tox`, the commands for making a new release are contained within the `finish` environment
-in `tox.ini`. Run the following from the shell:
-
-```shell
-$ tox -e finish
-```
-
-This script does the following:
-
-1. Uses BumpVersion to switch the version number in the `setup.cfg` and
-	 `src/pygraphon/version.py` to not have the `-dev` suffix
-2. Packages the code in both a tar archive and a wheel
-3. Uploads to PyPI using `twine`. Be sure to have a `.pypirc` file configured to avoid the need for manual input at this
-	 step
-4. Push to GitHub. You'll need to make a release going with the commit where the version was bumped.
-5. Bump the version to the next patch. If you made big changes and want to bump the version by minor, you can
-	 use `tox -e bumpversion minor` after.
 </details>

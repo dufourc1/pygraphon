@@ -1,11 +1,11 @@
 """Graphon based on a continuous function."""
 import inspect
 import math
-import warnings
 from copy import deepcopy
 from typing import Callable, Optional
 
 import numpy as np
+from loguru import logger
 from scipy.integrate import dblquad, simpson
 
 from pygraphon.utils.utils_func import copy_func
@@ -76,12 +76,14 @@ class Graphon:
                 raise ValueError("Initial edge density must be in  ]0,1[")
 
             if scaled and not math.isclose(self.integral_value, 1):
-                warnings.warn(
-                    "function provided does not integrate to 1, disregarding initial_rho, replacing with "
-                    + "integral_value of given function",
-                    UserWarning,
-                    stacklevel=2,
-                )
+                diff = abs(self.integral_value - initial_rho)
+                if diff > 1e-2:
+                    logger.debug(
+                        f"function provided does not integrate to 1, disregarding initial_rho {initial_rho:.3f},"
+                        + " replacing with "
+                        + f"integral_value {self.integral_value:.3f} of given function this may be due to numerical"
+                        + f" errors in the integration. Error is {diff:.3f}",
+                    )
                 self.initial_rho = deepcopy(self.integral_value)
             else:
                 self.initial_rho = deepcopy(initial_rho)
@@ -336,3 +338,24 @@ class Graphon:
             return 0.5 * self.graphon_function(x, y) + 0.5 * other.graphon_function(x, y)
 
         return Graphon(_function, check=False)
+
+    def sparsify(self, sparse_factor: float) -> None:
+        """Reduce the edge density of the graphon by a factor.
+
+        Parameters
+        ----------
+        sparse_factor : float
+            factor by which to reduce the edge density of the graphon
+
+        Raises
+        ------
+        ValueError
+            if sparse_factor is not in :math:`]0,1[`
+        """
+        if sparse_factor < 0 or sparse_factor > 1:
+            raise ValueError("Edge density must be in  ]0,1[")
+        logger.warning(
+            f"Sparsifying graphon by factor {sparse_factor}, this is irreversible until you restart Python"
+        )
+        # TODO: should return a copy of the graphon instead of modifying it
+        self.initial_rho *= sparse_factor

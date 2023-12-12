@@ -2,6 +2,7 @@
 from collections import Counter
 
 import networkx as nx
+import numba as nb
 import numpy as np
 
 from pygraphon.utils.utils_matrix import check_symmetric
@@ -104,18 +105,48 @@ def _approximate_P_from_node_membership(
     # links
     for i in range(ngroups):
         for j in np.arange(i, ngroups):
-            total = countGroups[groups[i]] * countGroups[groups[j]]
-            values[i, j] = (
-                np.sum(
-                    adjacencyMatrix[np.where(node_memberships == groups[i])[0]][
-                        :, np.where(node_memberships == groups[j])[0]
-                    ]
-                )
-                / total
+            total = (
+                countGroups[groups[i]] * countGroups[groups[j]]
+                if i != j
+                else countGroups[groups[i]] * (countGroups[groups[j]] - 1)
             )
+            values[i, j] = compute_edge_between_groups(
+                adjacencyMatrix,
+                np.where(node_memberships == groups[i])[0],
+                np.where(node_memberships == groups[j])[0],
+            )
+            values[i, j] /= total
             values[j, i] = values[i, j]
 
     for i in range(P.shape[0]):
-        for j in range(P.shape[1]):
+        for j in range(i + 1, P.shape[1]):
             P[i, j] = values[node_memberships[i], node_memberships[j]]
+            P[j, i] = P[i, j]
     return P
+
+
+@nb.jit(nopython=True)
+def compute_edge_between_groups(A, indices_1, indices_2):
+    """Compute the number of edges between two groups of nodes.
+
+    If the two groups are the same, the number of edges will be double counted.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        Adjacency matrix of the graph
+    indices_1 : np.ndarray
+        Indices of the first group
+    indices_2 : np.ndarray
+        Indices of the second group
+
+    Returns
+    -------
+    int
+        Number of edges between the two groups
+    """
+    result = 0
+    for i in indices_1:
+        for j in indices_2:
+            result += A[i, j]
+    return result

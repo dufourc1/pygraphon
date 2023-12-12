@@ -61,6 +61,8 @@ class SAS(BaseEstimator):
         original_indices = np.argsort(idx)
         P_hat = P_hat[original_indices, :]
         P_hat = P_hat[:, original_indices]
+        # remove diagonal to stay consistent with no self-loops
+        P_hat[np.diag_indices_from(P_hat)] = 0
 
         # map to [0, 1]
         np.clip(P_hat, 0, 1, out=P_hat)
@@ -103,7 +105,7 @@ class SAS(BaseEstimator):
             if self.h is None:
                 h = int(np.log(n))
             else:
-                if type(self.h) == float:
+                if isinstance(self.h, float):
                     h = int(self.h * n)
                 else:
                     h = self.h

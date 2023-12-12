@@ -36,7 +36,7 @@ class TestRegularGraphon:
         integral = np.sum(theta * areas)
 
         # check demormalized graphon is equal to theta
-        assert np.allclose(step_graphon.graphon * step_graphon.initial_rho, theta)
+        assert np.allclose(step_graphon.get_theta(), theta)
         # check block size correctly instantiated
         assert step_graphon.bandwidthHist == block_size
         # check areas
@@ -144,3 +144,49 @@ def test_print_method(capfd):
     )
     theoretical_out += "[0.01 0.03 0.30 0.90]]\n\n [0.09 0.09 0.09 0.03] (size of the blocks)\n"
     assert out == theoretical_out
+
+
+def test_init_raises() -> None:
+    """Test that the step graphon is correctly instantiated."""
+    # check graphon value are between 0 and 1
+    graphon = np.array([[1.8, 0.2], [0.2, 0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=0.5)
+
+    # Check bandwidth is consistent with graphon size
+    graphon = np.array([[0.8, 0.2], [0.2, 0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=1 / 3)
+
+    # Check bandwidth is between 0 and 1
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=1.1)
+
+
+def test_check_graphon_symmetric():
+    """Test that the graphon is correctly checked for symmetry."""
+    graphon = np.array([[0.8, 0.2], [0.7, 0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=0.5)
+
+
+def test_check_graphon_positive():
+    """Test that the graphon is positive."""
+    graphon = np.array([[0.8, 0.2], [0.2, -0.8]])
+    with pytest.raises(ValueError):
+        StepGraphon(graphon=graphon, bandwidthHist=0.5)
+
+
+def test_bandwidth_step_graphon(n_min=33, n_max=200, step=15) -> None:
+    """Test that bandwidth and graphon shapes are consistent."""
+    theta_test = np.random.rand(n_max, n_max)
+    theta_test = (theta_test + theta_test.T) / 2
+    np.fill_diagonal(theta_test, 0)
+    for n in range(n_min, n_max, step):
+        graphon = StepGraphon(theta_test[0:n, 0:n], bandwidthHist=1 / n)
+        assert graphon.get_number_groups() == n
+    # test 1/3 vs 0.3
+    with pytest.raises(ValueError):
+        StepGraphon(theta_test[0:3, 0:3], bandwidthHist=0.3)
+    _ = StepGraphon(theta_test[0:3, 0:3], bandwidthHist=1 / 3)
+    _ = StepGraphon(theta_test[0:4, 0:4], bandwidthHist=0.3)

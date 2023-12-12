@@ -39,6 +39,8 @@ We also provide a list of pre-implemented common graphons which are instances of
      - :math:`f(x,y) = \exp\left(-0.5\left[\min(x,y) + \sqrt{x} + \sqrt{y} \right]\right)`
    * - :py:class:`graphon_log_1_p`
      - :math:`f(x,y) = \log(1 + 0.5*\max(x,y))`
+   * - :py:class:`graphon_sinusoidal`
+     - :math:`f(x,y) = 0.5 + 0.5*\sin(2\pi x)\sin(2\pi y)`
    
 .. plot::
     :include-source: False
@@ -48,11 +50,13 @@ We also provide a list of pre-implemented common graphons which are instances of
     from pygraphon.graphons import common_graphons
     from pygraphon.plots import plot_probabilities, make_0_1
     import matplotlib.pyplot as plt
-
-    fig, ax = plt.subplots(2, 5, figsize=(15, 6))
+    n_rows = (len(common_graphons)-1)//5 + 1
+    fig, ax = plt.subplots(n_rows, 5, figsize=(15, 6))
     for i, graphon_name in enumerate(common_graphons):
         plot_probabilities(common_graphons[graphon_name], ax=ax[i//5, i%5], show_colorbar=True)
         ax[i//5, i%5].set_title(graphon_name)
+    for i in range(len(common_graphons), n_rows*5):
+        ax[i//5, i%5].axis('off')
     plt.tight_layout()
 
 .. automodule:: pygraphon.graphons
