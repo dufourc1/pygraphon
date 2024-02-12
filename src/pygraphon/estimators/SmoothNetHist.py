@@ -249,7 +249,7 @@ class SmoothNetHist(BaseEstimator):
                 + f"than the number of clusters {num_par_diff} in the histogram estimator"
             )
         clusters = (
-            list(range(nrow_tile, num_par_diff + 1))
+            list(range(2, num_par_diff + 1))
             if number_link_communities is None
             else [number_link_communities]
         )
