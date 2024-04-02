@@ -10,7 +10,7 @@ from skimage.transform import resize
 
 from pygraphon.estimators.SAS import SAS
 from pygraphon.graphons.StepGraphon import StepGraphon
-from pygraphon.norm.node_distance.Dist import Dist
+from pygraphon.norm import Dist, SimpleDifferenceDistance
 
 
 class TV_FL(SAS):
@@ -26,20 +26,18 @@ class TV_FL(SAS):
         max_num_iter: int = 20,
         tol: float = 1e-3,
         isotropic: bool = True,
+        distance: Dist = SimpleDifferenceDistance(),
     ):
         super().__init__(h, mu, max_num_iter, tol, isotropic)
-        self.h = h
-        self.mu = mu
-        self.max_num_iter = max_num_iter
-        self.tol = tol
-        self.isotropic = isotropic
+        self.distance = distance
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray, h=None
     ) -> Tuple[StepGraphon, np.ndarray]:
-        dist = Dist()
-
-        A, idx = self.sort(distance_matrix=dist, adjacency_matrix=adjacency_matrix)
+        A, idx = self.sort(
+            distance_matrix=self.distance.calculate_distance(adjacency_matrix),
+            adjacency_matrix=adjacency_matrix,
+        )
 
         P_hat, graphon_matrix = self.smooth(A, idx)
 
