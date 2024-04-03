@@ -2,6 +2,7 @@
 
 from typing import Optional, Tuple, Union
 
+import fast_tsp
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.signal import convolve2d
@@ -27,9 +28,19 @@ class TV_FL(SAS):
         tol: float = 1e-3,
         isotropic: bool = True,
         distance: Dist = SimpleDifferenceDistance(),
+        tsp_precision: float = 1e-3,
     ):
+        """
+        Parameters
+        ----------
+        distance : Dist, optional
+            The distance metric to use for sorting the adjacency matrix, by default SimpleDifferenceDistance()
+        tsp_precision : float, optional
+            The precision to use for the traveling salesman problem, by default 1e-3
+        """
         super().__init__(h, mu, max_num_iter, tol, isotropic)
         self.distance = distance
+        self.tsp_precision = tsp_precision
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray, h=None
@@ -46,11 +57,12 @@ class TV_FL(SAS):
             P_hat,
         )
 
-    def sort(distance_matrix: np.ndarray, adjacency_matrix) -> Tuple[np.ndarray, np.ndarray]:
+    def sort(
+        self, distance_matrix: np.ndarray, adjacency_matrix: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Sort the adjacency matrix based on a distance matrix."""
-        # Solve the traveling salesman problem
-        # We use the Hungarian algorithm to solve the assignment problem
-        _, col_ind = linear_sum_assignment(distance_matrix)
+        # get the permutation from fast TSP
+        col_ind = self.fast_tsp(distance_matrix)
         A_sorted = adjacency_matrix[col_ind, :]
         A_sorted = A_sorted[:, col_ind]
 
@@ -95,3 +107,9 @@ class TV_FL(SAS):
         np.clip(graphon_matrix, 0, 1, out=graphon_matrix)
 
         return P_hat, graphon_matrix
+
+    def fast_tsp(self, distance_matrix: np.ndarray) -> np.ndarray:
+        """Solve the traveling salesman problem using a fast heuristic."""
+        # scale the distance matrix to integers given the precision
+        distance_matrix = (distance_matrix * self.tsp_precision).astype(int)
+        return fast_tsp.find_tour(distance_matrix)
