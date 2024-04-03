@@ -7,8 +7,8 @@ from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
 from .SAS import SAS
 from .SmoothNetHist import SmoothNetHist
-from .UniversalSingularValueDecomposition import USVT
 from .TV_FL import TV_FL
+from .UniversalSingularValueDecomposition import USVT
 
 __all__ = classes = [
     "LG",
