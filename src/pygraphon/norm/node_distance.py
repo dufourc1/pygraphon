@@ -89,17 +89,19 @@ def compute_distance_matrix(adjacency_matrix: np.ndarray, distance_func: callabl
     """
     m = adjacency_matrix.shape[0]
     distance_matrix = np.zeros((m, m))
-    degrees = adjacency_matrix.sum(axis=0)
+    degrees = adjacency_matrix.sum(axis=0, dtype=int)
     max_degree = np.max(degrees)
+
+    # Use element-wise multiplication to replace each 1 in the adjacency matrix with the degree of the connected node
+    adjacent_degrees_matrix = adjacency_matrix * degrees
 
     # Calculate the degree distributions for each node
     degree_distributions = [
-        np.histogram(
-            adjacency_matrix[i].dot(degrees), bins=np.arange(max_degree + 2), density=True
-        )[0]
+        np.histogram(adjacent_degrees_matrix[i], bins=np.arange(max_degree + 2), density=True)[0]
         for i in range(m)
     ]
 
+    # Calculate the distribution of degrees of adjacent nodes for each node
     for i in range(m):
         for j in range(i + 1, m):
             distance = distance_func(degree_distributions[i], degree_distributions[j])
