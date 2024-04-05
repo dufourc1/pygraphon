@@ -71,26 +71,14 @@ class TV_FL(SAS):
     def smooth(self, adjacency_matrix: np.ndarray, idx: np.ndarray, h=None) -> np.ndarray:
         """Smooth the adjacency matrix based on the permutation idx."""
         n = adjacency_matrix.shape[0]
-        h = self._decide_h(n=n, h=h)
         # histogram estimation
-        H = convolve2d(adjacency_matrix, np.ones((h, h)) / (h**2), mode="same", boundary="symm")[
-            ::h, ::h
-        ]
-
-        # total variation minimization
-        n_half = round(n / 2)
-        Hpad = np.pad(H, ((n_half, n_half), (n_half, n_half)), mode="symmetric")
-
+       
         graphon_matrix = denoise_tv_bregman(
-            Hpad,
-            weight=2 * self.mu,
+            adjacency_matrix,
+            weight=6,
             max_num_iter=self.max_num_iter,
             eps=self.tol,
-            isotropic=self.isotropic,
         )
-
-        # crop to remove padding
-        graphon_matrix = graphon_matrix[n_half:-n_half, n_half:-n_half]
 
         # resize the graphon to size of the adjacency matrix
         P_hat = resize(graphon_matrix, (n, n), order=0, mode="edge", anti_aliasing=False)

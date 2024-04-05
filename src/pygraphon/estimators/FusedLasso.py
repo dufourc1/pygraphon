@@ -182,6 +182,9 @@ def construct_incidence_matrix_networkx(n: int) -> np.ndarray:
     numpy.ndarray
         The incidence matrix.
     """
-    G = nx.grid_2d_graph(n, n)
-    incidence_matrix = nx.incidence_matrix(G, oriented=False).toarray()
-    return incidence_matrix
+    D_col = np.zeros((n, n))
+    np.fill_diagonal(D_col[:,1:], 1)
+    np.fill_diagonal(D_col, -1)
+    D_col = D_col[:, :-1]  # Adjust shape to perform the intended operation
+
+    return D_col
