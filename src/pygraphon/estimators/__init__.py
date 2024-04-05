@@ -2,6 +2,7 @@
 
 from .completion import Completion
 from .EmpiricalDegrees import LG
+from .FusedLasso import FusedLasso
 from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
@@ -21,4 +22,5 @@ __all__ = classes = [
     "Completion",
     "SmoothNetHist",
     "TV_FL",
+    "FusedLasso",
 ]

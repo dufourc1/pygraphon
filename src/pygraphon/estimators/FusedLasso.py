@@ -49,6 +49,8 @@ class FusedLasso(BaseEstimator):
 
         P_hat = P_hat[tour_inv, :][:, tour_inv]
         np.fill_diagonal(P_hat, 0)
+        P_hat = (P_hat + P_hat.T) / 2
+        np.clip(P_hat, a_min=0, a_max=1, out=P_hat)
 
         graphon_hat = StepGraphon(P_hat, bandwidthHist=1 / adjacency_matrix.shape[0])
         return graphon_hat, P_hat
@@ -82,7 +84,7 @@ class FusedLasso(BaseEstimator):
         best_pred = np.Inf
 
         for j in range(len(lambda_grid)):
-            temp = self.fused_lasso_weighted_l2_2d(M_obs, lambda_=lambda_grid[j])
+            temp = self.fused_lasso_weighted_l2_2d(M_obs, lambda_val=lambda_grid[j])
 
             theta_hat_mat = np.array(temp).reshape((n, n))
 
@@ -96,7 +98,7 @@ class FusedLasso(BaseEstimator):
 
         best_ind = np.argmin(pred)
 
-        temp = self.fused_lasso_weighted_l2_2d(M_tour, lambda_=lambda_grid[best_ind])
+        temp = self.fused_lasso_weighted_l2_2d(M_tour, lambda_val=lambda_grid[best_ind])
 
         best_sol = temp
 
@@ -134,6 +136,8 @@ class FusedLasso(BaseEstimator):
         m, n = y.shape
         x = cp.Variable(y.shape)
 
+        mask = y[:,0:-2]*y[:,1:-1]
+
         # Create the differential matrices
         Dx = cp.Variable((m, n - 1))
         Dy = cp.Variable((m - 1, n))
@@ -151,7 +155,8 @@ class FusedLasso(BaseEstimator):
         problem = cp.Problem(objective, constraints)
 
         # Solve the problem
-        problem.solve(max_iters=self.max_num_iter, rel_tol=rel_tol, verbose=True)
+        problem.solve(max_iter=self.max_num_iter, eps_rel=rel_tol, verbose=False)
+        print(Dx.value, Dy.value)
 
         return x.value
 
