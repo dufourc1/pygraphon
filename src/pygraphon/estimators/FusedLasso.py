@@ -9,6 +9,7 @@ import scipy.stats
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons import StepGraphon
 from pygraphon.norm.node_distance import Dist, JensenShannonDivergenceDistance
+from pygraphon.utils import bound_away_from_one_and_zero_arrays
 
 
 class FusedLasso(BaseEstimator):
@@ -17,10 +18,10 @@ class FusedLasso(BaseEstimator):
     def __init__(
         self,
         distance: Dist = JensenShannonDivergenceDistance(),
-        lambda_grid: np.ndarray = 10 ** np.linspace(-1.2, 0.2, num=20),
-        max_num_iter: int = 1000,
-        fl_tol: float = 1e-3,
-        tsp_precision: float = 1e-3,
+        lambda_grid: np.ndarray = 10 ** np.linspace(-3, 2, num=20),
+        max_num_iter: int = 2000,
+        fl_tol: float = 1e-12,
+        tsp_precision: float = 1e-4,
     ):
         super().__init__()
         self.distance = distance
@@ -74,33 +75,34 @@ class FusedLasso(BaseEstimator):
         """
         n = M_tour.shape[0]
         pred = np.zeros(len(lambda_grid))
-
+        # take 80% for training
         non_missing = np.random.rand(n, n) < 0.8
         M_obs = np.where(non_missing, M_tour, 0)
-        missing = ~non_missing
-        indices = np.where(missing)
+        indices_to_eval = np.where(~non_missing)
 
         best_sol = np.zeros((n, n))
         best_pred = np.Inf
+        best_ind = None
 
         for j in range(len(lambda_grid)):
             temp = self.fused_lasso_weighted_l2_2d(M_obs, lambda_val=lambda_grid[j])
 
-            theta_hat_mat = np.array(temp).reshape((n, n))
+            theta_hat_mat = bound_away_from_one_and_zero_arrays(np.array(temp).reshape((n, n)))
 
-            pred[j] = -np.sum(
-                np.log(scipy.stats.binom.pmf(M_tour[indices], 1, theta_hat_mat[indices]))
+            pred[j] = -np.mean(
+                np.log(scipy.stats.binom.pmf(M_tour[indices_to_eval], 1, theta_hat_mat[indices_to_eval]))
             )
 
             if pred[j] < best_pred:
                 best_pred = pred[j]
-                best_sol = theta_hat_mat
+                best_ind = j
 
-        best_ind = np.argmin(pred)
+        print("Best lambda: ", lambda_grid[best_ind], "best pred: ", best_pred)
 
-        temp = self.fused_lasso_weighted_l2_2d(M_tour, lambda_val=lambda_grid[best_ind])
-
-        best_sol = temp
+        best_sol = self.fused_lasso_weighted_l2_2d(M_tour, lambda_val=lambda_grid[best_ind])
+        best_pred = -np.sum(
+                np.log(scipy.stats.binom.pmf(M_tour, 1, best_sol))
+            )
 
         return best_sol, best_pred
 
@@ -132,31 +134,30 @@ class FusedLasso(BaseEstimator):
         if w is None:
             w = np.ones(y.shape)
 
+        y.dtype = np.float64
+
         # Define variables
         m, n = y.shape
         x = cp.Variable(y.shape)
 
-        mask = y[:,0:-2]*y[:,1:-1]
+        D_col = np.zeros((n, n))
+        np.fill_diagonal(D_col[:,1:], 1)
+        np.fill_diagonal(D_col, -1)
+        D_col = D_col[:, :-1]  # Adjust shape to perform the intended operation
 
-        # Create the differential matrices
-        Dx = cp.Variable((m, n - 1))
-        Dy = cp.Variable((m - 1, n))
+        mask = y[:, 0:-1]*y[:, 1:n]
 
         # Define the objective function
         objective = cp.Minimize(
-            0.5 * cp.sum(cp.multiply(w, cp.square(y - x)))
-            + lambda_val * (cp.norm(Dx, 1) + cp.norm(Dy, 1))
+            0.5 * cp.norm(cp.multiply(w, cp.square(y - x)), 'fro')/n**2
+            + lambda_val * (cp.norm(cp.multiply(mask, cp.matmul(x, D_col)), 1))/n**2
         )
 
-        # Constraints for differential matrices
-        constraints = [Dx == x[:, 1:] - x[:, :-1], Dy == x[1:, :] - x[:-1, :]]
-
         # Define the problem
-        problem = cp.Problem(objective, constraints)
+        problem = cp.Problem(objective)
 
         # Solve the problem
         problem.solve(max_iter=self.max_num_iter, eps_rel=rel_tol, verbose=False)
-        print(Dx.value, Dy.value)
 
         return x.value
 
