@@ -145,19 +145,18 @@ class FusedLasso(BaseEstimator):
         np.fill_diagonal(D_col, -1)
         D_col = D_col[:, :-1]  # Adjust shape to perform the intended operation
 
-        mask = y[:, 0:-1]*y[:, 1:n]
 
         # Define the objective function
         objective = cp.Minimize(
             0.5 * cp.norm(cp.multiply(w, cp.square(y - x)), 'fro')/n**2
-            + lambda_val * (cp.norm(cp.multiply(mask, cp.matmul(x, D_col)), 1))/n**2
+            + lambda_val * cp.norm(cp.matmul(x, D_col), 1)/n**2
         )
 
         # Define the problem
         problem = cp.Problem(objective)
 
         # Solve the problem
-        problem.solve(max_iter=self.max_num_iter, eps_rel=rel_tol, verbose=False)
+        problem.solve(max_iters=self.max_num_iter, verbose=True)
 
         return x.value
 
