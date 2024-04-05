@@ -5,6 +5,8 @@ import cvxpy as cp
 import fast_tsp
 import numpy as np
 import scipy.stats
+from scipy.sparse import coo_matrix
+import networkx as nx
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons import StepGraphon
@@ -138,27 +140,16 @@ class FusedLasso(BaseEstimator):
 
         # Define variables
         m, n = y.shape
-        x = cp.Variable(y.shape)
+        D = construct_incidence_matrix_networkx(n).T
 
-        D_col = np.zeros((n, n))
-        np.fill_diagonal(D_col[:,1:], 1)
-        np.fill_diagonal(D_col, -1)
-        D_col = D_col[:, :-1]  # Adjust shape to perform the intended operation
-
-
-        # Define the objective function
-        objective = cp.Minimize(
-            0.5 * cp.norm(cp.multiply(w, cp.square(y - x)), 'fro')/n**2
-            + lambda_val * cp.norm(cp.matmul(x, D_col), 1)/n**2
-        )
-
-        # Define the problem
+        # Optimization problem
+        beta = cp.Variable((n, n), symmetric=True)
+        objective = cp.Minimize((0.5 * cp.norm(y - beta, 'fro')**2 + lambda_val * cp.norm(D @ cp.vec(beta), 1))/n**2)
         problem = cp.Problem(objective)
 
         # Solve the problem
-        problem.solve(max_iters=self.max_num_iter, verbose=True)
-
-        return x.value
+        problem.solve()        
+        return beta.value
 
     def sort(
         self, distance_matrix: np.ndarray, adjacency_matrix: np.ndarray
@@ -176,3 +167,21 @@ class FusedLasso(BaseEstimator):
         # scale the distance matrix to integers given the precision
         distance_matrix = (distance_matrix * self.tsp_precision).astype(int)
         return fast_tsp.find_tour(distance_matrix)
+
+
+def construct_incidence_matrix_networkx(n: int) -> np.ndarray:
+    """Construct the incidence matrix for a 2D grid graph.
+
+    Parameters
+    ----------
+    n : int
+        The number of nodes in each dimension of the grid.
+
+    Returns
+    -------
+    numpy.ndarray
+        The incidence matrix.
+    """
+    G = nx.grid_2d_graph(n, n)
+    incidence_matrix = nx.incidence_matrix(G, oriented=False).toarray()
+    return incidence_matrix
