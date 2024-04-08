@@ -3,10 +3,10 @@ from typing import Optional, Tuple
 
 import cvxpy as cp
 import fast_tsp
+import networkx as nx
 import numpy as np
 import scipy.stats
 from scipy.sparse import coo_matrix
-import networkx as nx
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.graphons import StepGraphon
@@ -92,7 +92,11 @@ class FusedLasso(BaseEstimator):
             theta_hat_mat = bound_away_from_one_and_zero_arrays(np.array(temp).reshape((n, n)))
 
             pred[j] = -np.mean(
-                np.log(scipy.stats.binom.pmf(M_tour[indices_to_eval], 1, theta_hat_mat[indices_to_eval]))
+                np.log(
+                    scipy.stats.binom.pmf(
+                        M_tour[indices_to_eval], 1, theta_hat_mat[indices_to_eval]
+                    )
+                )
             )
 
             if pred[j] < best_pred:
@@ -102,9 +106,7 @@ class FusedLasso(BaseEstimator):
         print("Best lambda: ", lambda_grid[best_ind], "best pred: ", best_pred)
 
         best_sol = self.fused_lasso_weighted_l2_2d(M_tour, lambda_val=lambda_grid[best_ind])
-        best_pred = -np.sum(
-                np.log(scipy.stats.binom.pmf(M_tour, 1, best_sol))
-            )
+        best_pred = -np.sum(np.log(scipy.stats.binom.pmf(M_tour, 1, best_sol)))
 
         return best_sol, best_pred
 
@@ -144,11 +146,14 @@ class FusedLasso(BaseEstimator):
 
         # Optimization problem
         beta = cp.Variable((n, n), symmetric=True)
-        objective = cp.Minimize((0.5 * cp.norm(y - beta, 'fro')**2 + lambda_val * cp.norm(D @ cp.vec(beta), 1))/n**2)
+        objective = cp.Minimize(
+            (0.5 * cp.norm(y - beta, "fro") ** 2 + lambda_val * cp.norm(D @ cp.vec(beta), 1))
+            / n**2
+        )
         problem = cp.Problem(objective)
 
         # Solve the problem
-        problem.solve()        
+        problem.solve()
         return beta.value
 
     def sort(
@@ -183,7 +188,7 @@ def construct_incidence_matrix_networkx(n: int) -> np.ndarray:
         The incidence matrix.
     """
     D_col = np.zeros((n, n))
-    np.fill_diagonal(D_col[:,1:], 1)
+    np.fill_diagonal(D_col[:, 1:], 1)
     np.fill_diagonal(D_col, -1)
     D_col = D_col[:, :-1]  # Adjust shape to perform the intended operation
 
