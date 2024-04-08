@@ -4,9 +4,8 @@ from typing import Optional, Tuple, Union
 
 import fast_tsp
 import numpy as np
-from scipy.optimize import linear_sum_assignment
-from scipy.signal import convolve2d
-from skimage.restoration import denoise_tv_bregman
+import scipy.stats
+from skimage.restoration import denoise_tv_bregman, denoise_tv_chambolle
 from skimage.transform import resize
 
 from pygraphon.estimators.SAS import SAS
@@ -24,11 +23,13 @@ class TV_FL(SAS):
         self,
         h: Optional[Union[int, float]] = None,
         mu: float = 7.5,
-        max_num_iter: int = 20,
-        tol: float = 1e-3,
+        max_num_iter: int = 1000,
+        tol: float = 1e-4,
         isotropic: bool = True,
         distance: Dist = SimpleDifferenceDistance(),
-        tsp_precision: float = 1e-3,
+        tsp_precision: float = 1e-4,
+        n_lambda_grid: int = 50,
+        tv_algorithm: str = "bregman",
     ):
         """
         Parameters
@@ -41,6 +42,13 @@ class TV_FL(SAS):
         super().__init__(h, mu, max_num_iter, tol, isotropic)
         self.distance = distance
         self.tsp_precision = tsp_precision
+        self.n_lambda_grid = n_lambda_grid
+        if tv_algorithm == "bregman":
+            self.tv_algorithm = denoise_tv_bregman
+        elif tv_algorithm == "chambolle":
+            self.tv_algorithm = denoise_tv_chambolle
+        else:
+            raise ValueError("Invalid TV algorithm")
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray, h=None
@@ -71,17 +79,28 @@ class TV_FL(SAS):
     def smooth(self, adjacency_matrix: np.ndarray, idx: np.ndarray, h=None) -> np.ndarray:
         """Smooth the adjacency matrix based on the permutation idx."""
         n = adjacency_matrix.shape[0]
-        # histogram estimation
-       
-        graphon_matrix = denoise_tv_bregman(
-            adjacency_matrix,
-            weight=6,
-            max_num_iter=self.max_num_iter,
-            eps=self.tol,
-        )
+        best_pred = -np.Inf
+        best_sol = np.zeros((n, n))
+        lambda_theory = 2 * np.log(n) ** (3 / 2)
+        if self.tv_algorithm == denoise_tv_bregman:  # bregman is 1/lambda
+            lambda_grid = np.linspace(0.01, lambda_theory, num=self.n_lambda_grid)
+        else:
+            lambda_grid = 1 / np.linspace(0.01, lambda_theory, num=self.n_lambda_grid)
+        for j in range(self.n_lambda_grid):
+            graphon_matrix = self.tv_algorithm(
+                adjacency_matrix,
+                weight=1 / lambda_grid[j],
+                max_num_iter=self.max_num_iter,
+                eps=self.tol,
+            )
+            # get the likelihood
+            pred = np.mean((scipy.stats.binom.logpmf(adjacency_matrix, 1, graphon_matrix)))
+            if pred > best_pred:
+                best_pred = pred
+                best_sol = graphon_matrix
 
         # resize the graphon to size of the adjacency matrix
-        P_hat = resize(graphon_matrix, (n, n), order=0, mode="edge", anti_aliasing=False)
+        P_hat = resize(best_sol, (n, n), order=0, mode="edge", anti_aliasing=False)
 
         # sort back
         original_indices = np.argsort(idx)
@@ -92,9 +111,9 @@ class TV_FL(SAS):
 
         # map to [0, 1]
         np.clip(P_hat, 0, 1, out=P_hat)
-        np.clip(graphon_matrix, 0, 1, out=graphon_matrix)
+        np.clip(best_sol, 0, 1, out=best_sol)
 
-        return P_hat, graphon_matrix
+        return P_hat, best_sol
 
     def fast_tsp(self, distance_matrix: np.ndarray) -> np.ndarray:
         """Solve the traveling salesman problem using a fast heuristic."""
