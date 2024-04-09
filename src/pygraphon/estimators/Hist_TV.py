@@ -14,7 +14,6 @@ from pygraphon.estimators.networkhistogram.nethist import nethist
 from pygraphon.graphons import StepGraphon
 from pygraphon.norm import Dist, SimpleDifferenceDistance
 
-
 class Hist_TV(BaseEstimator):
     """Total variation smoothed histogram estimator adapted from :cite:p:`olhede2014`."""
 
@@ -41,7 +40,6 @@ class Hist_TV(BaseEstimator):
             self.tv_algorithm = denoise_tv_chambolle
         else:
             raise ValueError("Invalid TV algorithm")
-        self._num_par_tv = -1
 
     def _approximate_graphon_from_adjacency(
         self,
