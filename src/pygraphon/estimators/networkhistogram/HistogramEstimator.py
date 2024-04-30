@@ -33,6 +33,7 @@ class HistogramEstimator(BaseEstimator):
         absTol: float = 2.5 * 1e-4,
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
+        progress_bar: bool = False,
     ) -> Tuple[StepGraphon, np.ndarray]:
         """Estimate the graphon function f(x,y) from an adjacency matrix.
 
@@ -56,6 +57,7 @@ class HistogramEstimator(BaseEstimator):
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
+            progress_bar=progress_bar,
         )
         return StepGraphon(graphon_matrix, bandwidthHist=h), P
 
@@ -67,6 +69,7 @@ class HistogramEstimator(BaseEstimator):
         absTol: float = 2.5 * 1e-4,
         maxNumIterations: int = 500,
         past_non_improving: int = 3,
+        progress_bar: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray, float]:
         """Use function from Universality of block model approximation [1].
 
@@ -80,6 +83,8 @@ class HistogramEstimator(BaseEstimator):
             size of the block of the histogram. Defaults to None
         use_default_bandwidth : bool
             if True, use the default bandwidth. Defaults to False.
+        progress_bar : bool
+            if True, show a progress bar. Defaults to False.
 
 
         Returns
@@ -108,6 +113,7 @@ class HistogramEstimator(BaseEstimator):
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
+            progress_bar=progress_bar,
         )
 
         bandwidthHist = h / adjacencyMatrix.shape[0]
