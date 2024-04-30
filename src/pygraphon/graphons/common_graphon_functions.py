@@ -48,6 +48,8 @@ graphon_sinusoidal = Graphon(
 )
 
 
+graphon_er = Graphon(function=lambda x, y: 0.3, repr="ER(0.3)")
+
 common_graphons = {
     "product": graphon_product,
     "exp_07": graphon_exp_07,
@@ -60,4 +62,5 @@ common_graphons = {
     "exp_polynomial": graphon_exp_polynomial,
     "log_1_p": graphon_log_1_p,
     "sinusoidal": graphon_sinusoidal,
+    "er": graphon_er,
 }
