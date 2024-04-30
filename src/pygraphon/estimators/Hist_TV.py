@@ -6,13 +6,13 @@ import fast_tsp
 import numpy as np
 import scipy.stats
 from skimage.restoration import denoise_tv_bregman, denoise_tv_chambolle
-from skimage.transform import resize
 
 from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.assignment import Assignment
 from pygraphon.estimators.networkhistogram.nethist import nethist
 from pygraphon.graphons import StepGraphon
 from pygraphon.norm import Dist, SimpleDifferenceDistance
+
 
 class Hist_TV(BaseEstimator):
     """Total variation smoothed histogram estimator adapted from :cite:p:`olhede2014`."""
@@ -77,6 +77,11 @@ class Hist_TV(BaseEstimator):
             progress_bar,
         )
         theta_matrix, col_ind = self.sort_theta(first_fit_graphon.get_theta())
+        intermediate_labels = np.copy(assignment.labels)
+        for i, label in enumerate(assignment.labels):
+            intermediate_labels[i] = col_ind[label]
+        assignment.labels = intermediate_labels
+
         graphon_sorted = StepGraphon(theta_matrix, bandwidthHist=first_fit_graphon.bandwidthHist)
 
         return self.smooth(graphon_sorted, adjacency_matrix, col_ind, assignment)
@@ -152,6 +157,8 @@ class Hist_TV(BaseEstimator):
         best_sol = None
         lambda_theory = 2 * np.log(k) ** (3 / 2)
 
+        best_pij = None
+
         if self.tv_algorithm == denoise_tv_bregman:  # bregman is 1/lambda
             lambda_grid = np.linspace(0.01, lambda_theory, num=self.n_lambda_grid)
         else:
@@ -174,6 +181,7 @@ class Hist_TV(BaseEstimator):
             if pred > best_pred:
                 best_pred = pred
                 best_sol = graphon_matrix
+                best_pij = pij
 
         # sort back
         original_indices = np.argsort(idx)
@@ -181,12 +189,7 @@ class Hist_TV(BaseEstimator):
         final_theta = final_theta[:, original_indices]
         np.clip(final_theta, 0, 1, out=final_theta)
         graphon = StepGraphon(final_theta, bandwidthHist=1 / k)
-        P_hat = resize(graphon.get_theta(), (n, n), order=0, mode="edge", anti_aliasing=False)
-        # remove diagonal to stay consistent with no self-loops
-        P_hat[np.diag_indices_from(P_hat)] = 0
-
-        # map to [0, 1]
-        np.clip(P_hat, 0, 1, out=P_hat)
+        P_hat = best_pij
 
         return (
             graphon,
