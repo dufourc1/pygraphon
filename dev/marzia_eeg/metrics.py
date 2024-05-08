@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import mannwhitneyu, ttest_ind
 
 
-def auc_ppv_score(topo_features_surv, topo_features_nsurv, plot=False):
+def auc_ppv_score(topo_features_surv, topo_features_nsurv, freq_list = np.arange(1,41) ,plot=False):
     aucs = []
     ppvs = []
-    for i in range(40):
+    for i in range(len(freq_list)):
         topo_feature_freq_i = np.concatenate((-topo_features_surv[:, i].flatten(), -topo_features_nsurv[:,i].flatten()))
         labels = np.concatenate((np.ones_like(topo_features_surv[:, i].flatten()), np.zeros_like(topo_features_nsurv[:,i].flatten())))
         fpr, tpr, thresholds = roc_curve(labels, topo_feature_freq_i)
