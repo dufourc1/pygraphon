@@ -45,7 +45,7 @@ def extract_wdpli(base_folder_path: str, surv=True):# -> tuple[dict, list[str]]:
                         if 'wpli_debiasedspctrm' in data.dtype.names:
                             wpli_data = data['wpli_debiasedspctrm'][0, 0]
                             for i in range(wpli_data.shape[2]):
-                                slice_df = pd.DataFrame(wpli_data[:, :, i])
+                                slice_df = pd.DataFrame(wpli_data[:62, :62, i])
                                 dataframes_wpli[f"{folder}_{mat_file}_wpli_debiasedspctrm_slice{i+1}"] = slice_df
                         else:
                             print(f"'wpli_debiasedspctrm' field not found in '{file_path}'")
