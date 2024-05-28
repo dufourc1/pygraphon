@@ -1,29 +1,52 @@
 # same but with a loop for all the frequencies
 import numpy as np
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, precision_recall_curve, f1_score
 import matplotlib.pyplot as plt
 from scipy.stats import mannwhitneyu, ttest_ind
 
 
-def auc_ppv_score(topo_features_surv, topo_features_nsurv, freq_list = np.arange(1,41) ,plot=False):
+def auc_ppv_score(topo_features_surv, topo_features_nsurv, method='tpr-fpr', plot=False):
     aucs = []
     ppvs = []
-    for i in range(len(freq_list)):
+    for i in range(40):
         topo_feature_freq_i = np.concatenate((-topo_features_surv[:, i].flatten(), -topo_features_nsurv[:,i].flatten()))
         labels = np.concatenate((np.ones_like(topo_features_surv[:, i].flatten()), np.zeros_like(topo_features_nsurv[:,i].flatten())))
+
         fpr, tpr, thresholds = roc_curve(labels, topo_feature_freq_i)
         roc_auc = auc(fpr, tpr)
         aucs.append(roc_auc)
-        optimal_idx = np.argmax(tpr - fpr)
+
+        precision, recall, thresholds_pr = precision_recall_curve(labels, topo_feature_freq_i)
+
+        if method == 'tpr-fpr':
+            optimal_idx = np.argmax(tpr - fpr)
+        elif method == 'f1':
+            # Calculate F1 scores for each threshold
+            f1_scores = [f1_score(labels, topo_feature_freq_i >= thresh) for thresh in thresholds_pr]
+            optimal_idx = np.argmax(f1_scores)
+            thresholds = thresholds_pr  # Update thresholds to match F1 scores calculation
+        elif method == 'auprc':
+            # Use the threshold corresponding to the highest precision given a minimum recall level
+            min_recall = 0.80  # Adjust the recall level requirement
+            valid_indices = np.where(recall[1:] >= min_recall)[0]  # Adjust indices for thresholds
+            if len(valid_indices) > 0:
+                high_recall_precisions = precision[valid_indices]
+                optimal_idx = np.argmax(high_recall_precisions)
+                thresholds = thresholds_pr[valid_indices]
+            else:
+                optimal_idx = 0
+        else:
+            raise ValueError("Method must be 'tpr-fpr', 'f1', or 'auprc'")
+
         optimal_threshold = thresholds[optimal_idx]
         positive_predictions = np.sum(topo_feature_freq_i >= optimal_threshold)
+
         if positive_predictions > 0:
             ppv = np.sum((topo_feature_freq_i >= optimal_threshold) & (labels == 1)) / positive_predictions
         else:
             ppv = 0
+
         ppvs.append(ppv)
-    #print(f"Max AUC: {max(aucs)} at frequency {np.argmax(aucs)+1}")
-    #print(f"Max PPV: {max(ppvs)} at frequency {np.argmax(ppvs)+1}")
 
     if plot:
         # plot the AUCs

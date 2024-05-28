@@ -89,11 +89,29 @@ def adj_percentile_thresholding(similarity_matrix, percentile):
         2-dimensional similarity matrix
     percentile : float
         percentile value for thresholding, e.g. 90 for 90th percentile
-    
+
     Returns
     -------
     np.ndarray
         adjacency matrix
     """
     threshold = np.nanpercentile(similarity_matrix, percentile)
+    return create_adjacency_matrix(similarity_matrix, threshold)
+
+
+def adj_brute_thresholding(similarity_matrix, threshold):
+    """Creates an adjacency matrix from a similarity matrix by value-thresholding.
+
+    Parameters
+    ----------
+    similarity_matrix : np.ndarray
+        2-dimensional similarity matrix
+    threshold : float
+        threshold value for adjacency matrix, e.g. 0.5
+
+    Returns
+    -------
+    np.ndarray
+        adjacency matrix
+    """
     return create_adjacency_matrix(similarity_matrix, threshold)
