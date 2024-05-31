@@ -1,9 +1,5 @@
-import numpy as np
-
-shift_x = 10
-shift_y = 10
-shift_z = 0
-
+# Electrodes lists
+# -----------------
 all_electrodes = [
     "LPA", "RPA", "Nz", "Fp1", "Fpz", "Fp2", "AF9", "AF7", "AF5", "AF3", "AF1", "AFz", 
     "AF2", "AF4", "AF6", "AF8", "AF10", "F9", "F7", "F5", "F3", "F1", "Fz", "F2", "F4", 
@@ -23,6 +19,56 @@ electrodes_experiments = ['Fp1','Fpz','Fp2','AF7','AF3','AF4','AF8',
                           'P7','P5','P3','P1','Pz','P2','P4','P6','P8',
                           'PO7','PO3','POz','PO4','PO8',
                           'O1','Oz','O2']
+
+# Electrodes clusters
+# -------------------
+# Electrodes by region
+regions = {
+    "frontal": ['Fp1', 'Fpz', 'Fp2', 'AF7', 'AF3', 'AF4', 'AF8', 'F9', 'F7', 'F5', 'F3', 'F1', 'Fz', 'F2', 'F4', 'F6', 'F8', 'F10'],
+    "temporal": ['FT7', 'T7', 'TP7', 'FT8', 'T8', 'TP8'],
+    "central": ['FC5', 'FC3', 'FC1', 'FCz', 'FC2', 'FC4', 'FC6', 'C5', 'C3', 'C1', 'Cz', 'C2', 'C4', 'C6', 'CP5', 'CP3', 'CP1', 'CPz', 'CP2', 'CP4', 'CP6'],
+    "parietal": ['P7', 'P5', 'P3', 'P1', 'Pz', 'P2', 'P4', 'P6', 'P8'],
+    "occipital": ['PO7', 'PO3', 'POz', 'PO4', 'PO8', 'O1', 'Oz', 'O2']
+}
+
+# Electrodes by hemisphere
+hemisphere = {
+    "left": [e for e in electrodes_experiments if any(e.endswith(str(n)) for n in ['1', '3', '5', '7', '9'])],
+    "midline": [e for e in electrodes_experiments if 'z' in e],
+    "right": [e for e in electrodes_experiments if any(e.endswith(str(n)) for n in ['2', '4', '6', '8', '10'])]
+}
+
+# Combined list: (Electrode, Region, Hemisphere)
+combined_list = []
+for electrode in electrodes_experiments:
+    region_found = [region for region, elist in regions.items() if electrode in elist]
+    hemisphere_found = [hemi for hemi, elist in hemisphere.items() if electrode in elist]
+    if region_found and hemisphere_found:
+        combined_list.append((electrode, region_found[0], hemisphere_found[0]))
+
+# Creating lists
+electrodes_regions_positions = [region for electrode in electrodes_experiments for region, elist in regions.items() if electrode in elist]
+electrodes_hemisphere_positions = [hemi for electrode in electrodes_experiments for hemi, elist in hemisphere.items() if electrode in elist]
+
+# Map of indices for region-based and hemisphere-based sorting
+# Sorting electrodes by regions then by hemisphere
+sorted_by_region_then_hemi = sorted(combined_list, key=lambda x: (x[1], {"left": 1, "midline": 2, "right": 3}[x[2]]))
+sorted_electrodes_by_region = [elec[0] for elec in sorted_by_region_then_hemi]
+
+# Sorting electrodes by hemisphere
+sorted_by_hemisphere = sorted(combined_list, key=lambda x: {"left": 1, "midline": 2, "right": 3}[x[2]])
+sorted_electrodes_by_hemisphere = [elec[0] for elec in sorted_by_hemisphere]
+
+# Generate index maps
+region_indices = [electrodes_experiments.index(elec) for elec in sorted_electrodes_by_region]
+hemisphere_indices = [electrodes_experiments.index(elec) for elec in sorted_electrodes_by_hemisphere]
+
+
+# Electrodes positions and their shift
+#-------------------------------------
+shift_x = 10
+shift_y = 10
+shift_z = 0
 
 all_electrodes_position = [
     (-86.0761, -19.9897, -47.9860), # LPA
