@@ -115,3 +115,26 @@ def adj_brute_thresholding(similarity_matrix, threshold):
         adjacency matrix
     """
     return create_adjacency_matrix(similarity_matrix, threshold)
+
+
+def get_band(freq):
+    if 1 <= freq <= 4:
+        return 'delta'
+    elif 4 < freq <= 7:
+        return 'theta'
+    elif 8 <= freq <= 12:
+        return 'alpha'
+    elif 12 < freq <= 16:
+        return 'sigma'
+    elif 13 <= freq <= 30:
+        return 'beta'
+    else:
+        return 'gamma'
+
+
+def find_transitions(bands):
+    transitions = []
+    for i in range(1, len(bands)):
+        if bands[i-1] != bands[i]:
+            transitions.append(i)
+    return transitions
