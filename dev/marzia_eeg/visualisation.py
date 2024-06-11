@@ -71,23 +71,24 @@ def plot_dual_eeg_network(
     node_colors = [cluster_to_color[cluster] for cluster in clusters]
 
     fig, axes = plt.subplots(1, 2, figsize=(20, 10))  # Setup figure and axes
-    
+
     # Plot for matrix1
     weights1 = [G1[u][v]['weight'] for u, v in G1.edges()]
     nx.draw(G1, pos, ax=axes[0], node_size=700, with_labels=True, node_color=node_colors,
             edge_color=weights1, width=1, edge_cmap=plt.cm.Blues)
-    axes[0].set_title('EEG ConNet Surv at frequency ' + frequency + ' and threshold ' + str(threshold) + '%' if frequency else 'EEG ConNet Surv')
-    
+    axes[0].set_title('Surviving EEG at frequency ' + frequency + ' and threshold ' + str(threshold) + '%' if frequency else 'Surviving EEG')
+
     # Plot for matrix2
     weights2 = [G2[u][v]['weight'] for u, v in G2.edges()]
     nx.draw(G2, pos, ax=axes[1], node_size=700, with_labels=True, node_color=node_colors,
             edge_color=weights2, width=1, edge_cmap=plt.cm.Blues)
-    axes[1].set_title('EEG ConNet NSurv at frequency ' + frequency + ' and threshold ' + str(threshold) + '%' if frequency else 'EEG ConNet NSurv')
+    axes[1].set_title('Surviving EEG at frequency ' + frequency + ' and threshold ' + str(threshold) + '%' if frequency else 'Non-surviving EEG')
 
     # Create a legend for the colors
     for cluster, color in cluster_to_color.items():
         plt.scatter([], [], color=color, label=cluster)
     plt.legend(title="Region", title_fontsize='13', fontsize='11', loc='upper right', bbox_to_anchor=(1.25, 1))
+    plt.suptitle('Connectivity Network')
 
     # Saving the plots if folder_path is specified
     if folder_path:
