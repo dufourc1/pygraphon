@@ -5,18 +5,25 @@ import matplotlib.pyplot as plt
 from scipy.stats import mannwhitneyu, ttest_ind
 
 
-def auc_ppv_score(topo_features_surv, topo_features_nsurv, method='tpr-fpr', plot=False):
+def auc_ppv_score(topo_features_surv, topo_features_nsurv, method='tpr-fpr', freq_list = np.arange(1,41), plot=False):
     aucs = []
     ppvs = []
     sensitivities = []
     specificities = []
     npvs = []
     accuracies = []
-    
-    for i in range(40):
-        topo_feature_freq_i = np.concatenate((-topo_features_surv[:, i].flatten(), -topo_features_nsurv[:,i].flatten()))
-        labels = np.concatenate((np.ones_like(topo_features_surv[:, i].flatten()), np.zeros_like(topo_features_nsurv[:,i].flatten())))
 
+    n_it_freq = len(freq_list) if freq_list is not None else 1 # 1 if only testibng one freq or one band
+    for i in range(n_it_freq):
+        # if topo feat is 2D then we flatten it else we keep it as it is
+        if topo_features_surv.ndim == 2:
+            topo_feature_freq_i_surv = topo_features_surv[:, i].flatten()
+            topo_feature_freq_i_nsurv = topo_features_nsurv[:, i].flatten()
+        else:
+            topo_feature_freq_i_surv = topo_features_surv
+            topo_feature_freq_i_nsurv = topo_features_nsurv
+        topo_feature_freq_i = np.concatenate((-topo_feature_freq_i_surv, -topo_feature_freq_i_nsurv))
+        labels = np.concatenate((np.ones_like(topo_feature_freq_i_surv), np.zeros_like(topo_feature_freq_i_nsurv)))
         fpr, tpr, thresholds = roc_curve(labels, topo_feature_freq_i)
         roc_auc = auc(fpr, tpr)
         aucs.append(roc_auc)
