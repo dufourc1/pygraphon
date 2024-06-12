@@ -121,13 +121,20 @@ def plot_with_boundaries(data, boundaries, ax, cmap='jet', vmin=None, vmax=None)
     return im
 
 
-def plot_with_boundaries_and_labels(data, boundaries, ax, labels, midpoints, cmap='jet', vmin=None, vmax=None):
+def plot_with_boundaries_and_labels(data,
+                                    boundaries,
+                                    ax,
+                                    labels,
+                                    midpoints,
+                                    cmap='jet',
+                                    vmin=None,
+                                    vmax=None):
     im = ax.imshow(data, cmap=cmap, vmin=vmin, vmax=vmax)
     for boundary in boundaries:
         ax.axhline(y=boundary-0.5, color='red', linestyle='--')  # Horizontal line
         ax.axvline(x=boundary-0.5, color='red', linestyle='--')  # Vertical line
     # Adding text labels
     for label, midpoint in zip(labels, midpoints):
-        ax.text(midpoint, -5, label, ha='center', va='bottom', color='red', fontsize=10, rotation=90)
-        ax.text(-10, midpoint, label, ha='right', va='center', color='red', fontsize=10)
+        ax.text(midpoint, -5, label, ha='center', va='bottom', color='red', fontsize=20, rotation=90)
+        ax.text(-10, midpoint, label, ha='right', va='center', color='red', fontsize=20)
     return im
