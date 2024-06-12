@@ -15,7 +15,7 @@ region_boundaries, region_midpoints, region_labels = calculate_boundaries_and_la
 hemisphere_boundaries, hemisphere_midpoints, hemisphere_labels = calculate_boundaries_and_labels([hemi for _, _, hemi in sorted_by_hemisphere])
 
 plt.rcParams.update({
-    'figure.figsize': (20, 20),
+    'figure.figsize': (10, 10),
     'savefig.dpi': 300,
     'font.size': 20,
     'font.family': 'Arial',
@@ -33,7 +33,7 @@ def plot_combined_visualization(
     frequency: str = None,
     folder_path: str = None,
     cmap: str = 'binary',
-    title: str = None
+    title_plot: str = None
 ):
     # Setup the figure
     fig, axs = plt.subplots(2, 2, figsize=(20, 20))
@@ -102,19 +102,19 @@ def plot_combined_visualization(
     pos = nx.get_node_attributes(G1, 'pos')
     clusters = [G1.nodes[label]['cluster'] for label in labels]
     node_colors = [cluster_to_color[cluster] for cluster in clusters]
-
+    node_size = 700
     # Network plots
     for idx, (G, title) in enumerate(zip([G1, G2], ['Surviving EEG Network', 'Non-surviving EEG Network'])):
         weights = [G[u][v]['weight'] for u, v in G.edges()]
-        nx.draw(G, pos, ax=axs[idx, 1], node_size=700, with_labels=True, node_color=node_colors,
+        nx.draw(G, pos, ax=axs[idx, 1], node_size=node_size, with_labels=True, node_color=node_colors,
                 edge_color=weights, width=1, edge_cmap=plt.cm.Blues)
         #axs[idx, 1].set_title(title + ' at frequency ' + (frequency if frequency else "N/A") + ' and threshold ' + str(threshold) + '%')
 
     # Create a legend for the colors
     for cluster, color in cluster_to_color.items():
         plt.scatter([], [], color=color, label=cluster)
-    plt.legend(title="Region", title_fontsize='13', fontsize='11', loc='upper right', bbox_to_anchor=(1.25, 1))
-    plt.suptitle(title)
+    plt.legend(title="Region", title_fontsize='30', fontsize='20', loc='upper right', bbox_to_anchor=(1.25, 1))
+    plt.suptitle(title_plot if title_plot else 'Combined Visualization')
     plt.tight_layout()
 
     # Saving the plots if folder_path is specified
