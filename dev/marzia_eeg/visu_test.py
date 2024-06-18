@@ -40,51 +40,34 @@ def plot_combined_visualization(
     min_val = np.nanmin(np.concatenate([graphon_surv, graphon_nsurv]))
     max_val = np.nanmax(np.concatenate([graphon_surv, graphon_nsurv])) 
 
+    # setting the color map
+    unique_clusters = list(set(cluster_label))
+    colors = plt.cm.get_cmap('Set2', len(unique_clusters))
+    cluster_to_color = {cluster: colors(i) for i, cluster in enumerate(unique_clusters)}
+    region_order = ['central', 'frontal', 'parietal', 'occipital', 'temporal']
+    region_colors = [cluster_to_color[region] for region in region_order]
+
     # plot graphons
     for idx, (graphon, title) in enumerate(zip([graphon_surv, graphon_nsurv], ['Survivors', 'Non-survivors'])):
-        if idx == 0:
-            if permutation == 'regions':
-                im = plot_with_boundaries_and_labels(graphon[region_indices, :][:, region_indices],
-                                                    boundaries=region_boundaries,
-                                                    midpoints=region_midpoints,
-                                                    labels=region_labels,
-                                                    cmap=cmap,
-                                                    ax=axs[idx, 0],
-                                                    vmin=min_val,
-                                                    vmax=max_val)
-            elif permutation == 'hemispheres':
-                im = plot_with_boundaries_and_labels(graphon[hemisphere_indices, :][:, hemisphere_indices],
-                                                    boundaries=hemisphere_boundaries,
-                                                    midpoints=hemisphere_midpoints,
-                                                    labels=hemisphere_labels,
-                                                    cmap=cmap,
-                                                    ax=axs[idx, 0],
-                                                    vmin=min_val,
-                                                    vmax=max_val)
-        else:
-            if permutation == 'regions':
-                im = plot_with_boundaries(graphon[region_indices, :][:, region_indices],
-                                        boundaries=region_boundaries,
-                                        cmap=cmap,
-                                        ax=axs[idx, 0],
-                                        vmin=min_val,
-                                        vmax=max_val)
-            elif permutation == 'hemispheres':
-                im = plot_with_boundaries(graphon[hemisphere_indices, :][:, hemisphere_indices],
-                                        boundaries=hemisphere_boundaries,
-                                        cmap=cmap,
-                                        ax=axs[idx, 0],
-                                        vmin=min_val,
-                                        vmax=max_val)
-
-        #axs[idx, 0].set_title(title)
+        if permutation == 'regions':
+            im = plot_with_boundaries_and_labels(graphon[region_indices, :][:, region_indices],
+                                                boundaries=region_boundaries,
+                                                cmap=cmap,
+                                                region_colors=region_colors,
+                                                ax=axs[idx, 0],
+                                                vmin=min_val,
+                                                vmax=max_val)
+        elif permutation == 'hemispheres':
+            im = plot_with_boundaries_and_labels(graphon[hemisphere_indices, :][:, hemisphere_indices],
+                                                boundaries=hemisphere_boundaries,
+                                                cmap=cmap,
+                                                region_colors=region_colors,
+                                                ax=axs[idx, 0],
+                                                vmin=min_val,
+                                                vmax=max_val)
         plt.colorbar(im, ax=axs[idx, 0], fraction=0.046, pad=0.04)
 
     # plot network
-    unique_clusters = list(set(cluster_label))
-    colors = plt.cm.get_cmap('Pastel2', len(unique_clusters))
-    cluster_to_color = {cluster: colors(i) for i, cluster in enumerate(unique_clusters)}
-
     def create_network(matrix):
         G = nx.Graph()
         for i, label in enumerate(labels):
@@ -108,12 +91,11 @@ def plot_combined_visualization(
         weights = [G[u][v]['weight'] for u, v in G.edges()]
         nx.draw(G, pos, ax=axs[idx, 1], node_size=node_size, with_labels=True, node_color=node_colors,
                 edge_color=weights, width=1, edge_cmap=plt.cm.Blues)
-        #axs[idx, 1].set_title(title + ' at frequency ' + (frequency if frequency else "N/A") + ' and threshold ' + str(threshold) + '%')
 
     # Create a legend for the colors
     for cluster, color in cluster_to_color.items():
         plt.scatter([], [], color=color, label=cluster)
-    plt.legend(title="Region", title_fontsize='30', fontsize='20', loc='upper right', bbox_to_anchor=(1.25, 1))
+    plt.legend(title="Region", title_fontsize='30', fontsize='20', loc='best', bbox_to_anchor=(1.25, 1))
     plt.suptitle(title_plot if title_plot else 'Combined Visualization')
     plt.tight_layout()
 
