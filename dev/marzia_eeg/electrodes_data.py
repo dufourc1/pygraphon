@@ -24,11 +24,11 @@ electrodes_experiments = ['Fp1','Fpz','Fp2','AF7','AF3','AF4','AF8',
 # -------------------
 # Electrodes by region
 regions = {
-    "frontal": ['Fp1', 'Fpz', 'Fp2', 'AF7', 'AF3', 'AF4', 'AF8', 'F9', 'F7', 'F5', 'F3', 'F1', 'Fz', 'F2', 'F4', 'F6', 'F8', 'F10'],
-    "temporal": ['FT7', 'T7', 'TP7', 'FT8', 'T8', 'TP8'],
     "central": ['FC5', 'FC3', 'FC1', 'FCz', 'FC2', 'FC4', 'FC6', 'C5', 'C3', 'C1', 'Cz', 'C2', 'C4', 'C6', 'CP5', 'CP3', 'CP1', 'CPz', 'CP2', 'CP4', 'CP6'],
+    "frontal": ['Fp1', 'Fpz', 'Fp2', 'AF7', 'AF3', 'AF4', 'AF8', 'F9', 'F7', 'F5', 'F3', 'F1', 'Fz', 'F2', 'F4', 'F6', 'F8', 'F10'],
     "parietal": ['P7', 'P5', 'P3', 'P1', 'Pz', 'P2', 'P4', 'P6', 'P8'],
-    "occipital": ['PO7', 'PO3', 'POz', 'PO4', 'PO8', 'O1', 'Oz', 'O2']
+    "occipital": ['PO7', 'PO3', 'POz', 'PO4', 'PO8', 'O1', 'Oz', 'O2'],
+    "temporal": ['FT7', 'T7', 'TP7', 'FT8', 'T8', 'TP8']
 }
 
 # Electrodes by hemisphere
@@ -66,8 +66,8 @@ hemisphere_indices = [electrodes_experiments.index(elec) for elec in sorted_elec
 
 # Electrodes positions and their shift
 #-------------------------------------
-shift_x = 10
-shift_y = 10
+shift_x = 20
+shift_y = 20
 shift_z = 0
 
 all_electrodes_position = [
