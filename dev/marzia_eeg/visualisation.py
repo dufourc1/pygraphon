@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 from typing import Tuple, List
+from matplotlib.patches import Rectangle
+
 
 def plot_eeg_network(
     matrix: np.ndarray,
@@ -121,20 +123,36 @@ def plot_with_boundaries(data, boundaries, ax, cmap='jet', vmin=None, vmax=None)
     return im
 
 
-def plot_with_boundaries_and_labels(data,
-                                    boundaries,
-                                    ax,
-                                    labels,
-                                    midpoints,
-                                    cmap='jet',
-                                    vmin=None,
-                                    vmax=None):
+def plot_with_boundaries_and_labels(data, boundaries, ax, region_colors, cmap='jet', vmin=None, vmax=None):
+    # Plot the image
     im = ax.imshow(data, cmap=cmap, vmin=vmin, vmax=vmax)
+
+    # Add boundary lines within the image
     for boundary in boundaries:
-        ax.axhline(y=boundary-0.5, color='red', linestyle='--')  # Horizontal line
-        ax.axvline(x=boundary-0.5, color='red', linestyle='--')  # Vertical line
-    # Adding text labels
-    for label, midpoint in zip(labels, midpoints):
-        ax.text(midpoint, -5, label, ha='center', va='bottom', color='red', fontsize=20, rotation=90)
-        ax.text(-10, midpoint, label, ha='right', va='center', color='red', fontsize=20)
+        ax.axhline(y=boundary-0.25, color='red', linestyle='--')  # Horizontal line
+        ax.axvline(x=boundary-0.25, color='red', linestyle='--')  # Vertical line
+    
+    # Define boundaries for rectangles
+    x_boundaries = [0] + boundaries
+    y_boundaries = [0] + boundaries
+
+    # Add colored rectangles above the plot
+    for i in range(len(x_boundaries) - 1):
+        width = x_boundaries[i + 1] - x_boundaries[i]
+        rect_color = region_colors[i]  # Get color from the provided region colors
+        rect = Rectangle((x_boundaries[i], -1), width, 1, facecolor=rect_color, edgecolor='none')
+        ax.add_patch(rect)
+
+    # Add colored rectangles to the left of the plot
+    for j in range(len(y_boundaries) - 1):
+        height = y_boundaries[j + 1] - y_boundaries[j]
+        rect_color = region_colors[j]  # Get color from the provided region colors
+        rect = Rectangle((-1, y_boundaries[j]), 1, height, facecolor=rect_color, edgecolor='none')
+        ax.add_patch(rect)
+
+    # Adjust limits and aspect ratio to fit the rectangles
+    ax.set_xlim(-1, data.shape[1])
+    ax.set_ylim(data.shape[0], -1)
+    ax.set_aspect('equal')
+
     return im
