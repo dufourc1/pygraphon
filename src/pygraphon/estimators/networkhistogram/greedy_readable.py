@@ -1,4 +1,5 @@
 """Implementation of network histogram estimator."""
+
 from copy import deepcopy
 
 import numpy as np

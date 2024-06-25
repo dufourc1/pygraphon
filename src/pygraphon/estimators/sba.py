@@ -1,4 +1,5 @@
 """Implementation of the SBA estimator."""
+
 import random
 from typing import List, Tuple
 

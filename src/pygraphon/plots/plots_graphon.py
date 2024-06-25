@@ -1,4 +1,5 @@
 """Utilities to plot graphons."""
+
 from typing import Optional, Tuple
 
 import matplotlib as mpl

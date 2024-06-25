@@ -1,4 +1,5 @@
 """Implementation of neighborhood smoothing estimator."""
+
 from typing import Tuple
 
 import numpy as np

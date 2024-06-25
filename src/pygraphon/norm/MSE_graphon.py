@@ -1,4 +1,5 @@
 """Exact permutation distance between block graphons."""
+
 import numpy as np
 
 from pygraphon.graphons.StepGraphon import StepGraphon

@@ -1,4 +1,5 @@
 """Fast assignment class."""
+
 from math import log
 from typing import Tuple
 

@@ -1,4 +1,5 @@
 """Estimator based on method of moments for cycle counts."""
+
 from collections.abc import Iterable as IterableCollection
 from itertools import product
 from typing import Callable, Iterable, List, Tuple, Union

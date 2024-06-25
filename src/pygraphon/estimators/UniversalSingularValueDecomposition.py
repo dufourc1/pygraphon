@@ -1,4 +1,5 @@
 """Implementation of USVD estimator."""
+
 from typing import Tuple
 
 import numpy as np

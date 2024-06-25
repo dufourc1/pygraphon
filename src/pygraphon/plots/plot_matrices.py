@@ -1,4 +1,5 @@
 """Utilities to plot matrices."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 

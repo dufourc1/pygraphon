@@ -1,4 +1,5 @@
 """Implementation of network histogram estimator."""
+
 from typing import Optional, Tuple
 
 import numpy as np

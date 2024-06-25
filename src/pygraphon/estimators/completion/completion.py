@@ -1,4 +1,5 @@
 """Implementation of the matrix completion scheme estimator."""
+
 from typing import Optional, Tuple
 
 import numpy as np

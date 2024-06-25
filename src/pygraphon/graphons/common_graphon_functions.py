@@ -6,6 +6,7 @@ The common_graphons dictionary is ordered as in the paper.
     exchangeable graph models." International Conference on Machine Learning.
     PMLR, 2014.
 """
+
 import numpy as np
 
 from .Graphon import Graphon

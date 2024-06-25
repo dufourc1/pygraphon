@@ -1,4 +1,5 @@
 """Random function to help with matrices."""
+
 from copy import copy
 from typing import Tuple
 

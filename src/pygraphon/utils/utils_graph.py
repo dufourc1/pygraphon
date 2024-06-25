@@ -1,4 +1,5 @@
 """Random utils to deal with graphs."""
+
 from collections import Counter
 
 import networkx as nx

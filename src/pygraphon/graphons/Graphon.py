@@ -1,4 +1,5 @@
 """Graphon based on a continuous function."""
+
 import inspect
 import math
 from copy import deepcopy
@@ -176,7 +177,7 @@ class Graphon:
         if self.integration_method == "simpson":
             x = np.linspace(EPS, 1 - EPS, 500)
             z = np.vectorize(self.graphon_function)(x[:, None], x)
-            integral = simpson(simpson(z, x), x)
+            integral = simpson(y=simpson(y=z, x=x), x=x)
         elif self.integration_method == "dblquad":
             integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
         else:

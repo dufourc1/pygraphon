@@ -1,4 +1,5 @@
 """Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
+
 from typing import Callable, Optional
 
 import numpy as np

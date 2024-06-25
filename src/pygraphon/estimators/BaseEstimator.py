@@ -1,4 +1,5 @@
 """Base class for graphon estimators."""
+
 from abc import abstractclassmethod
 from typing import Tuple, Union
 

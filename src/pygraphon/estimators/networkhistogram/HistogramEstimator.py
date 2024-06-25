@@ -1,4 +1,5 @@
 """Network histogram class."""
+
 from typing import Optional, Tuple
 
 import numpy as np

@@ -1,4 +1,5 @@
 """Random utils to deal with python functions."""
+
 import functools
 import types
 
