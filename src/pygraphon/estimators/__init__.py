@@ -5,6 +5,7 @@ from .EmpiricalDegrees import LG
 from .MomentEstimator import MomentEstimator, SimpleMomentEstimator
 from .nbdsmooth import NBDsmooth
 from .networkhistogram.HistogramEstimator import HistogramEstimator
+from .OT.SGWB import SGWB
 from .SAS import SAS
 from .SmoothNetHist import SmoothNetHist
 from .UniversalSingularValueDecomposition import USVT
@@ -19,4 +20,5 @@ __all__ = classes = [
     "SAS",
     "Completion",
     "SmoothNetHist",
+    "SGWB",
 ]
