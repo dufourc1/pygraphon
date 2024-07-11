@@ -24,6 +24,7 @@ class HistogramEstimator(BaseEstimator):
     def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:
         super().__init__()
         self.bandwidthHist = bandwithHist
+        self.labels = None
         if method != "mine":
             DeprecationWarning("method other than 'mine' are deprecated")
 
@@ -114,14 +115,14 @@ class HistogramEstimator(BaseEstimator):
         bandwidthHist = h / adjacencyMatrix.shape[0]
 
         graphon_matrix = assignment.theta
-        groupmembership = assignment.labels
+        self.labels = assignment.labels
 
         # fills in the edge probability matrix from the value of the graphon
-        edge_probability_matrix = np.zeros((len(groupmembership), len(groupmembership)))
+        edge_probability_matrix = np.zeros((len(self.labels), len(self.labels)))
         for i in range(edge_probability_matrix.shape[0]):
             for j in np.arange(i + 1, edge_probability_matrix.shape[0]):
                 edge_probability_matrix[i, j] = graphon_matrix[
-                    int(groupmembership[i]), int(groupmembership[j])
+                    int(self.labels[i]), int(self.labels[j])
                 ]
                 edge_probability_matrix[j, i] = edge_probability_matrix[i, j]
 
