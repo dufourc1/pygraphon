@@ -58,7 +58,7 @@ class SGWB(BaseEstimator):
             graphs = [nx.to_numpy_array(graph) for graph in graphs]
 
         aligned_graphs, ps, max_num, min_num, self.permutations = _align_graphs(graphs)
-        #ps = [np.ones_like(x)/x.shape[0] for x in ps]
+        # ps = [np.ones_like(x)/x.shape[0] for x in ps]
         p = estimate_target_distribution(ps, self.num_blocks(max_num))
         ws = np.ones(len(aligned_graphs)) / len(aligned_graphs)
 
