@@ -24,7 +24,7 @@ from scipy.special import comb
 from datetime import datetime
 from sparsity_regime import scaling_functions
 
-CRITERIONS = ["bic", "aic", "mallows_cp", "hqic", "fpe", "elbow"]
+CRITERIONS = ["bic", "mdl"]#"aic", "mallows_cp", "hqic", "fpe", "elbow"]
 
 
 def setup_logger_file(folder_name: str):

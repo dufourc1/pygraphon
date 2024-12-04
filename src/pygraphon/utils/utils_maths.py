@@ -149,6 +149,46 @@ def fpe(norm: float, num_par: int, n: int, *args, **kwargs) -> float:
     return norm * (n + num_par + 1) / (n - num_par - 1)
 
 
+def mdl(n: int,
+        num_par: int,
+        log_likelihood_val: float):
+    """
+    Computes the Minimum Description Length (MDL) for a stochastic block model,
+    considering unions of blocks with the same interaction probabilities.
+
+    For SSM, the MDL is computed as follows:
+    - Complexity: log2(n) + n_unique_params * log2(n)
+    - Data description: -log_likelihood_val
+
+    Note: we do not consider the complexity of the block memberships, as, for SSM,
+    the original block memberships are the same for all computed models. Thus, the
+    complexity of the block memberships is constant and does not affect the MDL.
+    Otherwise, the complexity of the block memberships should be considered as follows:
+    - Complexity: np.log2(n) + np.log2(k) + n * np.log2(k) + n_unique_params * np.log2(n)
+
+    Parameters
+    ----------
+    n : int
+        Number of nodes in the graph
+    num_par : int
+        Number of unique parameters in the block model
+    log_likelihood_val : float
+        Log-likelihood value of the graph given the block model
+    
+    Returns
+    -------
+    float
+        MDL value for the given graph and block model
+    """
+    # Complexity
+    model_description_length = np.log2(n) + num_par * np.log2(n)
+
+    # Step 4: Combine model and data description lengths to compute MDL
+    mdl = model_description_length - log_likelihood_val
+
+    return mdl
+
+
 @nb.jit(nopython=True)
 def log_likelihood(probs: np.ndarray, A: np.ndarray, eps=1e-8) -> float:
     r"""Compute the log-likelihood of the graphon given the adjacency matrix of a simple graph.

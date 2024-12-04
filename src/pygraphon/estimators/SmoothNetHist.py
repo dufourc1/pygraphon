@@ -22,6 +22,7 @@ from pygraphon.utils import (
     hqic,
     log_likelihood,
     mallows_cp,
+    mdl,
 )
 
 CRITERIONS = {
@@ -31,6 +32,7 @@ CRITERIONS = {
     "mallows_cp": mallows_cp,
     "hqic": hqic,
     "fpe": fpe,
+    "mdl": mdl,
 }
 
 

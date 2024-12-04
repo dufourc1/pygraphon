@@ -17,6 +17,7 @@ from .utils_maths import (
     hqic,
     log_likelihood,
     mallows_cp,
+    mdl,
 )
 from .utils_matrix import (
     bound_away_from_one_and_zero_arrays,
