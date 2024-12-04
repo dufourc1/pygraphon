@@ -144,7 +144,7 @@ def clean_temp_folder(folder_name: str) -> None:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
 
-def get_result_with_std(list_of_results: list, method=str) -> list:
+def get_result_with_std(list_of_results: list, method=str, factor_name:str = None,) -> list:
     """Computes the mean and the standard deviation of a list of results.
     Creates a list of strings with the mean and the standard deviation.
 
@@ -160,9 +160,9 @@ def get_result_with_std(list_of_results: list, method=str) -> list:
     """
     result = []
     if method == 'SmoothNetHist':
-        result.append(list_of_results[0][0]+'_'+list_of_results[0][-1])
+        result.append(list_of_results[0][0]+factor_name+'_'+list_of_results[0][-1])
     else:
-        result.append(list_of_results[0][0])
+        result.append(list_of_results[0][0]+factor_name)
     result.append(list_of_results[0][1])
     result.append(list_of_results[0][2])
     selected_elements = [sublist[3:-1] for sublist in list_of_results]
