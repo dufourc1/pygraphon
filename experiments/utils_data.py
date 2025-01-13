@@ -144,32 +144,73 @@ def clean_temp_folder(folder_name: str) -> None:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
 
-def get_result_with_std(list_of_results: list, method=str, factor_name:str = None,) -> list:
+def get_result_with_std(list_of_results: list, method=str, factor_name: str = None) -> list:
     """Computes the mean and the standard deviation of a list of results.
     Creates a list of strings with the mean and the standard deviation.
-
+    
     Parameters
     ----------
     list_of_results : list
-        list of ndarray of results
+        list of ndarray (or list) of results
+    method : str
+        The method used (e.g. 'SmoothNetHist')
+    factor_name : str
+        Additional string appended to the first results in the output
 
     Returns
     -------
     list
-        mean and standard deviation
+        The combined list, including name information, single-run metrics,
+        plus mean and std for the rest.
     """
+    # Check factor_name is a string, otherwise raise error
+    if not isinstance(factor_name, str):
+        raise ValueError("factor_name must be a string")
+
+    # Check that the first element is a string (as you specified)
+    if not isinstance(list_of_results[0][0], str):
+        raise ValueError("First element of list_of_results must be a string")
+
+    # Prepare the result list
     result = []
+
+    # Depending on the method, we build a name-string in result[0]
     if method == 'SmoothNetHist':
-        result.append(list_of_results[0][0]+factor_name+'_'+list_of_results[0][-1])
+        # We assume: list_of_results[0][-1] is also a string
+        result.append(list_of_results[0][0] + factor_name + '_' + list_of_results[0][-1])
     else:
-        result.append(list_of_results[0][0]+factor_name)
+        # For other methods
+        result.append(list_of_results[0][0] + factor_name)
+    
+    # Next, we append some fixed items that appear in positions 1 and 2
     result.append(list_of_results[0][1])
     result.append(list_of_results[0][2])
+
+    # 'selected_elements' are the numeric columns from index 3 up to (but excluding) the last
+    # for each sublist in list_of_results
     selected_elements = [sublist[3:-1] for sublist in list_of_results]
 
-    result_mean = np.mean(selected_elements, axis=0)
-    result_stds = np.std(selected_elements, axis=0)
-    for mean, std in zip(result_mean, result_stds):
-        result.append(mean)
-        result.append(std)
+    # Convert to numpy array for easier NaN checks
+    # If sublists can differ in length, this might fail. We assume uniform length:
+    selected_array = np.array(selected_elements, dtype=float)
+
+    # If there's any NaN or inf in the data, we'll produce all-NaN for mean & std
+    # (or you can choose a more selective approach if desired).
+    if np.isnan(selected_array).any() or np.isinf(selected_array).any():
+        # shape[1] is how many numeric columns we have
+        n_cols = selected_array.shape[1] if selected_array.ndim > 1 else 0
+        result_mean = [np.nan] * n_cols
+        result_stds = [np.nan] * n_cols
+    else:
+        # Compute mean/std across rows
+        result_mean = np.mean(selected_array, axis=0)
+        result_stds = np.std(selected_array, axis=0)
+
+    # Append each mean and std to the result list
+    # If you have N columns, you'll add 2*N items here.
+    for mean_val, std_val in zip(result_mean, result_stds):
+        result.append(mean_val)
+        result.append(std_val)
+
     return result
+
