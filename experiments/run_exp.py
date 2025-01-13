@@ -139,7 +139,10 @@ def main(
         logger.critical(f"Error with {method} on {graphon_repr} with n={n}")
         logger.critical(e)
         traceback.print_exc()
-        result = [method, graphon_repr, n, np.nan, np.nan, np.nan, np.nan, 0, 0]
+        if method == "SmoothNetHist":
+            result = [[method, graphon_repr, n, np.nan, np.nan, np.nan, np.nan, 0, 0] for _ in CRITERIONS]
+        else:
+            result = [method, graphon_repr, n, np.nan, np.nan, np.nan, np.nan, 0, 0]
     # ----------------------
     logger.info("Saving results ")
     with open("results" + f"{folder_name}.pkl", "wb") as f:
@@ -158,17 +161,15 @@ if __name__ == "__main__":
     # sparse regime import and init
     folder_name = "usual_graphon"
     mult_par = True
-    mult_rep = 5
+    mult_rep = 2
     n_min, n_max, n_step = 100, 2000, 100
     n_list = np.arange(n_min, n_max + 1, n_step)
-    #n_list = [500, 1000, 2000]
+    n_list = [300, 2000]
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # Compute scaling factors if sparse
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
     rho_common = 1  # Desired common value at n_min
-    # Compute scaling factors
     scaling_factors = {}
     for name, func in scaling_functions.items():
         g_n_min = func(n_min)
@@ -180,8 +181,7 @@ if __name__ == "__main__":
     for name, func in scaling_functions.items():
         print(f'Scaling factor for {name}: {scaling_factors[name]}')
         c_k = scaling_factors[name]
-        scaled_rho_n[name] = c_k * func(n_list)
-    
+        scaled_rho_n[name] = [c_k * func(n) for n in n_list]
 
     # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     # If generate with SBM-SSM
@@ -224,33 +224,44 @@ if __name__ == "__main__":
                     new_row=theta.Theta,
                     row_index=i + 1,
                 )
-                graphon = StepGraphon(
-                    theta.Theta, bandwidthHist=1 / k
-                )  # can add arg repr to specify the name as a str (default is "Step Graphon")
+                graphon = StepGraphon(theta.Theta, bandwidthHist=1 / k)
 
                 # Iterate over sparsity regimes
                 for rho_name, rho_values in scaled_rho_n.items():
                     logger.info(f"Processing sparsity regime: {rho_name}")
-                    
+
                     for j, n in enumerate(n_list):
-                        rho = rho_values[j]  # Get the rho_n for current n
+                        rho = rho_values[j]
                         logger.info(f"Applying rho_n={rho:.4f} for n={n}")
-                        
                         # Sparsify the graphon
                         graphon.sparsify(rho=rho)
-                        
+
                         result = []
                         for r in range(mult_rep):
                             logger.info(f"Repetition {r+1}/{mult_rep} for k={k}, n={n}, rho={rho_name}")
                             adj_matrix = graphon.draw(n=n, exchangeable=False)
-                            experiment_result = main(
-                                adjacency_matrix=adj_matrix,
-                                graphon=graphon,
-                                method="SmoothNetHist",
-                                folder_name=folder_name,
-                            )
-                            result.append(experiment_result)
-                        
+
+                            # -- TRY/EXCEPT HERE --
+                            try:
+                                experiment_result = main(
+                                    adjacency_matrix=adj_matrix,
+                                    graphon=graphon,
+                                    method="SmoothNetHist",
+                                    folder_name=folder_name,
+                                )
+                                result.append(experiment_result)
+                            except ValueError as e:
+                                logger.warning(
+                                    f"ValueError for k={k}, n={n}, repetition={r+1}, "
+                                    f"rho={rho_name}. Storing NaNs. Error: {e}"
+                                )
+                                # 'SmoothNetHist' typically returns a list of length len(CRITERIONS),
+                                # each item being some small list. We'll store a matching shape:
+                                nan_list = [[np.nan] for _ in range(len(CRITERIONS))]
+                                result.append(nan_list)
+                                continue
+                            # -- END TRY/EXCEPT --
+
                         # Update CSV with results for each criterion
                         for crit_idx, criterion in CRITERIONS:
                             update_row(
@@ -261,17 +272,19 @@ if __name__ == "__main__":
                                     method="SmoothNetHist",
                                     factor_name=rho_name
                                 ),
-                                row_index=i * len(n_list) * len(scaling_functions) * len(CRITERIONS)
-                                        + j * len(scaling_functions) * len(CRITERIONS)
-                                        + list(scaling_functions.keys()).index(rho_name) * len(CRITERIONS)
-                                        + crit_idx
-                                        + 1,
+                                row_index=(
+                                    i * len(n_list) * len(scaling_functions) * len(CRITERIONS)
+                                    + j * len(scaling_functions) * len(CRITERIONS)
+                                    + list(scaling_functions.keys()).index(rho_name) * len(CRITERIONS)
+                                    + crit_idx
+                                    + 1
+                                ),
                             )
+
         # ------------------------------------
         # ------- If single repetition -------
         # ------------------------------------
         else:
-            # Single repetition scenario
             csv_gen_graphon(
                 path="results/sbm_ssm",
                 file_name="comparison_sbm_ssm.csv",
@@ -286,32 +299,48 @@ if __name__ == "__main__":
                 max_outside_classes=theta_inter_max,
             )
             graphon = StepGraphon(theta.Theta, bandwidthHist=1 / k_max)
-            
+
             for rho_name, rho_values in scaled_rho_n.items():
                 logger.info(f"Processing sparsity regime: {rho_name}")
-                
+
                 for j, n in enumerate(n_list):
                     rho = rho_values[j]
                     logger.info(f"Applying rho_n={rho:.4f} for n={n}")
-                    
                     graphon.sparsify(rho=rho)
-                    
+
                     result = []
                     for r in range(mult_rep):
                         logger.info(f"Repetition {r+1}/{mult_rep} for k={k_max}, n={n}, rho={rho_name}")
                         adj_matrix = graphon.draw(n=n, exchangeable=False)
-                        experiment_result = main(
-                            adjacency_matrix=adj_matrix,
-                            graphon=graphon,
-                            method="SmoothNetHist",
-                            folder_name=folder_name,
-                        )
-                        result.append(experiment_result)
-                    
+
+                        # -- TRY/EXCEPT HERE --
+                        try:
+                            experiment_result = main(
+                                adjacency_matrix=adj_matrix,
+                                graphon=graphon,
+                                method="SmoothNetHist",
+                                folder_name=folder_name,
+                            )
+                            result.append(experiment_result)
+                        except ValueError as e:
+                            logger.warning(
+                                f"ValueError for k={k_max}, n={n}, repetition={r+1}, "
+                                f"rho={rho_name}. Storing NaNs. Error: {e}"
+                            )
+                            nan_list = [[np.nan] for _ in range(len(CRITERIONS))]
+                            result.append(nan_list)
+                            continue
+                        # -- END TRY/EXCEPT --
+
+                    # Update CSV
                     update_row(
                         folder_name="sbm_ssm",
                         file_name="comparison_sbm_ssm.csv",
-                        new_row=get_result_with_std(result, method="SmoothNetHist", rho_name=rho_name),
+                        new_row=get_result_with_std(
+                            result,
+                            method="SmoothNetHist",
+                            rho_name=rho_name
+                        ),
                         row_index=1,  # Adjust as needed
                     )
 
@@ -326,16 +355,18 @@ if __name__ == "__main__":
             + ".csv"
         )
         graphons = []
-        method = ["SmoothNetHist", "HistogramEstimator", "SAS", "USVT"]#, "NBDsmooth", "Completion"]
-        list_graphons = ["assortative_sbm", "dissassortative_sbm", "hsbm", "hsbm_partition", "partition"]
+        method = ["SmoothNetHist", "SAS", "USVT"]  # etc.
+        list_graphons = ["assortative_sbm"]#, "dissassortative_sbm"]
+        # e.g.: "hsbm", "hsbm_partition", "partition"
 
         for g in list_graphons:
             g = common_graphons[g]
             graphons.append(g)
 
-        # Estimate total number of graphon-method-n-rho combinations for CSV generation
+        # Estimate total number of graphon-method-n-rho combinations
         total_graphons = len(graphons)
         total_methods = len(method)
+        total_methods += len(CRITERIONS)-1 if "SmoothNetHist" in method else 0
         total_rhos = len(scaling_functions)
         total_n = len(n_list)
         total_entries = total_graphons * total_methods * total_rhos * total_n
@@ -343,10 +374,10 @@ if __name__ == "__main__":
         csv_gen_graphon(
             path="results/usual_graphon",
             file_name=file_name,
-            n_graphons=len(graphons) * (len(method) + len(CRITERIONS) - 1) * len(n_list) + 1,
+            n_graphons= total_entries,#len(graphons) * (len(method) + len(CRITERIONS) - 1) * len(n_list) + 1,
             smoothnethist_par=True,
         )
-        idx = 1
+        idx = 0
         # Iterate over each graphon
         for g in graphons:
             # Iterate over each method
@@ -354,38 +385,60 @@ if __name__ == "__main__":
                 # Iterate over each sparsity regime
                 for rho_name, rho_values in scaled_rho_n.items():
                     logger.info(f"Processing graphon={g.repr}, method={m}, sparsity regime={rho_name}")
-                    
+
                     # Iterate over each n
                     for k, n in enumerate(n_list):
                         rho = rho_values[k]
                         logger.info(f"Applying rho_n={rho:.4f} for n={n}")
-                        
-                        # Create a copy of the graphon to avoid in-place modification
+
+                        # Copy the graphon to avoid in-place modification
                         g_copy = g
                         g_copy.sparsify(sparse_factor=rho)
-                        
+
                         result = []
                         for r in range(mult_rep):
-                            logger.info(f"Repetition {r+1}/{mult_rep} for graphon={g.repr}, method={m}, n={n}, rho={rho_name}")
+                            logger.info(
+                                f"Repetition {r+1}/{mult_rep} for graphon={g.repr}, "
+                                f"method={m}, n={n}, rho={rho_name}"
+                            )
                             np.random.seed(42 + k + (r + 1) * (len(n_list) + 1))
                             adj_mat = g_copy.draw(n=n, exchangeable=False)
-                            experiment_result = main(
-                                adjacency_matrix=adj_mat,
-                                graphon=g_copy,
-                                method=m,
-                                folder_name=folder_name,
-                            )
+
+                            # -- TRY/EXCEPT HERE --
+                            try:
+                                experiment_result = main(
+                                    adjacency_matrix=adj_mat,
+                                    graphon=g_copy,
+                                    method=m,
+                                    folder_name=folder_name,
+                                )
+                            except (ValueError, OverflowError) as e:
+                                logger.warning(
+                                    f"ValueError for graphon={g.repr}, n={n}, method={m}, "
+                                    f"repetition={r+1}, rho={rho_name}. Storing NaNs. Error: {e}"
+                                )
+                                if m == "SmoothNetHist":
+                                    # Return shape consistent with your usage of sublist[crit_idx] + [criterion]
+                                    for _ in CRITERIONS:
+                                        experiment_result = [[np.nan for _ in range(9)]]
+                                else:
+                                    # For other methods, often a single float or small list is returned
+                                    # We'll store just [np.nan]
+                                    experiment_result = [np.nan for _ in range(9)]
+                                continue
                             result.append(experiment_result)
-                        
+                            # -- END TRY/EXCEPT --
+
                         # Update CSV with results
                         if m == "SmoothNetHist":
+                            # For each criterion, you do sublist[crit_idx] + [criterion]
                             for crit_idx, criterion in enumerate(CRITERIONS):
-                                print(f"crit_idx: {crit_idx}, criterion: {criterion}, result: {result}")
                                 update_row(
                                     folder_name="usual_graphon",
                                     file_name=file_name,
                                     new_row=get_result_with_std(
-                                        [sublist + [criterion] for sublist in result],
+                                        # Notice we select sublist[crit_idx]
+                                        [sublist[crit_idx] + [criterion] for sublist in result],
                                         method=m,
                                         factor_name=rho_name
                                     ),
@@ -393,6 +446,7 @@ if __name__ == "__main__":
                                 )
                                 idx += 1
                         else:
+                            # For methods with a single metric per run
                             update_row(
                                 folder_name="usual_graphon",
                                 file_name=file_name,
