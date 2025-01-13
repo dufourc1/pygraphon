@@ -1,5 +1,11 @@
 """utils to work with graphon."""
 
+from .utils_elongation import (
+    create_diagonal_partition_symmetric,
+    create_symmetric_diagonal_squares_partition,
+    get_elongation_list,
+    compute_average_elongation,
+)
 from .utils_func import copy_func
 from .utils_graph import (
     check_simple_adjacency_matrix,
@@ -29,6 +35,10 @@ from .utils_matrix import (
 from .utils_ssm import AssociativeFullyRandom, generate_hierarchical_theta
 
 __all__ = [
+    "create_diagonal_partition_symmetric",
+    "create_symmetric_diagonal_squares_partition",
+    "get_elongation_list",
+    "compute_average_elongation",
     "copy_func",
     "generate_all_permutations",
     "check_symmetric",
@@ -45,6 +55,7 @@ __all__ = [
     "mallows_cp",
     "hqic",
     "fpe",
+    "mdl",
     "log_likelihood",
     "check_consistency_graphon_shape_with_bandwidth",
     "scatter_symmetric_matrix",

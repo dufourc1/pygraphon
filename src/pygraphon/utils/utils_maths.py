@@ -8,6 +8,9 @@ import numpy as np
 from kneed import KneeLocator
 from loguru import logger
 
+from .utils_elongation import compute_average_elongation
+
+
 EPS = np.spacing(1)
 
 
@@ -180,10 +183,8 @@ def mdl(n: int,
     float
         MDL value for the given graph and block model
     """
-    # Complexity
     model_description_length = np.log2(n) + num_par * np.log2(n)
 
-    # Step 4: Combine model and data description lengths to compute MDL
     mdl = model_description_length - log_likelihood_val
 
     return mdl

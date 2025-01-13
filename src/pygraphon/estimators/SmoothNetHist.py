@@ -432,6 +432,7 @@ class SmoothNetHist(BaseEstimator):
                 num_par=comb(assignment.theta.shape[0] + 1, 2),
                 norm=np.linalg.norm(best_pij - adjacencyMatrix) / (n_nodes**2 - n_nodes),
                 var=np.var(best_pij - adjacencyMatrix, ddof=n_nodes),
+                theta_matrix=best_graphon.get_theta(),
             )
             list_criterion = (
                 [self.criterion_name] if self.criterion_name != "all" else CRITERIONS.keys()
@@ -542,6 +543,7 @@ class SmoothNetHist(BaseEstimator):
                 num_par=n_link_com[i],
                 norm=np.linalg.norm(pij - adjacencyMatrix) / (n_nodes**2 - n_nodes),
                 var=np.var(pij - adjacencyMatrix, ddof=n_nodes),
+                theta_matrix=graphon.get_theta(),
             )
             all_criterion_values.append(self.gof(**params))
         return all_criterion_values
