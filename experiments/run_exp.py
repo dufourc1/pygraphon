@@ -361,8 +361,8 @@ if __name__ == "__main__":
                         logger.info(f"Applying rho_n={rho:.4f} for n={n}")
                         
                         # Create a copy of the graphon to avoid in-place modification
-                        g_copy = g.copy()
-                        g_copy.sparsify(rho=rho)
+                        g_copy = g
+                        g_copy.sparsify(sparse_factor=rho)
                         
                         result = []
                         for r in range(mult_rep):
@@ -380,13 +380,14 @@ if __name__ == "__main__":
                         # Update CSV with results
                         if m == "SmoothNetHist":
                             for crit_idx, criterion in enumerate(CRITERIONS):
+                                print(f"crit_idx: {crit_idx}, criterion: {criterion}, result: {result}")
                                 update_row(
                                     folder_name="usual_graphon",
                                     file_name=file_name,
                                     new_row=get_result_with_std(
-                                        [sublist[crit_idx] + [criterion] for sublist in result],
+                                        [sublist + [criterion] for sublist in result],
                                         method=m,
-                                        rho_name=rho_name
+                                        factor_name=rho_name
                                     ),
                                     row_index=idx,
                                 )
@@ -398,7 +399,7 @@ if __name__ == "__main__":
                                 new_row=get_result_with_std(
                                     result,
                                     method=m,
-                                    rho_name=rho_name
+                                    factor_name=rho_name
                                 ),
                                 row_index=idx,
                             )
