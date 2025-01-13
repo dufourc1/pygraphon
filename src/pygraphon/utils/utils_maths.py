@@ -154,7 +154,8 @@ def fpe(norm: float, num_par: int, n: int, *args, **kwargs) -> float:
 
 def mdl(n: int,
         num_par: int,
-        log_likelihood_val: float):
+        log_likelihood_val: float,
+        *args, **kwargs) -> float:
     """
     Computes the Minimum Description Length (MDL) for a stochastic block model,
     considering unions of blocks with the same interaction probabilities.
