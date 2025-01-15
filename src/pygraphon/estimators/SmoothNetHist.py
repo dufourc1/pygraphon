@@ -23,6 +23,7 @@ from pygraphon.utils import (
     log_likelihood,
     mallows_cp,
     mdl,
+    elongation_criterion
 )
 
 CRITERIONS = {
@@ -33,6 +34,7 @@ CRITERIONS = {
     "hqic": hqic,
     "fpe": fpe,
     "mdl": mdl,
+    "elongation_criterion": elongation_criterion,
 }
 
 
@@ -192,6 +194,7 @@ class SmoothNetHist(BaseEstimator):
             norm=np.linalg.norm(pij - adjacencyMatrix)
             / (adjacencyMatrix.shape[0] ** 2 - adjacencyMatrix.shape[0]),
             var=np.var(pij - adjacencyMatrix, ddof=adjacencyMatrix.shape[0]),
+            theta_matrix=graphon_nethist.get_theta(),
         )
         list_criterion = (
             [self.criterion_name] if self.criterion_name != "all" else CRITERIONS.keys()

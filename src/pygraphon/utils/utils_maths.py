@@ -191,6 +191,30 @@ def mdl(n: int,
     return mdl
 
 
+def elongation_criterion(log_likelihood_val: float, theta_matrix: np.ndarray, num_par: int, *args, **kwargs) -> float:
+    """
+    Compute the elongation criterion for the graphon.
+
+    Parameters
+    ----------
+    log_likelihood_val : float
+        log-likelihood of the graphon given the adjacency matrix
+    theta_matrix : np.ndarray
+        matrix of shape labels [1..num_par]
+    num_par : int
+        number of shapes in the matrix
+    k : int
+        dimension of the matrix
+
+    Returns
+    -------
+    float
+        elongation criterion of the graphon
+    """
+    elongation = compute_average_elongation(theta_matrix, num_par)
+    return log_likelihood_val - elongation
+
+
 @nb.jit(nopython=True)
 def log_likelihood(probs: np.ndarray, A: np.ndarray, eps=1e-8) -> float:
     r"""Compute the log-likelihood of the graphon given the adjacency matrix of a simple graph.

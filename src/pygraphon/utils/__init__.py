@@ -24,6 +24,7 @@ from .utils_maths import (
     log_likelihood,
     mallows_cp,
     mdl,
+    elongation_criterion
 )
 from .utils_matrix import (
     bound_away_from_one_and_zero_arrays,
@@ -56,6 +57,7 @@ __all__ = [
     "hqic",
     "fpe",
     "mdl",
+    "elongation_criterion",
     "log_likelihood",
     "check_consistency_graphon_shape_with_bandwidth",
     "scatter_symmetric_matrix",
