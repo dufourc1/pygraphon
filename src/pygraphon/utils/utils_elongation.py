@@ -1,6 +1,7 @@
 import numpy as np
+from scipy.special import comb
 
-def get_elongation_list(theta_matrix: np.ndarray, num_par: int, k: int) -> list[float]:
+def get_elongation_list(theta_matrix: np.ndarray, num_par: int) -> list[float]:
     """
     Compute the elongation of each shape in a k-by-k adjacency matrix.
 
@@ -44,43 +45,39 @@ def get_elongation_list(theta_matrix: np.ndarray, num_par: int, k: int) -> list[
         - If any shape is empty.
         - [Optional] If the matrix is not symmetric (if you choose to enforce it).
     """
-
+    k = theta_matrix.shape[0]
+    #list all values in theta_matrix
     # Optional strict symmetry check:
-    # if not np.allclose(theta_matrix, theta_matrix.T):
-    #     raise ValueError("Matrix is not symmetric. Symmetry is required.")
+    if not np.allclose(theta_matrix, theta_matrix.T):
+        raise ValueError("Matrix is not symmetric. Symmetry is required.")
+    
+    if comb(k+1, 2 ) == num_par:
+        return [2.0 for _ in range(int(num_par))]
+    else:
+        unique_labels = np.unique(theta_matrix)
 
-    unique_labels = np.unique(theta_matrix)
-    if len(unique_labels) != num_par:
-        raise ValueError(
-            f"Expected {num_par} distinct shapes, but found {len(unique_labels)}."
-        )
+        elongations = []
+        for shape_label in unique_labels:
+            coords = np.argwhere(theta_matrix == shape_label)
+            if coords.size == 0:
+                raise ValueError(f"Shape {shape_label} has no blocks.")
 
-    expected_labels = np.arange(1, num_par + 1)
-    if not np.array_equal(np.sort(unique_labels), expected_labels):
-        raise ValueError("Shapes must be labeled consecutively from 1..num_par.")
+            area = coords.shape[0] / (k**2)
 
-    elongations = []
-    for shape_label in expected_labels:
-        coords = np.argwhere(theta_matrix == shape_label)
-        if coords.size == 0:
-            raise ValueError(f"Shape {shape_label} has no blocks.")
+            min_x, max_x = coords[:, 0].min(), coords[:, 0].max()
+            min_y, max_y = coords[:, 1].min(), coords[:, 1].max()
 
-        area = coords.shape[0] / (k**2)
+            horizontal_extent = (max_x - min_x + 1) / k
+            vertical_extent   = (max_y - min_y + 1) / k
+            diameter = horizontal_extent + vertical_extent
 
-        min_x, max_x = coords[:, 0].min(), coords[:, 0].max()
-        min_y, max_y = coords[:, 1].min(), coords[:, 1].max()
+            shape_elong = diameter / np.sqrt(area)
+            elongations.append(shape_elong)
 
-        horizontal_extent = (max_x - min_x + 1) / k
-        vertical_extent   = (max_y - min_y + 1) / k
-        diameter = horizontal_extent + vertical_extent
-
-        shape_elong = diameter / np.sqrt(area)
-        elongations.append(shape_elong)
-
-    return elongations
+        return elongations
 
 
-def compute_average_elongation(theta_matrix: np.ndarray, num_par: int, k: int) -> float:
+def compute_average_elongation(theta_matrix: np.ndarray, num_par: int) -> float:
     """
     Compute the average elongation over all shapes in theta_matrix.
 
@@ -90,8 +87,6 @@ def compute_average_elongation(theta_matrix: np.ndarray, num_par: int, k: int) -
         Matrix of shape labels [1..num_par].
     num_par : int
         Number of shapes in the matrix.
-    k : int
-        Dimension of the matrix.
 
     Returns
     -------
@@ -104,7 +99,7 @@ def compute_average_elongation(theta_matrix: np.ndarray, num_par: int, k: int) -
         - If shape labeling doesn't match {1..num_par} or if a shape is empty.
         - [Optional] If matrix is not symmetric (if enforced).
     """
-    elong_list = get_elongation_list(theta_matrix, num_par, k)
+    elong_list = get_elongation_list(theta_matrix, num_par)
     return np.mean(elong_list)
 
 
