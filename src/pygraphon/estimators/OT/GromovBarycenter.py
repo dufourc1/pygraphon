@@ -36,7 +36,6 @@ class GromovBarycenter(BaseEstimator):
         Tuple[Graphon, np.ndarray]
             estimated graphon function as a Graphon object and estimated edge connectivity matrix
         """
-
         graphon, Ps = self.fit_multiple(
             [adjacency_matrix], k, max_iter=max_iter, type=type, **kwargs
         )
@@ -67,7 +66,9 @@ class GromovBarycenter(BaseEstimator):
         """
         n = transport_map.shape[1]
         if type == "weighted":
-            P_hat = np.transpose(transport_map) @ barycenter @ transport_map * n**2
+            P_hat = (
+                np.transpose(transport_map) @ barycenter @ transport_map * n**2
+            )
         elif type == "argmax":
             indices = np.argmax(transport_map, axis=0)
             P_hat = barycenter[indices][:, indices]
@@ -98,6 +99,7 @@ class GromovBarycenter(BaseEstimator):
         )
         theta = res[0]
         Ps = [
-            self.barycenter_to_P_hat(res[1]["T"][i], theta, type=type) for i in range(len(graphs))
+            self.barycenter_to_P_hat(res[1]["T"][i], theta, type=type)
+            for i in range(len(graphs))
         ]
         return StepGraphon(theta, bandwidthHist=1 / k), Ps

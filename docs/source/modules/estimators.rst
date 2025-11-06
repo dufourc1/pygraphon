@@ -27,3 +27,4 @@ Implemented estimators
    USVT
    SAS
    SmoothNetHist
+   GromovBarycenter
