@@ -68,9 +68,7 @@ class SGWB(BaseEstimator):
         if isinstance(graphs[0], nx.Graph):
             graphs = [nx.to_numpy_array(graph) for graph in graphs]
 
-        aligned_graphs, ps, max_num, min_num, self.permutations = _align_graphs(
-            graphs
-        )
+        aligned_graphs, ps, max_num, min_num, self.permutations = _align_graphs(graphs)
         # ps = [np.ones_like(x)/x.shape[0] for x in ps]
         p = estimate_target_distribution(ps, self.num_blocks(max_num))
         ws = np.ones(len(aligned_graphs)) / len(aligned_graphs)
@@ -105,9 +103,7 @@ class SGWB(BaseEstimator):
         for i in range(len(maps)):
             self.maps.append(maps[i][:, self.permutations[i]])
 
-        self.graphon = StepGraphon(
-            stepfunc, bandwidthHist=1 / stepfunc.shape[0]
-        )
+        self.graphon = StepGraphon(stepfunc, bandwidthHist=1 / stepfunc.shape[0])
 
     def _approximate_graphon_from_adjacency(
         self,
@@ -190,14 +186,10 @@ def _smoothed__fgw_barycenter(
     for o in range(outer_iters):
         # update smoothed barycenter
         averaged_graph = _averaging_graphs(aligned_graphs, trans, ws)
-        barycenter = (
-            lmat2 @ averaged_graph @ lmat2.T + pmat2 @ averaged_graph @ pmat2.T
-        )
+        barycenter = lmat2 @ averaged_graph @ lmat2.T + pmat2 @ averaged_graph @ pmat2.T
         # update optimal transports
         for i in range(len(aligned_graphs)):
-            cost_i = _gw_cost(
-                barycenter, aligned_graphs[i], trans[i], p_b, aligned_ps[i]
-            )
+            cost_i = _gw_cost(barycenter, aligned_graphs[i], trans[i], p_b, aligned_ps[i])
             cost_i = gamma * cost_i + (1 - gamma) * cost_ps[i]
             cost_i /= np.max(cost_i)
             trans[i] = proximal_ot(
@@ -258,9 +250,7 @@ def _fgw_barycenter(
 
         # update optimal transports
         for i in range(len(aligned_graphs)):
-            cost_i = _gw_cost(
-                barycenter, aligned_graphs[i], trans[i], p_b, aligned_ps[i]
-            )
+            cost_i = _gw_cost(barycenter, aligned_graphs[i], trans[i], p_b, aligned_ps[i])
             cost_i = gamma * cost_i + (1 - gamma) * cost_ps[i]
             cost_i /= np.max(cost_i)
             if which == "original":
@@ -285,9 +275,7 @@ def _fgw_barycenter(
                     p_b.reshape(-1), aligned_ps[i].reshape(-1), cost_i, 5e-3
                 )
             else:
-                raise ValueError(
-                    "which should be one of 'original', 'ot', 'smooth'"
-                )
+                raise ValueError("which should be one of 'original', 'ot', 'smooth'")
 
     barycenter[barycenter > 1] = 1
     barycenter[barycenter < 0] = 0
@@ -395,9 +383,7 @@ def _gw_cost(
     return cost_st - 2 * (cost_s @ trans @ cost_t.T)
 
 
-def estimate_target_distribution(
-    probs: List[np.ndarray], dim_t: int = None
-) -> np.ndarray:
+def estimate_target_distribution(probs: List[np.ndarray], dim_t: int = None) -> np.ndarray:
     """
     Estimate target distribution via the average of sorted source probabilities
     Args:
@@ -444,9 +430,7 @@ def _align_graphs(
     for i in range(len(graphs)):
         num_i = graphs[i].shape[0]
 
-        node_degree = 0.5 * np.sum(graphs[i], axis=0) + 0.5 * np.sum(
-            graphs[i], axis=1
-        )
+        node_degree = 0.5 * np.sum(graphs[i], axis=0) + 0.5 * np.sum(graphs[i], axis=1)
         node_degree /= np.sum(node_degree)
         idx = np.argsort(node_degree)  # ascending
         idx = idx[::-1]  # descending
