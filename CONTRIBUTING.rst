@@ -44,11 +44,11 @@ Want to Contribute?
     $ git checkout -b feature/<YourFeatureName>
 
 5. This project should be well tested, so write unit tests in the :code:`tests/` directory
-6. Check that all tests are passing and code coverage is good with :code:`tox` before committing.
+6. Check that all tests are passing and code coverage is good with :code:`uv run pytest` before committing.
 
 .. code-block:: sh
 
-    $ tox
+    $ uv run pytest tests
 
 Pull Requests
 ~~~~~~~~~~~~~

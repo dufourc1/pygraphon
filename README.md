@@ -76,8 +76,6 @@ To cite this library, please use the following citation:
 
 <details>
  <summary>See Installation instructions</summary>
-
-<!-- Uncomment this section after your first ``tox -e finish``
 The most recent release can be installed from
 [PyPI](https://pypi.org/project/pygraphon/) with:
 
@@ -158,11 +156,10 @@ The final section of the README is for if you want to get involved by making a c
 
 ### ❓ Testing
 
-After cloning the repository and installing `tox` with `pip install tox`, the unit tests in the `tests/` folder can be
-run reproducibly with:
+After cloning the repository and installing `uv` (see [uv installation](https://docs.astral.sh/uv/)), the unit tests in the `tests/` folder can be run reproducibly with:
 
 ```shell
-$ tox -q 
+$ uv run pytest tests
 ```
 
 Additionally, these tests are automatically re-run with each commit in a [GitHub Action](https://github.com/dufourc1/pygraphon/actions?query=workflow%3ATests).
@@ -172,25 +169,17 @@ Additionally, these tests are automatically re-run with each commit in a [GitHub
 The documentation is built with [Sphinx](https://www.sphinx-doc.org/en/master/). After installing the package in development mode, the documentation can be built locally with:
 
 ```shell
-$ tox -e docs
-```
-
-The documentation will then be available in `.tox/tmp/build/html/`.
-
-
-Another way to build the documentation is to use the `make` command:
-
-```shell
 $ cd docs
 $ make html
 ```
 
-The documentation will then be available in `docs/build/html/`. To use the `make` command, one needs to install the
-*additional* necessary dependencies in the virutal environment. This can be done with:
+The documentation will then be available in `docs/build/html/`.
+
+To build the documentation, you'll need to install the necessary dependencies. This can be done with:
 
 ```shell
-$ pip install -r docs/requirements.txt
+$ uv sync --all-extras
 ```
 
-note: to correctly format the documentation, one can use tool such as `rstfmt` (installable with `pip install rstfmt`).
+note: to correctly format the documentation, one can use tool such as `rstfmt` (installable with `uv pip install rstfmt`).
 </details>
