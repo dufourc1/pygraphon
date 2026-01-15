@@ -1,11 +1,9 @@
 [project]
 name = "pygraphon"
-version = "0.1.0"
+version = "0.5.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "dufourc1", email = "dufourc115@gmail.com" }
-]
+authors = [{ name = "dufourc1", email = "dufourc115@gmail.com" }]
 requires-python = ">=3.13"
 dependencies = [
     "kneed>=0.8.5",
