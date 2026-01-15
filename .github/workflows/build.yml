@@ -26,6 +26,15 @@ jobs:
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
+    docs:
+        name: Documentation
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: astral-sh/ruff-action@v3
+            - run: ruff check --fix
+            - run: ruff format
+
     # docs:
     #     name: Documentation
     #     runs-on: ubuntu-latest

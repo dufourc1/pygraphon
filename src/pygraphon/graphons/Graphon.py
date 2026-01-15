@@ -253,7 +253,7 @@ class Graphon:
         if not isinstance(probs, int):
             if probs.shape[0] != int(n * (n - 1) / 2):
                 raise ValueError(
-                    f"probs array wrong size compared to number of nodes: got {probs.shape} instead of { n*(n-1)/2}"
+                    f"probs array wrong size compared to number of nodes: got {probs.shape} instead of {n * (n - 1) / 2}"
                 )
 
         # generate bernoulli draws with help of uniform rv
@@ -288,8 +288,8 @@ class Graphon:
         # Now we iterate over the probabilities array and call the function for each
         # latent variable. Way to do that in a vectorized fashion to avoid for
         # loop ?
-        I, J = np.triu_indices(n, 1)
-        for index, nodes in enumerate(zip(I, J)):
+        indices_i, indices_j = np.triu_indices(n, 1)
+        for index, nodes in enumerate(zip(indices_i, indices_j)):
             probs[index] = self.graphon_function(
                 latentVarArray[nodes[0]], latentVarArray[nodes[1]]
             )

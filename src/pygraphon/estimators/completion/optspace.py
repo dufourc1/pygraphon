@@ -131,7 +131,7 @@ class OptSpace(object):
             # check estimate again
             if self.n_components >= min(n, m) - 1:
                 warnings.warn(
-                    "Your matrix is estimated " "to be high-rank.",
+                    "Your matrix is estimated to be high-rank.",
                     RuntimeWarning,
                 )
 
@@ -145,7 +145,7 @@ class OptSpace(object):
                 )
         # otherwise rase an error.
         else:
-            raise ValueError("n-components must be " "an interger or 'auto'")
+            raise ValueError("n-components must be an interger or 'auto'")
         # The rescaling factor compensates the smaller average size of
         # the of the missing entries (mask) with respect to obs
         rescal_param = np.count_nonzero(mask) * self.n_components

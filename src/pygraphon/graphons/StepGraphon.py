@@ -5,9 +5,12 @@ from typing import Callable, Optional
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils import (check_consistency_graphon_shape_with_bandwidth,
-                             check_symmetric, compute_areas_histogram,
-                             scatter_symmetric_matrix)
+from pygraphon.utils import (
+    check_consistency_graphon_shape_with_bandwidth,
+    check_symmetric,
+    compute_areas_histogram,
+    scatter_symmetric_matrix,
+)
 
 
 class StepGraphon(Graphon):

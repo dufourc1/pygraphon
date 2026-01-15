@@ -14,8 +14,16 @@ from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.assignment import Assignment
 from pygraphon.estimators.networkhistogram.nethist import nethist
 from pygraphon.graphons import StepGraphon
-from pygraphon.utils import (aic, bic, edge_density, elbow_point, fpe, hqic,
-                             log_likelihood, mallows_cp)
+from pygraphon.utils import (
+    aic,
+    bic,
+    edge_density,
+    elbow_point,
+    fpe,
+    hqic,
+    log_likelihood,
+    mallows_cp,
+)
 
 CRITERIONS = {
     "bic": bic,

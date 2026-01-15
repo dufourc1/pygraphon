@@ -33,7 +33,7 @@ graphon_logit_max_power = Graphon(
     repr="1/(1 + exp(-(max(x,y)^2 + min(x,y)^4)))",
 )
 graphon_exp_max_power = Graphon(
-    function=lambda x, y: np.exp(-np.maximum(x, y) ** (3 / 4)),
+    function=lambda x, y: np.exp(-(np.maximum(x, y) ** (3 / 4))),
     repr="exp(-max(x,y)^(3/4))",
 )
 graphon_exp_polynomial = Graphon(
