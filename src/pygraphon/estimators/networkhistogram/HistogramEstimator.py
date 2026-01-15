@@ -22,9 +22,10 @@ class HistogramEstimator(BaseEstimator):
     """
 
     def __init__(
-        self, bandwithHist: Optional[float] = None, method: str = "mine"
+        self, bandwithHist: Optional[float] = None, method: str = "mine", progress_bar: bool = False
     ) -> None:
         super().__init__()
+        self.progress_bar = progress_bar
         self.bandwidthHist = bandwithHist
         if method != "mine":
             DeprecationWarning("method other than 'mine' are deprecated")
@@ -111,6 +112,7 @@ class HistogramEstimator(BaseEstimator):
             absTol=absTol,
             maxNumIterations=maxNumIterations,
             past_non_improving=past_non_improving,
+            progress_bar=self.progress_bar,
         )
 
         bandwidthHist = h / adjacencyMatrix.shape[0]
