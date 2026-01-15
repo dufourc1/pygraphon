@@ -74,6 +74,8 @@ class USVT(BaseEstimator):
         # reconstruct
         P_hat = u @ np.diag(s) @ v
 
+        P_hat = (P_hat + P_hat.T) / 2
+
         # clip values to [0,1]
         np.clip(P_hat, a_min=0, a_max=1, out=P_hat)
 
