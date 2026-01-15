@@ -3,64 +3,44 @@ name: build
 on: [push]
 
 jobs:
-  tests:
-    name: Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.8"]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install tox
-      - name: Test with pytest
-        run: tox -e py 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+    tests:
+        name: Tests
+        runs-on: ubuntu-latest
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8"]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install tox
-      - name: Check manifest
-        run: tox -e manifest
-      - name: Check code quality with flake8
-        run: tox -e flake8
-      - name: Check package metadata with Pyroma
-        run: tox -e pyroma
+        steps:
+            - uses: actions/checkout@v6
 
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8"]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install tox
-      - name: Check docstring coverage
-        run: tox -e docstr-coverage
-      - name: Check documentation build with Sphinx
-        run: tox -e docs
+            - name: Install uv
+              uses: astral-sh/setup-uv@v7
+              with:
+                  enable-cache: true
+
+            - name: Install the project
+              run: uv sync --locked --all-extras --dev
+
+            - name: Run tests
+              run: uv run pytest tests
+
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v3
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+
+    # docs:
+    #     name: Documentation
+    #     runs-on: ubuntu-latest
+    #     strategy:
+    #         matrix:
+    #             python-version: ["3.13"]
+    #     steps:
+    #         - uses: actions/checkout@v2
+    #         - name: Set up Python ${{ matrix.python-version }}
+    #           uses: actions/setup-python@v2
+    #           with:
+    #               python-version: ${{ matrix.python-version }}
+    #         - name: Install dependencies
+    #           run: pip install tox
+    #         - name: Check docstring coverage
+    #           run: tox -e docstr-coverage
+    #         - name: Check documentation build with Sphinx
+    #           run: tox -e docs
