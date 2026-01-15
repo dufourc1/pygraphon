@@ -1,15 +1,13 @@
 """Stepgraphon class represent all stepfunction approximation of a continuous graphon."""
+
 from typing import Callable, Optional
 
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils import (
-    check_consistency_graphon_shape_with_bandwidth,
-    check_symmetric,
-    compute_areas_histogram,
-    scatter_symmetric_matrix,
-)
+from pygraphon.utils import (check_consistency_graphon_shape_with_bandwidth,
+                             check_symmetric, compute_areas_histogram,
+                             scatter_symmetric_matrix)
 
 
 class StepGraphon(Graphon):
@@ -44,7 +42,9 @@ class StepGraphon(Graphon):
         self.areas = compute_areas_histogram(self.graphon, self.bandwidthHist)
         self.remainder = 1 - int(1 / self.bandwidthHist) * self.bandwidthHist
 
-        super().__init__(function=self.graphon_function_builder(), initial_rho=initial_rho)
+        super().__init__(
+            function=self.graphon_function_builder(), initial_rho=initial_rho
+        )
 
         self.repr = "StepGraphon \n"
         self.repr += np.array2string(
@@ -53,7 +53,9 @@ class StepGraphon(Graphon):
             floatmode="maxprec_equal",
         )
         self.repr += "\n\n "
-        self.repr += np.array2string(self.areas[0, :], precision=3, floatmode="maxprec_equal")
+        self.repr += np.array2string(
+            self.areas[0, :], precision=3, floatmode="maxprec_equal"
+        )
         self.repr += " (size of the blocks)"
 
     def get_theta(self) -> np.ndarray:
@@ -90,7 +92,9 @@ class StepGraphon(Graphon):
             float
                 f(x,y)
             """
-            return self.graphon[int(x // self.bandwidthHist)][int(y // self.bandwidthHist)]
+            return self.graphon[int(x // self.bandwidthHist)][
+                int(y // self.bandwidthHist)
+            ]
 
         return _function
 
@@ -181,7 +185,9 @@ class StepGraphon(Graphon):
             matrix of edge probabilities (nxn)
         """
         group_membership = np.floor(latentVarArray / self.bandwidthHist).astype(int)
-        probs = scatter_symmetric_matrix(self.graphon, group_membership) * self.initial_rho
+        probs = (
+            scatter_symmetric_matrix(self.graphon, group_membership) * self.initial_rho
+        )
         if not wholeMatrix:
             return probs[np.triu_indices(n, 1)]
         return probs

@@ -6,11 +6,9 @@ import networkx as nx
 import numpy as np
 import pytest
 
-from pygraphon.utils.utils_graph import (
-    check_simple_adjacency_matrix,
-    edge_density,
-    get_adjacency_matrix_from_graph,
-)
+from pygraphon.utils.utils_graph import (check_simple_adjacency_matrix,
+                                         edge_density,
+                                         get_adjacency_matrix_from_graph)
 
 
 def test_get_adjacency_matrix_from_graph():

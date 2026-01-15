@@ -55,9 +55,16 @@ class TestRegularGraphon:
         assert np.all(P_ij >= 0)
 
     def test_edge_probability_correct(self, step_graphon):
-        P_small = step_graphon.get_edge_probabilities(n=4, wholeMatrix=True, exchangeable=False)
+        P_small = step_graphon.get_edge_probabilities(
+            n=4, wholeMatrix=True, exchangeable=False
+        )
         P_theoric = np.array(
-            [[0, 0.8, 0.2, 0.2], [0.8, 0, 0.2, 0.2], [0.2, 0.2, 0, 0.8], [0.2, 0.2, 0.8, 0]]
+            [
+                [0, 0.8, 0.2, 0.2],
+                [0.8, 0, 0.2, 0.2],
+                [0.2, 0.2, 0, 0.8],
+                [0.2, 0.2, 0.8, 0],
+            ]
         )
         assert np.allclose(P_small, P_theoric)
 
@@ -66,7 +73,12 @@ class TestRegularGraphon:
 def theta_irregular():
     """Create a theta matrix."""
     return np.array(
-        [[0.8, 0.2, 0.1, 0.01], [0.2, 0.7, 0.2, 0.03], [0.1, 0.2, 0.8, 0.3], [0.01, 0.03, 0.3, 0.9]]
+        [
+            [0.8, 0.2, 0.1, 0.01],
+            [0.2, 0.7, 0.2, 0.03],
+            [0.1, 0.2, 0.8, 0.3],
+            [0.01, 0.03, 0.3, 0.9],
+        ]
     )
 
 
@@ -97,7 +109,8 @@ class TestIrregularGraphon(TestRegularGraphon):
 
         # check demormalized graphon is equal to theta
         assert np.allclose(
-            irregular_step_graphon.graphon * irregular_step_graphon.initial_rho, theta_irregular
+            irregular_step_graphon.graphon * irregular_step_graphon.initial_rho,
+            theta_irregular,
         )
         # check block size correctly instantiated
         assert irregular_step_graphon.bandwidthHist == 0.3
@@ -122,7 +135,9 @@ def test_print_method(capfd):
     g = StepGraphon(graphon=np.array([[0.8, 0.2], [0.2, 0.8]]), bandwidthHist=0.5)
     print(g)  # noqa: T201
     out, _ = capfd.readouterr()
-    theoretical_out = "StepGraphon \n[[0.8 0.2]\n [0.2 0.8]]\n\n [0.25 0.25] (size of the blocks)\n"
+    theoretical_out = (
+        "StepGraphon \n[[0.8 0.2]\n [0.2 0.8]]\n\n [0.25 0.25] (size of the blocks)\n"
+    )
 
     assert out == theoretical_out
 
@@ -139,10 +154,10 @@ def test_print_method(capfd):
     )
     print(g_irregular)  # noqa: T201
     out, _ = capfd.readouterr()
-    theoretical_out = (
-        "StepGraphon \n[[0.80 0.20 0.10 0.01]\n [0.20 0.70 0.20 0.03]\n [0.10 0.20 0.80 0.30]\n "
+    theoretical_out = "StepGraphon \n[[0.80 0.20 0.10 0.01]\n [0.20 0.70 0.20 0.03]\n [0.10 0.20 0.80 0.30]\n "
+    theoretical_out += (
+        "[0.01 0.03 0.30 0.90]]\n\n [0.09 0.09 0.09 0.03] (size of the blocks)\n"
     )
-    theoretical_out += "[0.01 0.03 0.30 0.90]]\n\n [0.09 0.09 0.09 0.03] (size of the blocks)\n"
     assert out == theoretical_out
 
 

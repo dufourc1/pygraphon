@@ -1,4 +1,5 @@
 """Implementation of USVD estimator."""
+
 from typing import Tuple
 
 import numpy as np
@@ -57,8 +58,14 @@ class USVT(BaseEstimator):
         if self.regime == "dense":
             threshold = (2 + self.eta) * np.sqrt(adjacency_matrix.shape[0])
         else:
-            kappa = 4 if rho * adjacency_matrix.shape[0] < np.log(adjacency_matrix.shape[0]) else 2
-            threshold = (1 + self.eta) * kappa * np.sqrt(adjacency_matrix.shape[0] * rho)
+            kappa = (
+                4
+                if rho * adjacency_matrix.shape[0] < np.log(adjacency_matrix.shape[0])
+                else 2
+            )
+            threshold = (
+                (1 + self.eta) * kappa * np.sqrt(adjacency_matrix.shape[0] * rho)
+            )
 
         # compute the singular value decomposition and threshold
         u, s, v = np.linalg.svd(adjacency_matrix, full_matrices=False)

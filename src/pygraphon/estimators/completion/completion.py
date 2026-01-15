@@ -1,4 +1,5 @@
 """Implementation of the matrix completion scheme estimator."""
+
 from typing import Optional, Tuple
 
 import numpy as np
@@ -22,7 +23,9 @@ class Completion(BaseEstimator):
         self.rank = rank
         self.tol = tol
         self.iternumber = iternumber
-        self.solver = OptSpace(n_components=rank, tol=tol, max_iterations=iternumber, sign=1)
+        self.solver = OptSpace(
+            n_components=rank, tol=tol, max_iterations=iternumber, sign=1
+        )
 
     def _approximate_graphon_from_adjacency(
         self, adjacency_matrix: np.ndarray

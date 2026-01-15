@@ -1,6 +1,7 @@
 import numpy as np
 
-from pygraphon.graphons.ssm_generators import AssociativeFullyRandom, generate_hierarchical_theta
+from pygraphon.graphons.ssm_generators import (AssociativeFullyRandom,
+                                               generate_hierarchical_theta)
 
 
 def test_theta_in_bounds():

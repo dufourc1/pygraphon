@@ -36,7 +36,9 @@ class MseProbaEdge(ValueMetric):
         ValueError
             If the probability matrices have different shapes
         """
-        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False, wholeMatrix=False)
+        p_0 = graphon.get_edge_probabilities(
+            self.n_nodes, exchangeable=False, wholeMatrix=False
+        )
         p_hat = graphon_2.get_edge_probabilities(
             self.n_nodes, exchangeable=False, wholeMatrix=False
         )
@@ -83,7 +85,9 @@ class MaeProbaEdge(ValueMetric):
         ValueError
             If the probability matrices have different shapes
         """
-        p_0 = graphon.get_edge_probabilities(self.n_nodes, exchangeable=False, wholeMatrix=False)
+        p_0 = graphon.get_edge_probabilities(
+            self.n_nodes, exchangeable=False, wholeMatrix=False
+        )
         p_hat = graphon_2.get_edge_probabilities(
             self.n_nodes, exchangeable=False, wholeMatrix=False
         )

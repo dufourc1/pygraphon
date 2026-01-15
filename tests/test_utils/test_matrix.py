@@ -4,12 +4,9 @@
 
 import numpy as np
 
-from pygraphon.utils.utils_matrix import (
-    bound_away_from_one_and_zero_arrays,
-    check_symmetric,
-    permute_matrix,
-    upper_triangle_values,
-)
+from pygraphon.utils.utils_matrix import (bound_away_from_one_and_zero_arrays,
+                                          check_symmetric, permute_matrix,
+                                          upper_triangle_values)
 
 
 def test_permute_matrix_simple():

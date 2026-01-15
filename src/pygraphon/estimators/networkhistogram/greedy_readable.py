@@ -1,4 +1,5 @@
 """Implementation of network histogram estimator."""
+
 from copy import deepcopy
 
 import numpy as np
@@ -61,14 +62,22 @@ def greedy_opt(
 
     pbar = tqdm(range(maxNumIterations), disable=not progress_bar)
     for m in pbar:
-        index_i = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
-        index_j = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
-        index_k = np.ceil(np.random.uniform(low=-1, high=n - 1, size=step_internal)).astype(int)
+        index_i = np.ceil(
+            np.random.uniform(low=-1, high=n - 1, size=step_internal)
+        ).astype(int)
+        index_j = np.ceil(
+            np.random.uniform(low=-1, high=n - 1, size=step_internal)
+        ).astype(int)
+        index_k = np.ceil(
+            np.random.uniform(low=-1, high=n - 1, size=step_internal)
+        ).astype(int)
 
         # decide if we do one or two swaps before checking if we improved
         one_or_two_swaps = np.array(np.random.uniform(size=step_internal) > 2 / 3) + 1
 
-        pbar.set_description(f"Log likelihood: {best_assignment.compute_log_likelihood():.4f}")
+        pbar.set_description(
+            f"Log likelihood: {best_assignment.compute_log_likelihood():.4f}"
+        )
 
         for s in range(step_internal):
             updated = False

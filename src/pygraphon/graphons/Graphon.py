@@ -1,4 +1,5 @@
 """Graphon based on a continuous function."""
+
 import inspect
 import math
 from copy import deepcopy
@@ -144,7 +145,9 @@ class Graphon:
         """
         integral = self.integral()
         if integral == 0:
-            raise ValueError("graphon integrates to 0, cannot be automatically corrected")
+            raise ValueError(
+                "graphon integrates to 0, cannot be automatically corrected"
+            )
         # keep copy of old graphon function to be able to rescale it
         # without having infinite recursion
         self.old_func = copy_func(self.graphon_function)
@@ -178,12 +181,16 @@ class Graphon:
             z = np.vectorize(self.graphon_function)(x[:, None], x)
             integral = simpson(simpson(z, x), x)
         elif self.integration_method == "dblquad":
-            integral = 2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
+            integral = (
+                2 * dblquad(self.graphon_function, 0, 1, lambda x: 0, lambda x: x)[0]
+            )
         else:
             raise ValueError("integration_method must be dblquad or simpson")
         return integral
 
-    def draw(self, n: int, exchangeable: bool = True, rho: Optional[float] = None) -> np.ndarray:
+    def draw(
+        self, n: int, exchangeable: bool = True, rho: Optional[float] = None
+    ) -> np.ndarray:
         """Draw a graph from the graphon with a given density and number of vertices.
 
         Parameters
@@ -207,7 +214,9 @@ class Graphon:
         ValueError
             if :py:obj:`rho` is not in :math:`]0,1[`
         """
-        probs = self.get_edge_probabilities(n, exchangeable=exchangeable, wholeMatrix=False)
+        probs = self.get_edge_probabilities(
+            n, exchangeable=exchangeable, wholeMatrix=False
+        )
         if rho is None:
             scale = 1
         else:
@@ -281,7 +290,9 @@ class Graphon:
         # loop ?
         I, J = np.triu_indices(n, 1)
         for index, nodes in enumerate(zip(I, J)):
-            probs[index] = self.graphon_function(latentVarArray[nodes[0]], latentVarArray[nodes[1]])
+            probs[index] = self.graphon_function(
+                latentVarArray[nodes[0]], latentVarArray[nodes[1]]
+            )
         probs *= self.initial_rho
 
         if wholeMatrix:
@@ -315,7 +326,9 @@ class Graphon:
             matrix of edge probabilities (nxn) if wholeMatrix (n*(n-1)/2) if not wholeMatrix
         """
         latentVarArray = (
-            np.random.uniform(0, 1, size=n) if exchangeable else np.array([i / n for i in range(n)])
+            np.random.uniform(0, 1, size=n)
+            if exchangeable
+            else np.array([i / n for i in range(n)])
         )
 
         return self._get_edge_probabilities(n, latentVarArray, wholeMatrix)
@@ -335,7 +348,9 @@ class Graphon:
         """
 
         def _function(x, y):
-            return 0.5 * self.graphon_function(x, y) + 0.5 * other.graphon_function(x, y)
+            return 0.5 * self.graphon_function(x, y) + 0.5 * other.graphon_function(
+                x, y
+            )
 
         return Graphon(_function, check=False)
 

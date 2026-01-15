@@ -27,7 +27,9 @@ class ValueMetric:
 
 
 class ClassificationMetric:
-    def __call__(self, adjacency_matrix: np.ndarray, pij: np.ndarray, **kwargs) -> float:
+    def __call__(
+        self, adjacency_matrix: np.ndarray, pij: np.ndarray, **kwargs
+    ) -> float:
         if adjacency_matrix.shape != pij.shape:
             raise ValueError("adjacency_matrix and pij must have the same shape")
         check_simple_adjacency_matrix(adjacency_matrix)

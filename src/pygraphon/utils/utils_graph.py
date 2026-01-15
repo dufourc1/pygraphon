@@ -1,4 +1,5 @@
 """Random utils to deal with graphs."""
+
 from collections import Counter
 
 import networkx as nx
@@ -37,7 +38,9 @@ def edge_density(adjacency_matrix: np.ndarray) -> float:
     float
         edge density rho
     """
-    return np.sum(adjacency_matrix) / (adjacency_matrix.shape[0] * (adjacency_matrix.shape[1] - 1))
+    return np.sum(adjacency_matrix) / (
+        adjacency_matrix.shape[0] * (adjacency_matrix.shape[1] - 1)
+    )
 
 
 def check_simple_adjacency_matrix(adjacency_matrix: np.ndarray) -> None:

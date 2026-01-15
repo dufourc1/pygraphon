@@ -1,4 +1,5 @@
 """Implementation of network histogram estimator."""
+
 from typing import Optional, Tuple
 
 import numpy as np
@@ -75,7 +76,9 @@ def nethist(
     return best_assignment, h
 
 
-def _oracle_analysis_badnwidth(A: np.ndarray, type_: str = "degs", alpha: float = 1) -> float:
+def _oracle_analysis_badnwidth(
+    A: np.ndarray, type_: str = "degs", alpha: float = 1
+) -> float:
     c = min(4, np.sqrt(A.shape[0]) / 8)
     h, _ = oracbwplugin(A=A, c=c, type_=type_, alpha=alpha)
     return int(h)
@@ -164,7 +167,12 @@ def oracbwplugin(
         u = np.sort(u.ravel())
         uMid = u[midPt]
         increment = 1
-        while np.unique(uMid).size <= num_diff_degrees & np.min(midPt) > 0 & np.max(midPt) < n:
+        while (
+            np.unique(uMid).size
+            <= num_diff_degrees & np.min(midPt)
+            > 0 & np.max(midPt)
+            < n
+        ):
             midPt = np.arange(
                 max(0, round(n / 2 - c * np.sqrt(n)) - 1 - increment),
                 min(n - 1, round(n / 2 + c * np.sqrt(n)) + increment),
@@ -219,9 +227,9 @@ def _first_guess_blocks(A: np.ndarray, h: int) -> np.ndarray:
     L = np.ones_like(distVec) - distVec**2
     d = np.sum(L, axis=1)
     d = d[:, np.newaxis]
-    L_inter = np.outer(d**-0.5, d**-0.5) * L - np.outer(np.sqrt(d), np.sqrt(d)) / np.sqrt(
-        np.sum(d**2)
-    )
+    L_inter = np.outer(d**-0.5, d**-0.5) * L - np.outer(
+        np.sqrt(d), np.sqrt(d)
+    ) / np.sqrt(np.sum(d**2))
     _, u = scipy.sparse.linalg.eigs(L_inter, k=1, which="LR")
     u = u.real.ravel()
 

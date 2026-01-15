@@ -139,7 +139,9 @@ class OptSpace(object):
         elif isinstance(self.n_components, int):
             if self.n_components > (min(n, m) - 1):
                 raise ValueError(
-                    "n-components must be at most" " 1 minus the min. shape of the" " input matrix."
+                    "n-components must be at most"
+                    " 1 minus the min. shape of the"
+                    " input matrix."
                 )
         # otherwise rase an error.
         else:
@@ -174,7 +176,9 @@ class OptSpace(object):
         # we will perform gradient decent for at most self.max_iterations
         for i in range(1, self.max_iterations):
             # generate new optimized loadings from F(X,Y) [1]
-            U_update, V_update = gradient_decent(U, V, S, obs, mask, self.step_size, rho)
+            U_update, V_update = gradient_decent(
+                U, V, S, obs, mask, self.step_size, rho
+            )
             # Line search for the optimum jump length in gradient decent
             line = line_search(
                 U,
@@ -197,7 +201,9 @@ class OptSpace(object):
             # Compute the distortion
             obs_error = obs - U.dot(S).dot(V.T)
             # update the new distortion
-            dist[i + 1] = norm(np.multiply(obs_error, mask), "fro") / np.sqrt(total_nonzeros)
+            dist[i + 1] = norm(np.multiply(obs_error, mask), "fro") / np.sqrt(
+                total_nonzeros
+            )
             # if the gradient decent has coverged then break the loop
             # and return the results
             if dist[i + 1] < self.tol:

@@ -1,4 +1,5 @@
 """Random function to help with matrices."""
+
 from copy import copy
 from typing import Tuple
 
@@ -65,7 +66,9 @@ def upper_triangle_values(array):
     return array[np.triu_indices(array.shape[0])]
 
 
-def bound_away_from_one_and_zero_arrays(array: np.ndarray, eps: float = EPS) -> np.ndarray:
+def bound_away_from_one_and_zero_arrays(
+    array: np.ndarray, eps: float = EPS
+) -> np.ndarray:
     """Bound away from 1 and 0 in the log likelihood.
 
     This is done to avoid numerical issues.
@@ -88,7 +91,9 @@ def bound_away_from_one_and_zero_arrays(array: np.ndarray, eps: float = EPS) -> 
 
 
 @nb.jit(nopython=True)
-def scatter_symmetric_matrix(blocks: np.ndarray, group_membership: np.ndarray) -> np.ndarray:
+def scatter_symmetric_matrix(
+    blocks: np.ndarray, group_membership: np.ndarray
+) -> np.ndarray:
     """Write all values from the blocks at the indices specified by group_membership.
 
     Will return a symmetric matrix such that the value at index (i,j) is the value of

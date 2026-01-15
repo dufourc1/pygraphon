@@ -1,4 +1,5 @@
 """Network histogram class."""
+
 from typing import Optional, Tuple
 
 import numpy as np
@@ -20,7 +21,9 @@ class HistogramEstimator(BaseEstimator):
             from the observation. Defaults to None.
     """
 
-    def __init__(self, bandwithHist: Optional[float] = None, method: str = "mine") -> None:
+    def __init__(
+        self, bandwithHist: Optional[float] = None, method: str = "mine"
+    ) -> None:
         super().__init__()
         self.bandwidthHist = bandwithHist
         if method != "mine":

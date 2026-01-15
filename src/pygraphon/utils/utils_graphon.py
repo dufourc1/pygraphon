@@ -52,7 +52,9 @@ def check_consistency_graphon_shape_with_bandwidth(
     inverse_bandwidth = 1 / bandwidth
     expected_shape = int(math.ceil(np.round(inverse_bandwidth, decimals=decimal_tol)))
     if graphon_shape[0] != expected_shape or graphon_shape[1] != expected_shape:
-        error_msg = "The graphon matrix should have size consistent with the bandwidth. "
+        error_msg = (
+            "The graphon matrix should have size consistent with the bandwidth. "
+        )
         details = f"graphon.shape[0] = {graphon_shape[0]}, bandwidthHist = {bandwidth}"
         choice_best = f" expexted shape {expected_shape} from {inverse_bandwidth}"
         raise ValueError(error_msg + details + choice_best)

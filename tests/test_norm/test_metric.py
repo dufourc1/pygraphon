@@ -46,7 +46,9 @@ def test_compute_AUC():
         A.flatten(), graphon.get_edge_probabilities(300, False, True).flatten()
     )
 
-    assert metric(A, graphon.get_edge_probabilities(300, False, True)) == theoretical_AUC
+    assert (
+        metric(A, graphon.get_edge_probabilities(300, False, True)) == theoretical_AUC
+    )
 
 
 def test_compute_AUPRC():
@@ -59,4 +61,6 @@ def test_compute_AUPRC():
         A.flatten(), graphon.get_edge_probabilities(10, False, True).flatten()
     )
 
-    assert metric(A, graphon.get_edge_probabilities(10, False, True)) == theoretical_AUPRC
+    assert (
+        metric(A, graphon.get_edge_probabilities(10, False, True)) == theoretical_AUPRC
+    )

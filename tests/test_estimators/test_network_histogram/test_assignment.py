@@ -4,12 +4,8 @@ import networkx as nx
 import numpy as np
 
 from pygraphon.estimators.networkhistogram.assignment import (
-    EPS,
-    Assignment,
-    bernlikelihood,
-    compute_edge_between_groups,
-    update_realized_number,
-)
+    EPS, Assignment, bernlikelihood, compute_edge_between_groups,
+    update_realized_number)
 from pygraphon.utils.utils_graph import get_adjacency_matrix_from_graph
 
 
@@ -35,7 +31,9 @@ def test_bernlikelihood():
     """Test the fast stable bernoulli likelihood function."""
     x = np.array([0.1, 0.2, 0.3, 0.4])
     for input in x:
-        assert bernlikelihood(input) == input * log(input) + (1 - input) * log(1 - input)
+        assert bernlikelihood(input) == input * log(input) + (1 - input) * log(
+            1 - input
+        )
     assert bernlikelihood(0) == bernlikelihood(EPS)
     assert bernlikelihood(1) == bernlikelihood(1 - EPS)
 
@@ -71,7 +69,9 @@ def test_assignement():
     assert np.all(assignment.counts == np.array([[6, 16], [16, 6]]))
     assert np.all(assignment.theta == np.array([[5 / 6, 2 / 16], [2 / 16, 5 / 6]]))
     theoretical_ll = (
-        6 * bernlikelihood(5 / 6) + 16 * bernlikelihood(2 / 16) + 6 * bernlikelihood(5 / 6)
+        6 * bernlikelihood(5 / 6)
+        + 16 * bernlikelihood(2 / 16)
+        + 6 * bernlikelihood(5 / 6)
     )
     assert assignment.log_likelihood == theoretical_ll
 
@@ -94,7 +94,11 @@ def test_update_assignment():
     assert np.all(new_assignment.counts == np.array([[6, 16], [16, 6]]))
     assert np.all(assignment.theta == new_assignment.theta)
     assert np.all(new_assignment.theta == np.array([[2 / 6, 8 / 16], [8 / 16, 2 / 6]]))
-    assert assignment.log_likelihood == new_assignment.log_likelihood == theoretical_ll_post_update
+    assert (
+        assignment.log_likelihood
+        == new_assignment.log_likelihood
+        == theoretical_ll_post_update
+    )
 
 
 def test_update_realized_numnber_vs_assignment_creation():
@@ -116,7 +120,10 @@ def test_update_realized_numnber_vs_assignment_creation():
         swap = np.random.choice(A.shape[0], 2, replace=False)
         new_labels = np.copy(assignment.labels)
         assignment.update((swap[0], swap[1]), A)
-        new_labels[swap[0]], new_labels[swap[1]] = new_labels[swap[1]], new_labels[swap[0]]
+        new_labels[swap[0]], new_labels[swap[1]] = (
+            new_labels[swap[1]],
+            new_labels[swap[0]],
+        )
         new_assignment = Assignment(new_labels, A)
         assert np.all(assignment.labels == new_assignment.labels)
         assert np.all(assignment.realized == new_assignment.realized)

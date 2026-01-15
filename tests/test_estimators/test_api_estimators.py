@@ -4,16 +4,9 @@ import networkx as nx
 import numpy as np
 import pytest
 
-from pygraphon.estimators import (
-    LG,
-    SAS,
-    USVT,
-    Completion,
-    HistogramEstimator,
-    NBDsmooth,
-    SimpleMomentEstimator,
-    SmoothNetHist,
-)
+from pygraphon.estimators import (LG, SAS, USVT, Completion,
+                                  HistogramEstimator, NBDsmooth,
+                                  SimpleMomentEstimator, SmoothNetHist)
 from pygraphon.graphons import StepGraphon
 from pygraphon.utils.utils_matrix import check_symmetric
 

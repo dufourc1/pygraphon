@@ -97,14 +97,18 @@ def generate_hierarchical_theta(
     """
     # Check if k is divisible by m
     if k % m != 0:
-        raise ValueError("k should be divisible by m for a uniform hierarchical structure.")
+        raise ValueError(
+            "k should be divisible by m for a uniform hierarchical structure."
+        )
 
     n = k // m  # Number of blocks within each meta-block
 
     theta = np.zeros((k, k))
 
     for i in range(k):
-        for j in range(i, k):  # Only loop over the upper triangle including the diagonal
+        for j in range(
+            i, k
+        ):  # Only loop over the upper triangle including the diagonal
             # Determine meta-blocks for i and j
             meta_block_i = i // n
             meta_block_j = j // n

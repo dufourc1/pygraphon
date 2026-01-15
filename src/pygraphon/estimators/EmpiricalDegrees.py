@@ -1,4 +1,5 @@
 """Implementation of empirical degrees based estimator."""
+
 from typing import Optional, Tuple
 
 import numpy as np
@@ -63,11 +64,14 @@ class LG(BaseEstimator):
         # Compute the largest gaps in the normalized degree sequence
         degree_differences = np.diff(normalized_degrees)
         largest_gap_indices = np.argsort(degree_differences)[::-1][: self.K - 1]
-        block_boundaries = np.concatenate(([0], np.sort(largest_gap_indices), [num_nodes]))
+        block_boundaries = np.concatenate(
+            ([0], np.sort(largest_gap_indices), [num_nodes])
+        )
 
         # Assign nodes to blocks based on their degree sequence
         block_assignments = [
-            node_indices[block_boundaries[i] + 1 : block_boundaries[i + 1]] for i in range(self.K)
+            node_indices[block_boundaries[i] + 1 : block_boundaries[i + 1]]
+            for i in range(self.K)
         ]
 
         # Assign communities based on the block assignments

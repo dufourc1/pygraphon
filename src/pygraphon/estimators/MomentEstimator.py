@@ -1,4 +1,5 @@
 """Estimator based on method of moments for cycle counts."""
+
 from collections.abc import Iterable as IterableCollection
 from itertools import product
 from typing import Callable, Iterable, List, Tuple, Union
@@ -45,11 +46,15 @@ class SimpleMomentEstimator(BaseEstimator):
 
         if type(blocks) in [int, float]:
             if int(blocks) != blocks:
-                raise ValueError("invalid type for blocks, expecting an integer or a list of float")
+                raise ValueError(
+                    "invalid type for blocks, expecting an integer or a list of float"
+                )
             blocks = np.repeat(1 / blocks, blocks)
         elif isinstance(blocks, IterableCollection) and not isinstance(blocks, str):
             if np.sum(blocks) != 1:
-                raise ValueError(f"Block sizes should add to one, but got {np.sum(blocks)}")
+                raise ValueError(
+                    f"Block sizes should add to one, but got {np.sum(blocks)}"
+                )
         else:
             raise ValueError(
                 f"Blocks argument should be either the number of blocks, or a list of size of blocks, but got {blocks}"
@@ -129,7 +134,9 @@ class SimpleMomentEstimator(BaseEstimator):
         raise ValueError("kind should be either abs or clip")
 
     @staticmethod
-    def _cycle_moments_theoretical(L: int, theta: np.ndarray, areas: np.ndarray = None) -> float:
+    def _cycle_moments_theoretical(
+        L: int, theta: np.ndarray, areas: np.ndarray = None
+    ) -> float:
         """Return the theoretical values of homomorphism densities of cycle of length L.
 
         Take as input a block model represented by a connection matrix theta and sizes of the blocks areas.
@@ -180,7 +187,9 @@ class SimpleMomentEstimator(BaseEstimator):
 
         for indices in list(product(range(K), repeat=L)):
             inter = (
-                np.prod([theta[indices[i]][indices[i + 1]] for i in range(len(indices) - 1)])
+                np.prod(
+                    [theta[indices[i]][indices[i + 1]] for i in range(len(indices) - 1)]
+                )
                 * theta[indices[-1]][indices[0]]
             )
 
@@ -190,7 +199,9 @@ class SimpleMomentEstimator(BaseEstimator):
         return result
 
     @staticmethod
-    def _edge_density_moment_theoretical(theta: np.ndarray, areas: np.ndarray = None) -> float:
+    def _edge_density_moment_theoretical(
+        theta: np.ndarray, areas: np.ndarray = None
+    ) -> float:
         """Return the theoretical values of homomorphism densities of edge density given a block model.
 
         Parameters
@@ -238,7 +249,9 @@ class SimpleMomentEstimator(BaseEstimator):
         return result / K**2
 
     @staticmethod
-    def _cherry_density_moment_theoretical(theta: np.ndarray, areas: np.ndarray = None) -> float:
+    def _cherry_density_moment_theoretical(
+        theta: np.ndarray, areas: np.ndarray = None
+    ) -> float:
         """Return the theoretical values of homomorphism densities of cherry density given a block model.
 
         Parameters
@@ -283,7 +296,9 @@ class SimpleMomentEstimator(BaseEstimator):
         result = 0
 
         for indices in list(product(range(K), repeat=3)):
-            inter = np.prod([theta[indices[i]][indices[i + 1]] for i in range(len(indices) - 1)])
+            inter = np.prod(
+                [theta[indices[i]][indices[i + 1]] for i in range(len(indices) - 1)]
+            )
 
             inter *= np.prod([areas[i] for i in indices])
             result += inter
@@ -327,7 +342,9 @@ class SimpleMomentEstimator(BaseEstimator):
                 self._edge_density_moment_theoretical(theta) - edgeDensity,
             ]
             for L in range(self.numberParameters - 1):
-                functions.append(self._cycle_moments_theoretical(L + 3, theta) - cyclesCounts[L])
+                functions.append(
+                    self._cycle_moments_theoretical(L + 3, theta) - cyclesCounts[L]
+                )
             return functions
 
         return func
@@ -376,7 +393,9 @@ class MomentEstimator(SimpleMomentEstimator):
 
     def __init__(self, blocks: Union[int, Iterable[float]]) -> None:
         super().__init__(blocks)
-        self.numberParameters = self.numberBlocks * (self.numberBlocks - 1) // 2 + self.numberBlocks
+        self.numberParameters = (
+            self.numberBlocks * (self.numberBlocks - 1) // 2 + self.numberBlocks
+        )
         if self.numberParameters > 9:
             raise ValueError("number of parameters should be <= 9")
         self.counter = CycleCount(self.numberParameters - 1)

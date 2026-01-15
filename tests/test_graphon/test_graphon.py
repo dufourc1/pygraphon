@@ -44,10 +44,12 @@ class TestGraphon:
         assert np.all(P_ij >= 0)
 
     def test_edge_probability_correct(self, graphon, function):
-        P_small = graphon.get_edge_probabilities(n=4, wholeMatrix=True, exchangeable=False)
-        P_theoric = np.array([function(x / 4, y / 4) for x in range(4) for y in range(4)]).reshape(
-            4, 4
+        P_small = graphon.get_edge_probabilities(
+            n=4, wholeMatrix=True, exchangeable=False
         )
+        P_theoric = np.array(
+            [function(x / 4, y / 4) for x in range(4) for y in range(4)]
+        ).reshape(4, 4)
         np.fill_diagonal(P_theoric, 0)
         assert np.allclose(P_small, P_theoric)
 

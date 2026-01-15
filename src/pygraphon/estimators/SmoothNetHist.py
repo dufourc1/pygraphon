@@ -1,4 +1,5 @@
 """Smoothing Network Histograms Class."""
+
 from __future__ import annotations
 
 from typing import List, Optional, Tuple
@@ -13,16 +14,8 @@ from pygraphon.estimators.BaseEstimator import BaseEstimator
 from pygraphon.estimators.networkhistogram.assignment import Assignment
 from pygraphon.estimators.networkhistogram.nethist import nethist
 from pygraphon.graphons import StepGraphon
-from pygraphon.utils import (
-    aic,
-    bic,
-    edge_density,
-    elbow_point,
-    fpe,
-    hqic,
-    log_likelihood,
-    mallows_cp,
-)
+from pygraphon.utils import (aic, bic, edge_density, elbow_point, fpe, hqic,
+                             log_likelihood, mallows_cp)
 
 CRITERIONS = {
     "bic": bic,
@@ -46,7 +39,9 @@ class SmoothNetHist(BaseEstimator):
         graphon.
     """
 
-    def __init__(self, criterion: str = "bic", bandwidth: Optional[float] = None) -> None:
+    def __init__(
+        self, criterion: str = "bic", bandwidth: Optional[float] = None
+    ) -> None:
         super().__init__()
         if criterion.lower() not in CRITERIONS.keys() and criterion.lower() != "all":
             raise ValueError(
@@ -56,7 +51,9 @@ class SmoothNetHist(BaseEstimator):
             self.gof = None
             self.criterion_name = "all"
             self.criterion_values = {k: np.inf for k in CRITERIONS.keys()}
-            self.best_pairs = {k: {"graphon": None, "pij": None} for k in CRITERIONS.keys()}
+            self.best_pairs = {
+                k: {"graphon": None, "pij": None} for k in CRITERIONS.keys()
+            }
             self._criterion_nethist = {k: np.inf for k in CRITERIONS.keys()}
             self._num_par_smooth = {k: -1 for k in CRITERIONS.keys()}
         else:
@@ -243,7 +240,10 @@ class SmoothNetHist(BaseEstimator):
         # Number of link communities and input check
         self._num_par_nethist = comb(nrow_tile + 1, 2)
         num_par_diff = len(np.unique(flat_graphon))
-        if number_link_communities is not None and number_link_communities > num_par_diff:
+        if (
+            number_link_communities is not None
+            and number_link_communities > num_par_diff
+        ):
             raise ValueError(
                 f"The number of link communities {number_link_communities} is greater "
                 + f"than the number of clusters {num_par_diff} in the histogram estimator"
@@ -427,11 +427,14 @@ class SmoothNetHist(BaseEstimator):
                 log_likelihood_val=assignment.log_likelihood,
                 n=adjacencyMatrix.shape[0],
                 num_par=comb(assignment.theta.shape[0] + 1, 2),
-                norm=np.linalg.norm(best_pij - adjacencyMatrix) / (n_nodes**2 - n_nodes),
+                norm=np.linalg.norm(best_pij - adjacencyMatrix)
+                / (n_nodes**2 - n_nodes),
                 var=np.var(best_pij - adjacencyMatrix, ddof=n_nodes),
             )
             list_criterion = (
-                [self.criterion_name] if self.criterion_name != "all" else CRITERIONS.keys()
+                [self.criterion_name]
+                if self.criterion_name != "all"
+                else CRITERIONS.keys()
             )
             for criterion in list_criterion:
                 self.gof = CRITERIONS[criterion.lower()]
@@ -489,9 +492,9 @@ class SmoothNetHist(BaseEstimator):
             self._num_par_smooth[criterion] = n_link_com[best_index]
             self.criterion_values[criterion] = all_criterion_values[best_index]
             self.best_pairs[criterion]["graphon"] = tensor_graphon[best_index]
-            self.best_pairs[criterion]["pij"] = tensor_graphon[best_index]._get_edge_probabilities(
-                n=n_nodes, latentVarArray=latentVar
-            )
+            self.best_pairs[criterion]["pij"] = tensor_graphon[
+                best_index
+            ]._get_edge_probabilities(n=n_nodes, latentVarArray=latentVar)
         # Return by default bic to preserve estimator structure, other criterion are available in self.best_pairs.
         best_graphon = self.best_pairs[ref_criterion]["graphon"]
         best_pij = self.best_pairs[ref_criterion]["pij"]
@@ -555,14 +558,18 @@ class SmoothNetHist(BaseEstimator):
             warn("The model has not been fitted yet, returning np.inf.")
         return self.criterion_values[self.criterion_name]
 
-    def choose_best(self, values: np.ndarray, criterion_name: Optional[str] = None, **kwargs):
+    def choose_best(
+        self, values: np.ndarray, criterion_name: Optional[str] = None, **kwargs
+    ):
         if criterion_name is None:
             criterion_name = self.criterion_name
         if criterion_name != "elbow":
             best_value = np.inf
             for i, criterion_candidate in enumerate(values):
                 improvement = (
-                    (best_value - criterion_candidate) / best_value if best_value != np.inf else 1
+                    (best_value - criterion_candidate) / best_value
+                    if best_value != np.inf
+                    else 1
                 )
                 if improvement >= self._tolerance and improvement > 0:
                     best_value = criterion_candidate

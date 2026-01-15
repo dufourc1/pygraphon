@@ -1,4 +1,5 @@
 """Base class for graphon estimators."""
+
 from abc import abstractclassmethod
 from typing import Tuple, Union
 
@@ -6,7 +7,8 @@ import networkx as nx
 import numpy as np
 
 from pygraphon.graphons.Graphon import Graphon
-from pygraphon.utils import check_simple_adjacency_matrix, get_adjacency_matrix_from_graph
+from pygraphon.utils import (check_simple_adjacency_matrix,
+                             get_adjacency_matrix_from_graph)
 
 
 class BaseEstimator:

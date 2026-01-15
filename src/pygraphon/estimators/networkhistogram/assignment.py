@@ -1,4 +1,5 @@
 """Fast assignment class."""
+
 from math import log
 from typing import Tuple
 
@@ -20,7 +21,9 @@ class Assignment:
         self.theta = self.realized / self.counts
         self.log_likelihood = self.compute_log_likelihood()
 
-    def compute_counts_realized(self, adjacency: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def compute_counts_realized(
+        self, adjacency: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Compute the number of edges and the number of realized edges between communities specified by labels.
 
         Parameters
@@ -46,7 +49,9 @@ class Assignment:
                 counts[g_prime, g] = counts[g, g_prime]
                 realized[g_prime, g] = realized[g, g_prime]
             counts[g, g] = self.group_sizes[g] * (self.group_sizes[g] - 1) / 2
-            realized[g, g] = compute_edge_between_groups(adjacency, member_g, member_g) / 2
+            realized[g, g] = (
+                compute_edge_between_groups(adjacency, member_g, member_g) / 2
+            )
 
         return counts, realized
 
@@ -81,7 +86,9 @@ class Assignment:
         None
         """
         # important: we need to pass the unswapped labels to compute_counts_realized
-        self.realized = update_realized_number(self.realized, self.labels, adjacency, swap)
+        self.realized = update_realized_number(
+            self.realized, self.labels, adjacency, swap
+        )
         self.labels[swap[0]], self.labels[swap[1]] = (
             self.labels[swap[1]],
             self.labels[swap[0]],
@@ -157,16 +164,24 @@ def update_realized_number(realized_edges, labels, adjacency, swap):
         group_i = labels[i]
         if adjacency[swap[0], i] == 1:
             realized_edges[group_node_1, group_i] -= 1
-            realized_edges[group_i, group_node_1] = realized_edges[group_node_1, group_i]
+            realized_edges[group_i, group_node_1] = realized_edges[
+                group_node_1, group_i
+            ]
 
             realized_edges[group_node_2, group_i] += 1
-            realized_edges[group_i, group_node_2] = realized_edges[group_node_2, group_i]
+            realized_edges[group_i, group_node_2] = realized_edges[
+                group_node_2, group_i
+            ]
         if adjacency[swap[1], i] == 1:
             realized_edges[group_node_2, group_i] -= 1
-            realized_edges[group_i, group_node_2] = realized_edges[group_node_2, group_i]
+            realized_edges[group_i, group_node_2] = realized_edges[
+                group_node_2, group_i
+            ]
 
             realized_edges[group_node_1, group_i] += 1
-            realized_edges[group_i, group_node_1] = realized_edges[group_node_1, group_i]
+            realized_edges[group_i, group_node_1] = realized_edges[
+                group_node_1, group_i
+            ]
 
     return realized_edges
 

@@ -1,4 +1,5 @@
 """Exact permutation distance between block graphons."""
+
 import numpy as np
 
 from pygraphon.graphons.StepGraphon import StepGraphon
@@ -67,16 +68,22 @@ def permutation_distance(
     # this means they have the same size of blocks if the graphon have the
     # same shape
     if graphon2.bandwidthHist != graphon1.bandwidthHist:
-        raise NotImplementedError("different size of graphons cannot be compared for now")
+        raise NotImplementedError(
+            "different size of graphons cannot be compared for now"
+        )
 
     # check if the graphon blocks all have same size
     if len(np.unique(graphon1.areas)) != 1 or len(np.unique(graphon2.areas)) != 1:
-        raise NotImplementedError("Cannot compare graphons with heterogeneous block sizes")
+        raise NotImplementedError(
+            "Cannot compare graphons with heterogeneous block sizes"
+        )
 
     # generate all possible permutations
     permutations_possible = generate_all_permutations(graphon1_matrix.shape[0])
 
-    norm_value = np.sqrt(np.sum(((graphon1_matrix - graphon2_matrix) ** 2) * graphon1.areas))
+    norm_value = np.sqrt(
+        np.sum(((graphon1_matrix - graphon2_matrix) ** 2) * graphon1.areas)
+    )
     if not exchangeable or norm_value == 0:
         return norm_value
 

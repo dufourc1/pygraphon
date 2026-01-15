@@ -5,9 +5,7 @@
 import numpy as np
 
 from pygraphon.utils.utils_graphon import (
-    check_consistency_graphon_shape_with_bandwidth,
-    compute_areas_histogram,
-)
+    check_consistency_graphon_shape_with_bandwidth, compute_areas_histogram)
 
 
 def test_compute_areas_histogram():

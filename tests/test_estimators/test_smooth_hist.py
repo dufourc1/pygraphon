@@ -13,8 +13,13 @@ class DeterministicSmoother(SmoothNetHist):
         k_init = len(np.unique(flat_graphon))
         return np.concatenate(
             [
-                np.repeat(np.arange(number_link_communities), k_init // number_link_communities),
-                np.repeat([number_link_communities - 1], k_init % number_link_communities),
+                np.repeat(
+                    np.arange(number_link_communities),
+                    k_init // number_link_communities,
+                ),
+                np.repeat(
+                    [number_link_communities - 1], k_init % number_link_communities
+                ),
             ]
         )
 
@@ -60,7 +65,9 @@ def test_cluster_reduction() -> None:
     """Test if the clustering method reduces the number of groups."""
     estimator = SmoothNetHist("aic")
 
-    test_array_3 = np.array([0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52])
+    test_array_3 = np.array(
+        [0.1, 0.15, 0.12, 0.09, 0.23, 0.27, 0.29, 0.3, 0.5, 0.55, 0.48, 0.52]
+    )
     labels_array_3 = estimator._cluster(3, test_array_3)
     assert len(np.unique(labels_array_3)) == 3
     assert test_array_3.shape == labels_array_3.shape
@@ -94,7 +101,9 @@ def test_smoothing_operator() -> None:
         flat_graphon=flat_graphon,
         flat_areas=flat_areas,
     )
-    assert np.allclose(computed_smoothed_est, np.array([[1.8, 0.6, 0.6, 1.8, 0.6, 1.8]]))
+    assert np.allclose(
+        computed_smoothed_est, np.array([[1.8, 0.6, 0.6, 1.8, 0.6, 1.8]])
+    )
 
 
 def test_smoothing_histLC_givenLC_reg_block() -> None:
@@ -134,7 +143,12 @@ def test_smoothing_histLC_givenLC_nonreg_block() -> None:
     """Test smoothing_histLC_givenLC with non-regular block graphon."""
     n = 99
     theta = np.array(
-        [[0.5, 0.3, 0.1, 0.7], [0.3, 0.6, 0.25, 0.1], [0.1, 0.25, 0.6, 0.3], [0.7, 0.1, 0.3, 0.01]]
+        [
+            [0.5, 0.3, 0.1, 0.7],
+            [0.3, 0.6, 0.25, 0.1],
+            [0.1, 0.25, 0.6, 0.3],
+            [0.7, 0.1, 0.3, 0.01],
+        ]
     )
     hist = StepGraphon(theta, bandwidthHist=0.3)
     adj = hist.draw(rho=None, n=n, exchangeable=False)
@@ -149,7 +163,9 @@ def test_smoothing_histLC_givenLC_nonreg_block() -> None:
         flat_graphon=theta[np.triu_indices_from(theta)],
         flat_areas=hist.areas[np.triu_indices_from(theta)],
     )
-    theoretical_theta = estimator._flat_to_tensor(flat_theoretical_thera, hist)[0].graphon
+    theoretical_theta = estimator._flat_to_tensor(flat_theoretical_thera, hist)[
+        0
+    ].graphon
 
     estimator._num_par_nethist = len(np.unique(hist.graphon))
     smooth_test1, n_link_com = estimator._smoothing_histLC(
@@ -167,14 +183,18 @@ def test_smoothing_histLC_tensor() -> None:
     adj = hist.draw(rho=None, n=n, exchangeable=False)
 
     estimator = SmoothNetHist("bic")
-    olhede_fit, _ = estimator._first_approximate_graphon_from_adjacency(adjacencyMatrix=adj)
+    olhede_fit, _ = estimator._first_approximate_graphon_from_adjacency(
+        adjacencyMatrix=adj
+    )
     params_olhede_fit = comb(olhede_fit.graphon.shape[0] + 1, 2)
     smooth_test_tensor, n_link_com = estimator._smoothing_histLC(
         hist_approx=olhede_fit, A=adj, number_link_communities=None
     )
     assert np.array_equal(
         n_link_com,
-        np.arange(olhede_fit.get_number_groups(), len(np.unique(olhede_fit.graphon)) + 1),
+        np.arange(
+            olhede_fit.get_number_groups(), len(np.unique(olhede_fit.graphon)) + 1
+        ),
     )
 
     assert estimator._num_par_nethist == params_olhede_fit

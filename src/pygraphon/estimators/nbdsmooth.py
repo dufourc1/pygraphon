@@ -1,4 +1,5 @@
 """Implementation of neighborhood smoothing estimator."""
+
 from typing import Tuple
 
 import numpy as np
@@ -22,7 +23,9 @@ class NBDsmooth(BaseEstimator):
         D = cdist(A_sq, A_sq, metric="minkowski", p=1)
 
         # compute kernel matrix
-        kernel_mat = (D < np.percentile(D, q=100 * h, axis=1, keepdims=True)).astype(np.double)
+        kernel_mat = (D < np.percentile(D, q=100 * h, axis=1, keepdims=True)).astype(
+            np.double
+        )
 
         # normalize kernel matrix row-wise
         kernel_mat /= np.sum(kernel_mat, axis=1, keepdims=True) + 1e-10

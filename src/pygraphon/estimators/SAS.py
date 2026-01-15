@@ -1,4 +1,5 @@
 """Implementation of the matrix completion scheme estimator."""
+
 from typing import Optional, Tuple, Union
 
 import numpy as np
@@ -37,7 +38,9 @@ class SAS(BaseEstimator):
         A, idx = self.empirical_degree_sorting(adjacency_matrix)
 
         # histogram estimation
-        H = convolve2d(A, np.ones((h, h)) / (h**2), mode="same", boundary="symm")[::h, ::h]
+        H = convolve2d(A, np.ones((h, h)) / (h**2), mode="same", boundary="symm")[
+            ::h, ::h
+        ]
 
         # total variation minimization
         n_half = round(n / 2)
@@ -55,7 +58,9 @@ class SAS(BaseEstimator):
         graphon_matrix = graphon_matrix[n_half:-n_half, n_half:-n_half]
 
         # resize the graphon to size of the adjacency matrix
-        P_hat = resize(graphon_matrix, (n, n), order=0, mode="edge", anti_aliasing=False)
+        P_hat = resize(
+            graphon_matrix, (n, n), order=0, mode="edge", anti_aliasing=False
+        )
 
         # sort back
         original_indices = np.argsort(idx)

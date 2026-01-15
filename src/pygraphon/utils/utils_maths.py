@@ -1,4 +1,5 @@
 """Random maths functions."""
+
 import math
 from itertools import permutations
 from typing import Iterable

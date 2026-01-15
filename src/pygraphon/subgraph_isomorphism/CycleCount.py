@@ -1,4 +1,5 @@
 """Class to compute cycle homomorphism."""
+
 import numpy as np
 from scipy.special import comb
 
@@ -70,7 +71,9 @@ class CycleCount:
         raise NotImplementedError("approximate_network_profile is not implemented")
 
     @staticmethod
-    def normalize_counts(counts: np.ndarray, n_nodes: int, normalization: str = "s") -> np.ndarray:
+    def normalize_counts(
+        counts: np.ndarray, n_nodes: int, normalization: str = "s"
+    ) -> np.ndarray:
         """Normalize the counts of cycles.
 
         For a cycle of size k, the normalization is either
@@ -168,7 +171,9 @@ class CycleCount:
             elif k == 5:
                 dA5 = np.diag(Ak)
                 tA5 = np.sum(dA5)
-                t[k - 1] = tA5 - 5 * np.sum((degrees[non_zero_degrees] - 1) * dA3)  # ** (1 / k)
+                t[k - 1] = tA5 - 5 * np.sum(
+                    (degrees[non_zero_degrees] - 1) * dA3
+                )  # ** (1 / k)
                 A5 = Ak
             elif k == 6:
                 dA6 = np.diag(Ak)
@@ -190,7 +195,9 @@ class CycleCount:
                 inter += 7 * tA5
                 inter -= 28 * np.sum((A2**2) * A1)
                 inter += 7 * np.sum(
-                    A2 * A1 * np.outer(degrees[non_zero_degrees], (degrees[non_zero_degrees]))
+                    A2
+                    * A1
+                    * np.outer(degrees[non_zero_degrees], (degrees[non_zero_degrees]))
                 )
                 inter += 14 * np.sum(dA3 * degrees[non_zero_degrees] ** 2)
                 inter += 7 * np.sum(dA3 * np.sum(A2, axis=1))
@@ -239,7 +246,9 @@ class CycleCount:
                 )
                 xk4 = 0
                 for i in range(A1.shape[0]):
-                    xk4 += A1[i, :] @ (A1 * (A1 @ np.diag(A1[i, :]) @ A1)) @ (A1[i, :].T)
+                    xk4 += (
+                        A1[i, :] @ (A1 * (A1 @ np.diag(A1[i, :]) @ A1)) @ (A1[i, :].T)
+                    )
                 inter += 22 * xk4
                 t[k - 1] = inter  # ** (1 / k)
             elif k == 9:
@@ -303,7 +312,8 @@ class CycleCount:
                     - 54 * np.sum(A1 * A2 * (A2 @ np.diag(dA2) @ A1))
                     - 18
                     * np.sum(
-                        (np.diag(dA2) @ (A1 * A2)) * np.tile(np.sum(A2, axis=0), (A2.shape[0], 1))
+                        (np.diag(dA2) @ (A1 * A2))
+                        * np.tile(np.sum(A2, axis=0), (A2.shape[0], 1))
                     )
                     - 3 * np.sum((np.outer(dA2, dA2) * (A1 * (A1 @ np.diag(dA2) @ A1))))
                     + 324 * np.sum(A1 * A2 * ((A1 * A2) @ A1))
@@ -311,10 +321,14 @@ class CycleCount:
                 )
                 for i1 in range(A1.shape[0]):
                     inter = inter + 99 * (
-                        A1[i1, :] @ (A1 * (A1 @ np.diag(A2[i1, :]) @ A1)) @ (A1[i1, :].T)
+                        A1[i1, :]
+                        @ (A1 * (A1 @ np.diag(A2[i1, :]) @ A1))
+                        @ (A1[i1, :].T)
                     )
                     inter = inter + 99 * (
-                        A1[i1, :] @ (A1 * (A1 @ np.diag(A1[i1, :]) @ (A1 * A2))) @ (A1[i1, :].T)
+                        A1[i1, :]
+                        @ (A1 * (A1 @ np.diag(A1[i1, :]) @ (A1 * A2)))
+                        @ (A1[i1, :].T)
                     )
                 inter = inter - 156 * xk4
                 t[k - 1] = inter  # ** (1 / k)
